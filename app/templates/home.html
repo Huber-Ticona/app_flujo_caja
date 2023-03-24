@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+{% block encabezado %}
+<link rel="stylesheet" href="{{url_for('static', filename= 'css/home.css')}}">
+{% endblock %}
+{% block contenido %}
+<ul class="tilesWrap">
+	<li>
+		<h3>Gestión Comercio</h3>
+		<p>
+			App para gestionar los flujos de caja de un comercio.
+		</p>
+		<a href="/comercio"><button>Acceder</button></a>
+	</li>
+	<li>
+		<h3>Gestión Parcela</h3>
+		<p>
+			When an unknown printer took a galley of type and scrambled it to make 
+			a type specimen book. It has survived not only five centuries.
+		</p>
+		<a href="/parcela"><button>Acceder </button></a>
+	</li>
+    <!-- 
+	<li>
+		<h2>03</h2>
+		<h3>Title 3</h3>
+		<p>
+			But also the leap into electronic typesetting, remaining essentially 
+			unchanged. It was popularised in the 1960s.
+		</p>
+		<button>Read more</button>
+	</li>
+	<li>
+		<h2>04</h2>
+		<h3>Title 4</h3>
+		<p>
+			With the release of Letraset sheets containing Lorem Ipsum passages,  
+			and more recently with desktop publishing software like Aldus PageMaker 
+			including versions of Lorem Ipsum.
+		</p>
+		<button>Read more</button>
+	</li>-->
+</ul>
+{% endblock %}

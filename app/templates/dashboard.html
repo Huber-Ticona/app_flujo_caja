@@ -1,0 +1,24 @@
+{% extends 'layout.html' %} {% block encabezado %}
+<link rel="stylesheet" href="{{url_for('static', filename= 'css/dashboard.css')}}" />
+{% endblock %}
+{% block contenido %}
+<div class="dashboard-contenido">
+
+</div>
+
+<script>
+    $('.contenedor-link').on('click', '.link', function () {
+        var optionUrl = $(this).data("url"); // obtener la url de la opción seleccionada
+        $.ajax({
+            url: optionUrl,
+            method: 'post',
+            success: function (data) {
+                // actualizar la segunda columna con el contenido devuelto por la petición
+                $(".dashboard-contenido").html(data);
+            }
+        });
+
+    })
+</script>
+
+{% endblock %}
