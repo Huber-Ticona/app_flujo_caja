@@ -1,0 +1,43 @@
+
+.contenedor-group-detalle{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+}
+.group-detalle{
+    min-width: 300px;
+    width: 50%;
+}
+
+.input-table-liquidacion{
+    width: 100px;
+    border: 1px solid red;
+}
+.input-text-table-liquidacion{
+    width: 200px;
+    border: 1px solid yellow;
+}
+.dashboard-contenido{
+    margin: 1px 1px;
+    height: 100%;
+    
+    overflow-y: scroll;
+    scrollbar-color: red  #3b3b42 ;
+    scrollbar-width: auto;
+}
+
+/* Eliminar color azul de tab links */
+.nav-link , .nav-link:hover{
+    color: inherit;
+  }
+
+.dashboard{
+    height: 100%;
+    display: grid;
+    place-items: center;
+    font-size: 30px;
+    font-family: "Roboto-Thin";
+    font-weight: 500;
+  }
+  

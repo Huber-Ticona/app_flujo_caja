@@ -1,0 +1,309 @@
+<div>
+
+    <div  class="text-center">
+
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Fecha</span>
+            <input type="date" id="fecha" class="form-control" value="{{fecha}}">
+            <span class="input-group-text bg-light d-block">
+                <i class="fa fa-calendar"></i>
+            </span>
+        </div>
+
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Empresa provedora</span>
+            <input type="text" class="form-control" id="prov_empresa">
+          
+        </div>
+
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Tipo documento</span>
+            <select name="" class="form-control" id="prov_documento">
+                <option value="boleta">Boleta</option>
+                <option value="factura">Factura</option>
+                <option value="guia">Guia</option>
+            </select>
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Folio documento</span>
+            <input type="text" class="form-control"  id="prov_folio" value="0" >
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Tipo Gasto</span>
+            <input type="text" class="form-control"  id="tipo">
+        </div>
+
+    
+        <hr class="hr">
+        
+        <div class="table-responsive">
+            <table class="table" >
+                <thead>
+                    <tr>
+                        <th>Cantidad</th>
+                        <th>Unidad</th>
+                        <th>Descripcion</th>
+                        <th>P.unitario</th>
+                        <th>P.total</th>
+                        <th>action</th>
+                    </tr>
+                </thead>
+    
+                <tbody class="body-tabla-gasto">
+                    
+                </tbody>
+    
+            </table>
+        </div>
+        <div class="text-center">
+            <button class="btn btn-secondary" id="btn-add-item">Añadir Item</button>
+        </div>
+        <hr class="hr">
+
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Total</span>
+            <input type="text" id="total" class="form-control" value="0">
+        </div>
+
+
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Comentario</span>
+            <input type="text" id="comentario" class="form-control">
+        </div>
+        <div class="input-group mb-3 ">
+            <span class="input-group-text" id="basic-addon1">periodo_id</span>
+            <input type="number" id="periodo_id" class="form-control" disabled>
+        </div>
+
+
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm">
+                <input type="submit" value="Registrarse" class="btn btn-primary" id="registrar_gasto">
+            </div>
+        </div>
+
+    </div>
+</div>
+<style>
+    .body-tabla-gasto input[type=number] {
+        max-width: 80px;
+        border: 1px solid red;
+    }
+    /* Ocultar las flechas de incrementar y decrementar en los input de tipo number */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"] {
+        -moz-appearance: textfield; /* Firefox */
+    }
+    
+</style>
+<script>
+    var form = {{form_gasto|safe}}
+    console.log("json form gasto: ",form)
+
+    var list_form = {{list_gasto|safe}}
+    console.log("list form gasto: ",list_form)
+
+    console.log('form periodo_id, ',periodo_id)
+    
+    $('#periodo_id').val(periodo_id)
+    $('#formulario').submit(function (event) {
+        console.log('------ VALIDANDO TODOS LOS CAMPOS -------')
+        var empresa = $('#nombre_empresa').val();
+        var rubro = $('#rubro_empresa').val();
+
+        // comprobar que todos los campos estén completos
+        if (!empresa) {
+            alert('Por favor, completa todos los campos');
+            event.preventDefault();
+            return;
+        }
+        if (rubro == '') {
+            alert('Por favor, seleccione rubro');
+            event.preventDefault();
+            return;
+        }
+
+    })
+    // Agregar fila.
+$(".dashboard-contenido").on("click", "#btn-add-item", function () {
+    console.log("Añadiendo fila -...");
+    let data = {
+        cantidad: "0",
+        unidad: "UND",
+        descripcion: "...",
+        precio_unitario: "0",
+        precio_total: "0",
+    };
+    crear_fila_gasto(data);
+});
+
+// Crear fila tabla gasto.
+function crear_fila_gasto(dato) {
+    var tabla_gasto = $(".body-tabla-gasto");
+
+    var numeroDeFilas = tabla_gasto.find("tr").length;
+
+    console.log("Número de filas en la tabla: " + numeroDeFilas);
+
+    var i = numeroDeFilas;
+    var tabla_gasto = $(".body-tabla-gasto");
+
+    var fila = $("<tr>");
+
+    var cantidad_input = $("<input>")
+        .attr("type", "number")
+        .val(dato.cantidad)
+        .addClass("input-text-table-gasto cantidad-gt");
+    var unidad_input = $("<input>")
+        .attr("type", "number")
+        .val(dato.cantidad)
+        .addClass("input-table-gasto unidad-gt");
+    var precio_unitario_input = $("<input>")
+        .attr("type", "number")
+        .val(dato.precio_unitario)
+        .addClass("input-table-gasto precio-unitario-gt");
+    var descripcion_input = $("<input>")
+        .attr("type", "text")
+        .val(dato.descripcion)
+        .addClass("input-table-gasto descripcion-gt");
+    var precio_total = $("<input>")
+        .attr("type", "number")
+        .val(dato.precio_total)
+        .addClass("input-table-gasto precio-total-gt");
+
+    var boton = $("<button>")
+        .text("Eliminar")
+        .addClass("btn-remover-fila-gasto");
+
+    fila.append(
+        $("<td>").append(cantidad_input),
+        $("<td>").append(unidad_input),
+        $("<td>").append(descripcion_input),
+        $("<td>").append(precio_unitario_input),
+        $("<td>").append(precio_total),
+        $("<td>").append(boton)
+    );
+
+    tabla_gasto.append(fila);
+}
+$(".dashboard-contenido").on(
+    "click",
+    ".btn-remover-fila-gasto",
+    function () {
+        // Encuentra el elemento padre <tr> de este botón y elimínalo
+        console.log("eliminando fila gasto.");
+        $(this).closest("tr").remove();
+    }
+);
+// Funcion para obtener el Array de JSON de la tabla liquidaciones.
+function obtenerDatosDeTablaGasto() {
+    var datos = []; // Aquí almacenaremos los objetos JSON
+
+    // Itera sobre las filas de la tabla
+    $(".body-tabla-gasto tr").each(function () {
+        var fila = $(this);
+        var cantidad = fila.find(".cantidad-gt").val();
+        var unidad = fila.find(".unidad-gt").val();
+        var descripcion = fila.find(".descripcion-gt").val();
+        var precio_unitario = fila.find(".precio-unitario-gt").val();
+        var precio_total = fila.find(".precio-total-gt").val();
+
+        // Crea un objeto JSON con los valores de la fila
+        var filaJSON = {
+            cantidad: cantidad,
+            unidad: unidad,
+            descripcion: descripcion,
+            precio_unitario: precio_unitario,
+            precio_total: precio_total,
+        };
+
+        // Agrega el objeto JSON al array
+        datos.push(filaJSON);
+    });
+    console.log("DETALLE: ", datos);
+    return datos;
+}
+// REGISTRAR DATOS GASTO
+$(".dashboard-contenido").on("click", "#registrar_gasto", function () {
+    let gasto_id = $(this).data("gasto_id");
+    let url = "";
+    let mode = "registro";
+    if (typeof gasto_id === "undefined") {
+        // La variable es undefined
+        console.log("La variable es undefined. MODO REGISTRO");
+        url = "/api/gasto/{{periodo_id}}/registrar";
+    } else {
+        // La variable tiene un valor
+        console.log("La variable no es undefined. MODO UPDATE");
+        url = "/api/gasto/actualizar/" + gasto_id.toString();
+        mode = "update";
+    }
+
+    console.log("GASTO ID: ", gasto_id);
+    console.log("------- INICIANDO " + mode + " GASTO ------- ");
+    
+    list_form.forEach(function(objeto) {
+
+        console.log(objeto.name_field, objeto.type, objeto.nullable);
+    });
+    let fecha = $("#fecha").val()
+    let prov_empresa = $("#prov_empresa").val()
+    let prov_documento = $("#prov_documento").val()
+    let prov_folio = $("#prov_folio").val()
+    let tipo = $("#tipo").val()
+    let detalle = obtenerDatosDeTablaGasto();
+    let comentario = $("#comentario").val()
+
+    console.log("detalle: ", detalle);
+    if(detalle.length == 0){
+        console.log("detalle 0, rellene")
+    }
+
+    let total = parseInt($("#total").val());
+
+    let data = JSON.stringify({
+        fecha: fecha,
+        prov_documento:prov_documento,
+        prov_empresa:prov_empresa,
+        prov_folio:prov_folio,
+        tipo:tipo,
+        detalle: detalle,
+        total :total,
+        comentario: comentario,
+        periodo_id: periodo_id,
+    });
+    console.log("DATOS gasto", data);
+
+    if (
+        fecha == "" 
+    ) {
+        console.log("RELLENE TODOS LOS DATOS..");
+    } else {
+        console.log("------- " + mode + " GASTO ... ----------");
+
+        $.ajax({
+            type: "POST",
+            url: url,
+            contentType: "application/json; charset=utf-8",
+            data: data,
+            success: function (res) {
+                if (res.status) {
+                    console.log(res.msg);
+                    $(".dashboard-contenido").empty();
+                    array_json_liquidacion = [];
+                    toastr.success(res.msg, res.title, { timeOut: 3000 });
+                } else {
+                    console.log(res.msg);
+                    toastr.error(res.msg, res.title, { timeOut: 3000 });
+                }
+            },
+        });
+    }
+});
+</script>

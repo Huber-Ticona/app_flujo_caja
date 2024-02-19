@@ -1,3 +1,5 @@
 instance
 activar_entorno.bat
 venv
+liquidaciones
+migrations

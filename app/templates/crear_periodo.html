@@ -1,0 +1,76 @@
+{% extends 'layout.html' %}
+
+{% block contenido %}
+
+
+<div class="container-fluid">
+    <div class="text-center">Registrar de Periodo</div>
+    <br><br>
+    <form id="formulario" method="post" class="form-horizontal">
+        {{ form.csrf_token }}
+
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Año</span>
+            {{form.periodo_fiscal(class="form-control")}}
+        </div>
+
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Inicio</span>
+            {{form.inicio(type="text", class="form-control" ) }}
+            <span class="input-group-text bg-light d-block">
+                <i class="fa fa-calendar"></i>
+            </span>
+        </div>
+
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Termino</span>
+            {{form.termino(type="text" ,class="form-control" ) }}
+            <span class="input-group-text bg-light d-block">
+                <i class="fa fa-calendar"></i>
+            </span>
+        </div>
+
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm">
+                <input type="submit" value="Registrarse" class="btn btn-primary" style="width: auto;">
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    $("#inicio").datepicker();
+    $("#termino").datepicker();
+
+    $('#formulario').submit(function (event) {
+        console.log('------ VALIDANDO TODOS LOS CAMPOS -------')
+        let periodo_fiscal = $('#periodo_fiscal').val();
+        let inicio = $('#inicio').val();
+        let termino = $('#termino').val();
+        console.log(periodo_fiscal, inicio, termino)
+        console.log(periodo_fiscal.length)
+
+        // comprobar que todos los campos estén completos
+        if (!periodo_fiscal | !inicio | !termino) {
+            alert('Por favor, completa todos los campos');
+            event.preventDefault();
+            return;
+        }
+        // comprobar año
+        if (periodo_fiscal.length > 4) {
+            alert('Año incorrecto, debe tener 4 digitos.');
+            event.preventDefault();
+            return;
+        }
+        // comprobar fechas
+        if (inicio.length > 10 | termino.length > 10) {
+            alert('Fecha de inicio o termino incorrecta. Use el calendario proporcionado.');
+            event.preventDefault();
+            return;
+        }
+
+    })
+</script>
+{% endblock %}

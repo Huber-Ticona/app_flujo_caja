@@ -1,0 +1,58 @@
+{% extends 'layout.html' %}
+
+{% block contenido %}
+
+
+<div class="container-fluid">
+    <div class="text-center">Registrar de empresa</div>
+    <br><br>
+    <form id="formulario" method="post" class="form-horizontal">
+        {{ form.csrf_token }}
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Nombre Empresa</span>
+            {{form.nombre_empresa(class="form-control")}}
+        </div>
+
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Rubro Empresa</span>
+            {{form.rubro_empresa(class="form-control")}}
+            <select class="form-select" id="select-rubro">
+                <option value="">Seleccione rubro</option>
+                <option value="Agricola">Agricola</option>
+                <option value="Comercial">Comercial</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm">
+                <input type="submit" value="Registrarse" class="btn btn-primary" style="width: auto;">
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    $('#select-rubro').change(function () {
+        $('#rubro_empresa').val($(this).val());
+    });
+    $('#formulario').submit(function (event) {
+        console.log('------ VALIDANDO TODOS LOS CAMPOS -------')
+        var empresa = $('#nombre_empresa').val();
+        var rubro = $('#rubro_empresa').val();
+
+        // comprobar que todos los campos estén completos
+        if (!empresa) {
+            alert('Por favor, completa todos los campos');
+            event.preventDefault();
+            return;
+        }
+        if (rubro == '') {
+            alert('Por favor, seleccione rubro');
+            event.preventDefault();
+            return;
+        }
+
+    })
+</script>
+{% endblock %}

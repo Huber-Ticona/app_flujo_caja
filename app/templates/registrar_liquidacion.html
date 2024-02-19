@@ -1,0 +1,194 @@
+<div class="container-fluid">
+    
+    {%if liquidacion %}
+    <div class="text-center">Actualizar Liquidacion {{liquidacion.liquidacion_id}}</div>
+    <br>
+    <div class="input-group">
+        <input type="file" class="form-control" name="csv-file" id="csv-file" accept=".csv" required>
+        <button class="btn btn-outline-secondary" type="button" id="enviar_csv">Subir</button>
+        <button class="btn btn-outline-secondary" type="button" id="rellenar_datos">Generar tabla</button>
+    </div>
+
+    <br>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">Nro Guia</span>
+        <input type="text" class="form-control" id="nro_guia" value="{{liquidacion.detalles_extras['nro_guia']}}">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">Fecha</span>
+        <input type="date" class="form-control" id="fecha" value="{{liquidacion.fecha}}">
+    </div>
+
+    <br>
+    <hr class="hr">
+    <div class="table-responsive">
+        <table class="table-sm">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>cantidad</th>
+                    <th>P.venta</th>
+                    <th>P.neto</th>
+                    <th>Iva.guia</th>
+                    <th>precio</th>
+                    <th>total</th>
+                    <th>action</th>
+                </tr>
+            </thead>
+
+            <tbody class="body-tabla-liquidacion">
+                {%for item in liquidacion.detalle %}
+                <tr>
+                    <td><input type="text" name="" id="" class="input-text-table-liquidacion producto-lq" value="{{item.producto}}"></td>
+                    <td><input type="number" name="" id="" class="input-table-liquidacion cantidad-lq" value="{{item.cantidad}}"></td>
+                    <td><input type="number" name="" id="" class="input-table-liquidacion precioventa-lq" value="{{item.precio_venta}}"></td>
+                    <td><input type="number" name="" id="" class="input-table-liquidacion neto-lq" value="{{item.neto}}"></td>
+                    <td><input type="number" name="" id="" class="input-table-liquidacion ivaguia-lq" value="{{item.iva_guia}}"></td>
+                    <td><input type="number" name="" id="" class="input-table-liquidacion precio-lq" value="{{item.precio}}"></td>
+                    <td><input type="number" name="" id="" class="input-table-liquidacion total-lq" value="{{item.total}}"></td>
+                    <td><button class="btn-remover-fila-liquidacion">Eliminar</button></td>
+                </tr>
+                {%endfor%}
+            </tbody>
+
+        </table>
+    </div>
+    
+    <div class="text-center">
+        <button class="btn btn-secondary" id="btn-add-item">Añadir Item</button>
+    </div>
+    <hr class="hr">
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">Total</span>
+        <input type="number" class="form-control" id="total_venta" value="{{liquidacion.total_venta}}">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">TOTAL NETO(guia)</span>
+        <input type="number" class="form-control" id="total_neto_guia" value="{{liquidacion.detalles_extras['total_neto_guia']}}">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">10% COMISION</span>
+        <input type="number" class="form-control" id="comision" value="{{liquidacion.detalles_extras['comision']}}">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">FLETE ARI-STGO</span>
+        <input type="number" class="form-control" id="flete_ari_stgo" value="{{liquidacion.detalles_extras['flete_ari_stgo']}}">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">FLETE STGO-ARI</span>
+        <input type="number" class="form-control" id="flete_stgo_ari" value="{{ liquidacion.detalles_extras['flete_stgo_ari'] }}">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">TOTAL DESCUENTOS</span>
+        <input type="number" class="form-control" id="total_descuento" value="{{liquidacion.total_descuento}}">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">TOTAL A PAGAR</span>
+        <input type="number" class="form-control" id="total_pago" value="{{liquidacion.total_pago}}">
+    </div>
+    <!-- Vendedor -->
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">Vendedor</span>
+
+        <select class="form-select" id="input-vendedor">
+            <option value="NO ASIGNADO" {% if 'vendedor' in liquidacion.detalles_extras and liquidacion.detalles_extras['vendedor'] == 'NO ASIGNADO' %} selected {% endif %}>NO ASIGNADO</option>
+            <option value="STEFANO" {% if 'vendedor' in liquidacion.detalles_extras and liquidacion.detalles_extras['vendedor'] == 'STEFANO' %} selected {% endif %}>STEFANO</option>
+            <option value="DANILO" {% if 'vendedor' in liquidacion.detalles_extras and liquidacion.detalles_extras['vendedor'] == 'DANILO' %} selected {% endif %}>DANILO</option>
+        </select>
+
+    </div>
+    <div class="text-center">
+        <button class="btn btn-secondary" id="registrar_liquidacion" data-liquidacion_id="{{liquidacion.liquidacion_id}}">Actualizar</button>
+    </div>
+    {%else%}
+    <div class="text-center">Registrar Liquidacion</div>
+    <br>
+    <div class="input-group">
+        <input type="file" class="form-control" name="csv-file" id="csv-file" accept=".csv" required>
+        <button class="btn btn-outline-secondary" type="button" id="enviar_csv">Subir</button>
+        <button class="btn btn-outline-secondary" type="button" id="rellenar_datos">Generar tabla</button>
+    </div>
+
+    <br>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">Nro Guia</span>
+        <input type="text" class="form-control" id="nro_guia">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">Fecha</span>
+        <input type="date" class="form-control" id="fecha">
+    </div>
+
+    <br>
+    <hr class="hr">
+    <div class="table-responsive">
+        <table class="table-sm">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>cantidad</th>
+                    <th>P.venta</th>
+                    <th>P.neto</th>
+                    <th>Iva.guia</th>
+                    <th>precio</th>
+                    <th>total</th>
+                    <th>action</th>
+                </tr>
+            </thead>
+
+            <tbody class="body-tabla-liquidacion">
+                
+            </tbody>
+
+        </table>
+    </div>
+    
+    <div class="text-center">
+        <button class="btn btn-secondary" id="btn-add-item">Añadir Item</button>
+    </div>
+    <hr class="hr">
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">Total</span>
+        <input type="number" class="form-control" id="total_venta">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">TOTAL NETO(guia)</span>
+        <input type="number" class="form-control" id="total_neto_guia">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">10% COMISION</span>
+        <input type="number" class="form-control" id="comision">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">FLETE ARI-STGO</span>
+        <input type="number" class="form-control" id="flete_ari_stgo">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">FLETE STGO-ARI</span>
+        <input type="number" class="form-control" id="flete_stgo_ari">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">TOTAL DESCUENTOS</span>
+        <input type="number" class="form-control" id="total_descuento">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">TOTAL A PAGAR</span>
+        <input type="number" class="form-control" id="total_pago">
+    </div>
+    <!-- Vendedor -->
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">Vendedor</span>
+
+        <select class="form-select" id="input-vendedor">
+            <option value="NO ASIGNADO" selected>NO ASIGNADO</option>
+            <option value="STEFANO">STEFANO</option>
+            <option value="DANILO">DANILO</option>
+            
+        </select>
+    </div>
+    <div class="text-center">
+        <button class="btn btn-secondary" id="registrar_liquidacion" >Registrar</button>
+    </div>
+    {%endif%}
+    
+</div>

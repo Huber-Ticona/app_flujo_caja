@@ -1,0 +1,67 @@
+<div class="container-fluid">
+<div class="row">
+    <div class="col">
+        <div class="d-flex gap-3">
+            <h3>Lista liquidacion</h3>
+            <button class="btn btn-secondary" hx-post="/liquidacion" hx-target="#dashboard-contenido">Registrar Liquidación</button>
+        </div>
+        {% if lista_liquidacion %}
+        <table id="miTabla" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th scope="col">Liquidacion</th>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Total venta</th>
+                    <th scope="col">Acción</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                
+                {% for item in lista_liquidacion %}
+                <tr>
+                    <td>Liquidacion {{loop.index}} | guia: {{item.detalles_extras['nro_guia']}} | Id: {{item.liquidacion_id}}</td>
+                    <td>{{item.fecha}}</td>
+                    <td>{{item.total_venta}}</td>
+                    <td>
+                        <button class="btn bg-none rounded-circle border border-2 btn-mod-lq" data-id="{{item.liquidacion_id}}"><i class="fas fa-pen"></i></button>
+                        <button class="btn bg-none rounded-circle border border-2"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+                {% endfor %}
+
+               
+                
+        </table>
+        {%else%}
+        <div class="d-flex justify-content-start" style="font-size: 20px;">
+            No se han registrado liquidaciones.
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+</div>
+<script>
+    
+    $(document).ready(function() {
+      //$('#miTabla').DataTable();
+      console.log("Creando datatable liquidacion.")
+      let table = new DataTable('#miTabla', {
+        columnDefs: [
+        {
+          targets: 2, // Índice de la columna "Total Venta" (empezando desde 0)
+          orderData: 2, // Índice de la columna de datos subyacente para ordenar
+          render: function(data, type, row) {
+            // Se formatea para mostrar como moneda
+            if (type === 'display') {
+                data = parseInt(data)
+              return '$' + data.toLocaleString({currency:"CLP"})
+            }
+            return data;
+          }
+        }
+      ]
+        });
+    }); 
+  </script>

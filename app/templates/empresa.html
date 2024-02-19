@@ -1,0 +1,33 @@
+{% extends 'layout.html' %} 
+
+{% block encabezado %}
+<link rel="stylesheet" href="{{url_for('static', filename= 'css/dashboard.css')}}" />
+{% endblock %}
+
+{% block contenido %}
+<div class="container-fluid">
+    <div class="contenedor-años" style="width:200px">
+        <button class="btn btn-secondary">Volver</button>
+        <p>Años</p>
+        <ul class="list-group">
+            {%if periodos %}
+            {% for item in periodos %}
+            <a href="/empresa/{{id}}/{{item.periodo_id}}" class="list-group-item list-group-item-action">Año
+                {{item.periodo_fiscal}}</a>
+
+            {% endfor %}
+            {%endif%}
+        </ul>
+    </div>
+
+
+<div class="dashboard-contenido">
+    <div class="row">
+        <div class="col">
+            <a href="/empresa/{{id}}/crear-periodo" class="btn btn-secondary">Añadir Periodo</a>
+        </div>
+    </div>
+</div>
+</div>
+
+{% endblock %}

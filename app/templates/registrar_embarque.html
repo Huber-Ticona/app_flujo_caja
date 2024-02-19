@@ -1,0 +1,109 @@
+<div class="container-fluid">
+    <div class="text-center">Registrar de embarque</div>
+    <br>
+
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1">Fecha</span>
+        <input type="text" class="form-control" id="datepicker">
+        <span class="input-group-text bg-light d-block">
+            <i class="fa fa-calendar"></i>
+        </span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Parcela</th>
+                    <th scope="col">Nave</th>
+                    <th scope="col">Hortaliza</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Accion</th>
+                </tr>
+            </thead>
+            <tbody class="body-tabla-embarque">
+
+            </tbody>
+        </table>
+    </div>
+    <div class="contenedor-group-detalle">
+        <div class="group-detalle">
+
+
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">Parcela</span>
+
+                <select class="form-select" id="input-parcela">
+                    <option value="Km 17 Parcela">Km 17 Parcela</option>
+                    <option value="Km 17 Olivo">Km 17 Olivo</option>
+                    <option value="Km 28 Sobraya">Km 28 Sobraya</option>
+                </select>
+            </div>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">Nave</span>
+                <select class="form-select" id="input-nave">
+                    <option value="1">Nave 1</option>
+                    <option value="2">Nave 2</option>
+                    <option value="3">Nave 3</option>
+                </select>
+            </div>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">Hortaliza</span>
+                <select class="form-select" id="input-hortaliza">
+                    <option value="Tomate Bola">Tomate Bola</option>
+                    <option value="Tomate Cherry">Tomate Cherry</option>
+                    <option value="Morron">Morron</option>
+                    <option value="Pepino">Pepino</option>
+                </select>
+            </div>
+
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">Total Gamelas</span>
+                <input type="number" class="form-control" placeholder="0" id="input-total">
+            </div>
+
+            <div class="text-center">
+                <button class="btn btn-secondary add-detalle">Añadir detalle</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table" id="tabla2">
+            <thead>
+                <tr>
+                    <th>Hortaliza</th>
+                    <th>Total Terreno</th>
+                    <th>Total Procesado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Las filas de la tabla se agregarán dinámicamente aquí -->
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="input-group">
+        <span class="input-group-text">Observacion</span>
+        <textarea class="form-control" aria-label="With textarea" id="observacion"></textarea>
+    </div>
+    <br>
+    <hr class="hr" />
+    <br>
+    <div class="text-center">
+        <button class="btn btn-secondary" id="enviar_datos">Enviar datos</button>
+    </div>
+
+    <br><br><br>
+    <button>xd</button>
+
+
+
+    <br>
+
+
+
+</div>

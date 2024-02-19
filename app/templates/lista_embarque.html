@@ -1,0 +1,49 @@
+<div class="container-fluid">
+
+<div class="row">
+    <div class="col"> 
+        <div class="d-flex gap-3">
+            <h3>Lista embarques</h3>
+            <button class="btn btn-secondary" hx-post="/embarque" hx-target="#dashboard-contenido">Registrar Embarque</button>
+        </div>
+        
+        <table id="myTabla" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th scope="col">Embarque</th>
+                    <th scope="col">Fecha</th>
+                    <th scope="col">Acción</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% if lista_embarque %}
+                {% for item in lista_embarque %}
+                <tr>
+                    <td>Embarque {{loop.index}}</td>
+                    <td>{{item.fecha}}</td>
+                    <td>
+                        <button class="btn bg-none rounded-circle border border-2"><i class="fas fa-pen"></i></button>
+                        <button class="btn bg-none rounded-circle border border-2"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+                {% endfor %}
+
+                {% else %}
+                <tr>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                </tr>
+                {% endif %}
+        </table>
+
+    </div>
+</div>
+</div>
+<script>
+    $(document).ready(function() {
+        //$('#miTabla').DataTable();
+        let table = new DataTable('#myTabla');
+      }); 
+</script>

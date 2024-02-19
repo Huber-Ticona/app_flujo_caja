@@ -1,24 +1,54 @@
-{% extends 'layout.html' %} {% block encabezado %}
-<link rel="stylesheet" href="{{url_for('static', filename= 'css/dashboard.css')}}" />
-{% endblock %}
-{% block contenido %}
-<div class="dashboard-contenido">
+{% extends 'layout.html' %}
 
-</div>
+{% block encabezado %}
+
+<link rel="stylesheet" href="{{url_for('static', filename= 'css/dashboard.css')}}">
+<!-- Estilos de DataTables (CSS) -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.0/css/dataTables.dataTables.css">
+
+<!-- DataTables (JS) -->
+<script src="https://cdn.datatables.net/2.0.0/js/dataTables.min.js"></script>
+{% endblock%}
+
+{% block contenido %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+  <ul class=flashes>
+  {% for category, message in messages %}
+    <li class="{{ category }}">{{ message }}</li>
+  {% endfor %}
+  </ul>
+{% endif %}
+{% endwith %}
+  <div class="dashboard-contenido" id="dashboard-contenido">
+        <div class="dashboard">
+          DASHBOARD
+        </div>
+    </div>
 
 <script>
-    $('.contenedor-link').on('click', '.link', function () {
-        var optionUrl = $(this).data("url"); // obtener la url de la opción seleccionada
-        $.ajax({
-            url: optionUrl,
-            method: 'post',
-            success: function (data) {
-                // actualizar la segunda columna con el contenido devuelto por la petición
-                $(".dashboard-contenido").html(data);
-            }
-        });
-
-    })
+    var periodo_id = parseInt('{{periodo_id}}')
+    console.log("periodo_id: ",periodo_id)
+    var aux_dashboard = $('.dashboard').clone()
+    $('.dashboard-contenido').append(aux_dashboard)
 </script>
+<script src="{{url_for('static', filename= 'scripts/dashboard.js')}}"></script>
 
+<!-- <style>
+    .sidebar {
+        width: 250px;
+        height: 100vh;
+        position: fixed;
+        
+        background-color: white;
+        z-index: 9999; /* POR ENCIMA DE TODO border: 2px solid rebeccapurple;*/
+        transition: margin-left 0.3s ease; /* Cambiado a margin-left para la animación */
+        overflow-y: scroll ;
+        margin-left: -250px;
+       
+      }
+      .sidebar.active{
+        margin-left: 0;
+        }
+</style> -->
 {% endblock %}

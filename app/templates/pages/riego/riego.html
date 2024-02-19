@@ -1,0 +1,58 @@
+<h1>Riego</h1>
+
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item " role="presentation">
+      <button class="nav-link active"   data-bs-toggle="tab" 
+      data-bs-target="#gasto_lista" type="button" role="tab" >Lista</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link"  hx-get="/api/riegos/registrar" hx-target="#gasto_registrar" data-bs-toggle="tab" 
+      data-bs-target="#gasto_registrar" type="button" role="tab">Registrar Riego</button>
+    </li>
+  
+  </ul>
+
+  <div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="gasto_lista" role="tabpanel">
+      <!-- LISTA RIEGO -->
+      {% if riegos %}
+      <div>ahi riegos </div>
+
+      <table id="tabla" class="display" style="width:100%">
+          <thead>
+              <th>ID</th>
+              <th>Fecha</th>
+              <th>Lugar</th>
+              <th>Nave</th>
+              <th>Minutos</th>
+              <th>accion</th>
+          </thead>
+          <tbody>
+              {% for riego in riegos %}
+              <tr id="{{riego.riego_id}}">
+                  <td>{{riego.riego_id}}</td>
+                  <td>{{riego.fecha}}</td>
+                  <td>{{riego.lugar}}</td>
+                  <td>{{riego.nave}}</td>
+                  <td>{{riego.minutos}}</td>
+                  <td>
+                      <button class="btn bg-none rounded-circle border border-2 btn-mod-lq" ><i class="fas fa-pen"></i></button>                   
+                      <button class="btn bg-none rounded-circle border border-2" hx-delete="/api/riegos/{{riego.riego_id}}" hx-confirm="¿Seguro que desea eliminar el riego {{riego.riego_id}}?">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                  </td>
+              </tr>
+              {% endfor %}
+            
+          </tbody>
+      </table>
+      {%else%}
+      <div>no ahi riegos</div>
+      {%endif%}
+    </div>
+    <div class="tab-pane fade" id="gasto_registrar" role="tabpanel" ></div>
+  </div>
+
+<script>
+
+</script>

@@ -1,13 +1,68 @@
-<div class="container">
+<!-- <div class="container">
     <div class="sidebar-header">
 
     </div>
     <div class="sidebar-contenido">
         <div class="contenedor-link">
-            <div class="link" data-url="/parcela/embarque">Embarque</div>
-            <div class="link" data-url="/parcela/flujo_caja">flujos</div>
+            <div class="link" data-url="/embarque">Registrar Embarque</div>
+            <div class="link" data-url="/lista/embarque">Lista Embarque</div>
+            <div class="link" data-url="/liquidacion">Registrar Liquidacion</div>
+            <div class="link" data-url="/lista/liquidacion">Lista Liquidacion</div>
+
+
             <div class="link" data-url="/parcela/flujo_caja">Otro</div>
         </div>
     </div>
 
-</div>
+</div> -->
+
+<div class="sidebar">
+    <!-- Contenido del sidebar -->
+    <div class="contenido_sidebar">
+         
+    </div>
+   <div class="contenedor-link">
+        <div class="link" data-url="/embarque">Registrar Embarque</div>
+        <div class="link" data-url="/lista/embarque">Lista Embarque</div>
+        <div class="link" data-url="/liquidacion">Registrar Liquidacion</div>
+        <div class="link" data-url="/lista/liquidacion">Lista Liquidacion</div>
+
+
+        <div class="link" data-url="/parcela/flujo_caja">Otro</div>
+    </div>
+    <p>hola</p>
+  </div>
+
+
+  <style>
+    .sidebar {
+      width: 200px;
+      height: 100vh;
+      position: fixed;
+      border: 2px solid rebeccapurple;
+      background-color: white;
+      z-index: 9999; /* POR ENCIMA DE TODO */
+      transition: margin-left 0.3s ease; /* Cambiado a margin-left para la animación */
+      overflow-y: scroll ;
+    }
+    .contenido_sidebar{
+      background-color: aqua;
+      height:500px;
+      width: 100%;
+    }
+    /* Estilo para el scrollbar del contenedor */
+    .sidebar::-webkit-scrollbar {
+  width: 8px; /* Ancho del scrollbar */
+}
+
+/* Estilo para la barra del scrollbar */
+.sidebar::-webkit-scrollbar-thumb {
+  background-color: red; /* Color de la barra del scrollbar */
+  border-radius: 4px; /* Radio de borde para hacerlo redondeado */
+}
+
+/* Estilo para la pista del scrollbar (el fondo del scrollbar) */
+.sidebar::-webkit-scrollbar-track {
+  background-color: transparent; /* Color de fondo de la pista del scrollbar */
+}
+  </style>

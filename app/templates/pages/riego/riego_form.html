@@ -1,0 +1,101 @@
+<div>
+
+    <div  class="text-center">
+
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Fecha</span>
+            <input type="date" id="fecha" class="form-control" value="{{fecha}}">
+            <span class="input-group-text bg-light d-block">
+                <i class="fa fa-calendar"></i>
+            </span>
+        </div>
+
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Lugar</span>
+            <select class="form-select" id="lugar">
+                <option value="Km 17 Parcela">Km 17 Parcela</option>
+                <option value="Km 17 Olivo">Km 17 Olivo</option>
+                <option value="Km 28 Sobraya">Km 28 Sobraya</option>
+            </select>
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Nave</span>
+            <select name="" class="form-control" id="nave">
+                <option value="Nave 1">Nave 1</option>
+                <option value="Nave 2">Nave 2</option>
+                <option value="Nave 3">Nave 3</option>
+            </select>
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Minutos</span>
+            <input type="number" class="form-control"  id="minutos" value="0">
+        </div>
+
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Regador</span>
+            <select name="" class="form-control" id="regador">
+                <option value="Huber Ticona">Huber Ticona</option>
+                <option value="Hugo Ticona">Hugo Ticona</option>
+                <option value="Otro">Otro</option>
+            </select>
+        </div>
+
+
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1">Comentario</span>
+            <textarea type="text" id="comentario" class="form-control"></textarea>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm">
+                <input type="submit" value="Registrarse" class="btn btn-primary" id="submit_riego">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    $('#submit_riego').on("click",function(){
+        console.log("Riego xd")
+        url = "{% if riego %}/api/riegos/{{riego.riego_id}}{% else %} /api/riegos/registrar {%endif%}"
+        console.log("|url: ", url)
+        let fecha = $('#fecha').val()
+        let lugar = $("#lugar").val()
+        let nave = $("#nave").val()
+        let minutos = $("#minutos").val()
+        let regador = $("#regador").val()
+        let comentario = $("#comentario").val()
+
+        form_data = {
+           fecha : fecha,
+           lugar:lugar,
+           nave:nave,
+           minutos:minutos,
+           regador:regador,
+           comentario:comentario,
+           periodo_id:'{{periodo_id}}'
+        }
+        $.ajax({
+            url : url,
+            method: 'post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(form_data),
+            success: function (res) {
+                console.log(res);
+                if (res.status){
+                    $(".dashboard-contenido").empty();
+                    $(".dashboard-contenido").append(aux_dashboard);
+                    toastr.success(res.msg, res.title, { timeOut: 3000 });
+                } else {
+                    console.log(res.msg);
+                    toastr.error(res.msg, res.title, { timeOut: 3000 });
+                }
+            },
+            error: function(e){
+                console.log("Ocurrio un error: ",e.status)
+            }
+
+        })
+    })
+</script>

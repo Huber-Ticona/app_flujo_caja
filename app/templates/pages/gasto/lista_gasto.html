@@ -1,0 +1,119 @@
+
+<!-- TOAST COMPONENT  -->
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+    <div id="toast" class="toast align-items-center text-white  border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div id="toast-body" class="toast-body"></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    </div>
+  </div>
+  
+<!-- <div class="text-center">
+	 Button HTML (to Trigger Modal) 
+	<a href="#myModal" class="trigger-btn" data-bs-toggle="modal">Click to Open Confirm Modal</a>
+</div> -->
+
+<!-- Modal HTML 
+<div id="myModal" class="modal fade">
+	<div class="modal-dialog modal-confirm">
+		<div class="modal-content">
+			<div class="modal-header">			
+				<h4 class="modal-title">Confirmación</h4>	
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<p>¿Seguro que desea eliminar el gasto <strong id="modal-data"></strong>?</p>
+			</div>
+			<div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cancelar</button>
+				<button  id="borrarGasto" class="btn btn-danger" data-bs-dismiss="modal">Si, Borrar el gasto!</button>
+			</div>
+		</div>
+	</div>
+</div> -->
+
+<table id="tabla_1" class="display" style="width:100%">
+    <thead>
+        <th>ID</th>
+        <th>Fecha</th>
+        <th>Nombre gasto</th>
+        <th>Empresa</th>
+        <th>total</th>
+        <th>accion</th>
+    </thead>
+    <tbody id="cuerpo-tabla">
+        {% for gasto in gastos %}
+         <tr id="{{gasto.gasto_id}}">
+            <td>{{gasto.gasto_id}}</td>
+            <td>{{gasto.fecha}}</td>
+            <td>{{gasto.tipo}}</td>
+            <td>{{gasto.prov_empresa}}</td>
+            <td>{{gasto.total}}</td>
+            <td>
+                <button class="btn bg-none rounded-circle border border-2 btn-mod-lq" ><i class="fas fa-pen"></i></button>
+                <!-- <a href="#myModal" class="btn bg-none rounded-circle border border-2 eliminarGasto" data-bs-toggle="modal" data-gasto_id="{{gasto.gasto_id}}"><i class="fas fa-trash"></i></a>
+                 -->
+                 <button class="btn bg-none rounded-circle border border-2" hx-delete="/api/gasto/{{gasto.gasto_id}}" hx-confirm="¿Seguro que desea eliminar el gasto {{gasto.gasto_id}}?">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+       
+    </tbody>
+</table>
+
+<script>
+  let table = new DataTable('#tabla_1',{
+    columnDefs: [
+    {
+      targets: 4, // Índice de la columna "Total Venta" (empezando desde 0)
+      orderData: 2, // Índice de la columna de datos subyacente para ordenar
+      render: function(data, type, row) {
+        // Se formatea para mostrar como moneda
+        if (type === 'display') {
+            data = parseInt(data)
+          return '$' + data.toLocaleString({currency:"CLP"})
+        }
+        return data;
+      }
+    }
+  ]
+  });
+    let toastElement = document.getElementById("toast")
+    let toastBody = document.getElementById("toast-body")
+
+    let toast = new bootstrap.Toast(toastElement, { delay: 2000 })
+
+    htmx.on("eliminar_gasto", (e) => {
+        console.log("Evento showMessage recibido.")
+        console.log("Data: ",e.detail)
+        toastBody.innerText = e.detail.msg
+        console.log("ID recibido: ",e.detail.id)
+        // Encuentra la fila con el mismo ID y la elimina
+        $('#cuerpo-tabla').find('tr#' + e.detail.id).remove();
+        $('#toast').addClass(e.detail.class)
+        toast.show()
+    })
+    // Al hacer clic en el botón Eliminar de la tabla
+    $('.eliminarGasto').click(function () {
+        
+      // Obten el data-id_empleado de la fila
+      var gasto_id = $(this).data('gasto_id');
+      console.log("Confirmacion Eliminando gasto: ", gasto_id)
+      // Obtén el nombre del empleado de la misma fila
+      // var nombreEmpleado = $(this).closest('tr').find('td:eq(1)').text();
+      
+      // Muestra el nombre del empleado en el modal
+      $('#modal-data').text(gasto_id);
+      console.log($('#borrarGasto').attr('hx-delete'))
+      // Puedes verificar si el atributo se ha actualizado imprimiéndolo en la consola
+      console.log("Nuevo hx-delete:", $("#borrarGasto").attr("hx-delete"));
+      // Configura ruta href
+      $('#borrarGasto').attr('hx-delete','/hola')
+    });
+    
+    
+  </script>
+

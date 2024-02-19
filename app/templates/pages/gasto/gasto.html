@@ -1,0 +1,19 @@
+
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item " role="presentation">
+      <button class="nav-link active"  hx-get="/api/gasto/{{periodo_id}}/lista" hx-target="#gasto_lista" hx-trigger="load" data-bs-toggle="tab" 
+      data-bs-target="#gasto_lista" type="button" role="tab" >Lista</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link"  hx-get="/api/gasto/{{periodo_id}}/registrar" hx-target="#gasto_registrar" data-bs-toggle="tab" 
+      data-bs-target="#gasto_registrar" type="button" role="tab">Registrar gasto</button>
+    </li>
+  
+  </ul>
+
+  <div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="gasto_lista" role="tabpanel" >...</div>
+    <div class="tab-pane fade" id="gasto_registrar" role="tabpanel" >...</div>
+  </div>
+
+  
