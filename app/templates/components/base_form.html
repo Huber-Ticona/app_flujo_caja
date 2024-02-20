@@ -1,0 +1,130 @@
+<div>
+    <h3>BASE FORM</h3>
+
+    <form id="base_form" action="{{form.url}}" method="POST">
+
+        {% for field in form %}
+
+        {% if field.type != 'CSRFTokenField' and field.type != 'SelectField' and field.type != 'HiddenField' %}
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1"> {{ field.label() }} | {{field.name}}</span>
+            {{ field(class="form-control") }}
+        </div>
+        {% endif %}
+
+        {% if field.type == 'SelectField' %}
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1"> {{ field.label() }}</span>
+            {{ field(class="form-control") }}
+        </div>
+        {% endif %}
+
+        {% if field.type == 'HiddenField' %}
+            <div class="input-group mb-3">
+                {{ field(class="form-control") }}
+            </div>
+            {% if field.name in  form.tablas %}
+                {%for input in form.tablas[field.name].inputs %}
+                <div class="input-group mb-3">
+                    <span class="input-group-text text-capitalize">{{ input.name}}</span>
+                    <input type="{{input.type}}" class="form-control" name="" id="{{ input.name}}">
+                </div>
+                {%endfor%}
+            {%endif%}
+        {% endif %}
+        
+        {% endfor %}
+        <h1>{{form.tabla}}</h1>
+
+        {% if form.tabla %}
+        <div class="table-responsive">
+        <table id="tabla_riego" class="table">
+            <thead>
+               {%for head in form.tabla %}
+               <th>{{head}}</th>
+               {%endfor%}
+            </thead>
+            <tbody id="body-tabla">
+            </tbody>
+        </table>
+    </div>
+        <div class="btn btn-secondary add-fila">add</div>
+        {%endif%}
+        
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm">
+                <input type="submit" value="Registrar" class="btn btn-primary">
+            </div>
+        </div>
+     </form>
+</div>
+<script>
+/**/
+$('#base_form').on('submit',function(){
+    // Prevenir el envío del formulario para manejarlo manualmente
+    //event.preventDefault();
+   
+    console.log("prevenido")
+     {% if form.tablas %}
+    console.log({{form.tablas|safe}})
+        {% for key,value in form.tablas.items() %}
+            console.log("Tabla: {{key}}")
+            console.log("Value: {{value|safe}}")
+            // Declarando json
+            let aux = {}
+            // Obteniendo valores de inputs
+            {% for input in value.inputs %}
+                let {{input.name}} = $('#{{input.name}}').val()
+                aux['{{input.name}}'] = {{input.name}}
+            {% endfor %}
+            aux['extra'] = "extraasasdas"
+            console.log(aux)
+            $('#{{key}}').val(JSON.stringify(aux))
+        {% endfor %}
+    {% endif %}
+    
+})
+/* FUNCION AGREGAR FILA */
+$(".contenido-principal-body").on("click",".add-fila", function (){
+    console.log("Añadiendo fila generica-...");
+    let data = {
+        id: "0",
+        nombre: "",
+    };
+    var tabla = $("#body-tabla");
+    var numeroDeFilas = tabla.find("tr").length;
+
+    console.log("Número de filas en la tabla: " + numeroDeFilas);
+
+    var i = numeroDeFilas;
+    
+
+    var fila = $("<tr>");
+    {% for input in form.tabla %}
+    var {{input}} = $("<input>")
+        .attr("type", "number")
+        .addClass("input-text")
+
+    fila.append($("<td>").append({{input}}))
+    {% endfor%}
+
+    var boton = $("<button>")
+        .addClass("btn-remover-fila btn bg-none rounded-circle border border-2")
+        .append('<i class="fas fa-trash"></i>')
+
+    fila.append($("<td>").append(boton))
+    tabla.append(fila);
+})
+  
+/* FUNCION ELIMINAR FILA */
+$(".contenido-principal-body").on(
+    "click",
+    ".btn-remover-fila",
+    function () {
+        // Encuentra el elemento padre <tr> de este botón y elimínalo
+        console.log("eliminando fila.");
+        $(this).closest("tr").remove();
+    }
+);
+
+</script>

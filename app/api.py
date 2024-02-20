@@ -1,6 +1,6 @@
 from flask import Blueprint,render_template,request,redirect,url_for,jsonify,session,Response,abort
-from .forms import Crear_Gasto_Form
-from .models import Gasto,Riego
+from .forms import Crear_Gasto_Form,Empleado_form
+from .models import Gasto,Riego,Empleado
 from .extensions import get_fields_and_types,model_to_dict2,db
 from html import escape
 from datetime import datetime
@@ -85,14 +85,7 @@ def eliminar_gasto(gasto_id=None):
         data['msg'] =  f"Gasto {gasto_id} no encontrado en la DB."
         data['class'] = "bg-danger"
 
-    return Response(
-        status=204,
-        headers={
-            'HX-Trigger': json.dumps({
-                "eliminar_gasto": data,
-                
-            })
-        })
+    return Response(status=204,headers={'HX-Trigger': json.dumps({"eliminar_registro": data,})})
 
 @api_bp.route('/test')
 def test():
@@ -128,6 +121,8 @@ def riego(riego_id = None):
     print('*'*30 + ' Riegos ' + '*'*30)
     empresa_id = session["empresa_id"]
     periodo_id = session["periodo_id"]
+    print('|(session) Periodo_id: ',periodo_id)
+    print('|(session) Emprsa_id: ',empresa_id)
     if request.method == 'GET':
         if not riego_id:
             # Enviar lista de riegos
@@ -135,19 +130,25 @@ def riego(riego_id = None):
             print("|Idea: Mostrar lista riegos.")
             print("|Riegos: ",riegos)
             return render_template('pages/riego/riego.html',riegos=riegos)
-         
-        
-
+    
         print("|Idea: Mostrar riego_form con datos.")
         riego = Riego.query.filter_by(riego_id=riego_id).first()
         print(f'|Riego: {riego}')
-        print('|(session) Periodo_id: ',periodo_id)
-        print('|(session) Emprsa_id: ',empresa_id)
         # Obtener lista de riego o aplicar filtros según sea necesario
-        return render_template('pages/riego/riego.html')
+        return render_template('pages/riego/riego_form.html',riego=riego,periodo_id=periodo_id)
     
     if request.method == 'PUT':
-         print("|Idea: Mostrar riego_form con datos.")
+         print("|Idea: Actualizar riego con los datos obtenidos mediante PUT.")
+         riego = Riego.query.filter_by(riego_id=riego_id).first()
+         print(f'|Riego: {riego}')
+         data = request.get_json()
+         print("|Data: ", data)
+         riego.update_from_dict(data)
+         db.session.commit()
+         try:
+            return jsonify(status=True,title='Exito', msg='Riego actualizado exitosamente.')
+         except:
+            return jsonify(status=False,title='Error', msg='Ocurrio un error al actualizado.')
 
     if request.method == 'DELETE':
          print("|Idea: Eliminar riego.")
@@ -155,40 +156,87 @@ def riego(riego_id = None):
          print("|Riego a eliminar: ",riego)
          db.session.delete(riego)
          db.session.commit()
-         return jsonify(status=True,msg="elimiando")
-        
+         data = {
+            "class":"",
+            "msg": f"Error al eliminar Riego {riego_id}.",
+            "id": riego_id
+         }
+         try:
+            return Response(status=204,headers={'HX-Trigger': json.dumps({"eliminar_registro": data,})})
+         except:
+            return Response(status=204,headers={'HX-Trigger': json.dumps({"eliminar_registro": data,})})
 
     
-@api_bp.route('/riego2', methods=['GET', 'POST'])
-def riego2():
+@api_bp.route('/trabajadores/registrar', methods=['GET', 'POST'])
+def crear_trabajadores():
     if request.method == 'GET':
-        riegos= ['riego 1', 'riego 2']
-        # Obtener lista de riego o aplicar filtros según sea necesario
-        return jsonify(riegos)
+        model_form = model_to_dict2(Empleado)
+        print(model_form)
+        empresa_id = session['empresa_id']
+        form = Empleado_form()
+        form.empresa_id.default = empresa_id
+        form.process()
+        return render_template("components/base_form.html",form=form)
     elif request.method == 'POST':
         # Crear un nuevo producto
-        data = request.json
-        # Validar y agregar el nuevo producto a la lista
-        nuevo_producto = {"id": len(productos) + 1, "nombre": data["nombre"], "precio": data["precio"]}
-        productos.append(nuevo_producto)
-        return jsonify(nuevo_producto), 201  # 201 Created
+        data = request.form
+        print("form data: ",data)
+        detalle = json.loads(request.form.get('detalle'))
+        empresa_id = request.form.get('empresa_id')
+        print(f"detalle: {detalle} | type: {type(detalle)}")
+        new_empleado = Empleado(detalle = detalle, empresa_id=empresa_id)
+        print("new empleado: ",new_empleado)
+        db.session.add(new_empleado)
+        db.session.commit() 
+        return 'yes'
 
-@api_bp.route('/riego/<int:riego_id>', methods=['GET', 'PUT', 'DELETE'])
-def handle_producto(producto_id):
-    producto = next((p for p in productos if p['id'] == producto_id), None)
-
-    if not producto:
-        return jsonify({"error": "Producto no encontrado"}), 404  # 404 Not Found
-
+@api_bp.route('/trabajadores', methods=['GET'])
+@api_bp.route('/trabajadores/<int:empleado_id>', methods=['GET','DELETE','PUT'])
+def trabajadores(empleado_id = None):
+    print('*'*30 + ' Trabajadores ' + '*'*30)
+    empresa_id = session["empresa_id"]
+    periodo_id = session["periodo_id"]
+    print('|(session) Periodo_id: ',periodo_id)
+    print('|(session) Emprsa_id: ',empresa_id)
     if request.method == 'GET':
-        # Obtener detalles del producto
-        return jsonify(producto)
-    elif request.method == 'PUT':
-        # Actualizar el producto
-        data = request.json
-        producto.update({"nombre": data["nombre"], "precio": data["precio"]})
-        return jsonify(producto)
-    elif request.method == 'DELETE':
-        # Eliminar el producto
-        productos.remove(producto)
-        return jsonify({"mensaje": "Producto eliminado"})
+        if not empleado_id:
+            # Enviar lista de riegos
+            empleados = Empleado.query.filter_by(empresa_id=empresa_id).all()
+            print("|Idea: Mostrar lista Trabajadores.")
+            print("|Trabajadores: ",empleados)
+            return render_template('pages/empleado/empleado.html',empleados=empleados)
+    
+        print("|Idea: Mostrar riego_form con datos.")
+        riego = Riego.query.filter_by(riego_id=riego_id).first()
+        print(f'|Riego: {riego}')
+        # Obtener lista de riego o aplicar filtros según sea necesario
+        return render_template('pages/riego/riego_form.html',riego=riego,periodo_id=periodo_id)
+    
+    if request.method == 'PUT':
+         print("|Idea: Actualizar riego con los datos obtenidos mediante PUT.")
+         riego = Riego.query.filter_by(riego_id=riego_id).first()
+         print(f'|Riego: {riego}')
+         data = request.get_json()
+         print("|Data: ", data)
+         riego.update_from_dict(data)
+         db.session.commit()
+         try:
+            return jsonify(status=True,title='Exito', msg='Riego actualizado exitosamente.')
+         except:
+            return jsonify(status=False,title='Error', msg='Ocurrio un error al actualizado.')
+
+    if request.method == 'DELETE':
+         print("|Idea: Eliminar empleado.")
+         empleado = Empleado.query.filter_by(empleado_id=empleado_id).first()
+         print("|empleado a eliminar: ",empleado)
+         db.session.delete(empleado)
+         db.session.commit()
+         data = {
+            "class":"",
+            "msg": f"Error al eliminar Empleado {empleado_id}.",
+            "id": empleado_id
+         }
+         try:
+            return Response(status=204,headers={'HX-Trigger': json.dumps({"eliminar_registro": data,})})
+         except:
+            return Response(status=204,headers={'HX-Trigger': json.dumps({"eliminar_registro": data,})})

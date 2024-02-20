@@ -1,0 +1,38 @@
+<div>
+    <h2>Lista de Empleados</h2>
+    <button class="btn btn-secondary" hx-get="/api/trabajadores/registrar" hx-target=".contenido-principal-body">Registrar nuevo empleado</button>
+    {% if empleados %}
+      <div>ahi riegos </div>
+
+      <table id="tabla_riego" class="display" style="width:100%">
+          <thead>
+              <th>ID</th>
+              {%for key,value in empleados[0].detalle.items() %}
+                <th>{{key}}</th>
+              {%endfor%}
+              <th>accion</th>
+          </thead>
+          <tbody>
+              {% for empleado in empleados %}
+              <tr id="{{empleado.empleado_id}}">
+                <td>{{empleado.empleado_id}}</td>
+                  {% for key2,value2 in empleado.detalle.items() %}
+                  <td>{{value2}}</td>
+                  {%endfor%}
+                  <td>
+                    <button class="btn bg-none rounded-circle border border-2"
+                    hx-get="/api/trabajadores/{{empleado.empleado_id}}"
+                    hx-target="#dashboard-contenido" ><i class="fas fa-pen"></i></button>                   
+                  <button class="btn bg-none rounded-circle border border-2" hx-delete="/api/trabajadores/{{empleado.empleado_id}}" hx-confirm="¿Seguro que desea eliminar el trabajador {{empleado.empleado_id}}?">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                  </td>
+              </tr>
+              {% endfor %}
+            
+          </tbody>
+      </table>
+      {%else%}
+      <div>no ahi riegos</div>
+      {%endif%}
+</div>

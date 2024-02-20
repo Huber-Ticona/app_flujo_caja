@@ -132,6 +132,9 @@ class Riego(db.Model):
     comentario = db.Column(db.String(255), nullable=False)
      # Foreaneas
     periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto
+    def update_from_dict(self, data):
+        for key, value in data.items():
+            setattr(self, key, value)
 
 class Empleado(db.Model):
     __tablename__ = 'empleado'

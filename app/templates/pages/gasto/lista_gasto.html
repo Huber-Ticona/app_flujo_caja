@@ -33,7 +33,7 @@
 	</div>
 </div> -->
 
-<table id="tabla_1" class="display" style="width:100%">
+<table id="tabla_gasto" class="display" style="width:100%">
     <thead>
         <th>ID</th>
         <th>Fecha</th>
@@ -65,37 +65,24 @@
 </table>
 
 <script>
-  let table = new DataTable('#tabla_1',{
-    columnDefs: [
-    {
-      targets: 4, // Índice de la columna "Total Venta" (empezando desde 0)
-      orderData: 2, // Índice de la columna de datos subyacente para ordenar
-      render: function(data, type, row) {
-        // Se formatea para mostrar como moneda
-        if (type === 'display') {
-            data = parseInt(data)
-          return '$' + data.toLocaleString({currency:"CLP"})
+  $(document).ready(function() {
+    let tabla_gasto = new DataTable('#tabla_gasto',{
+      columnDefs: [
+      {
+        targets: 4, // Índice de la columna "Total Venta" (empezando desde 0)
+        orderData: 2, // Índice de la columna de datos subyacente para ordenar
+        render: function(data, type, row) {
+          // Se formatea para mostrar como moneda
+          if (type === 'display') {
+              data = parseInt(data)
+            return '$' + data.toLocaleString({currency:"CLP"})
+          }
+          return data;
         }
-        return data;
       }
-    }
-  ]
-  });
-    let toastElement = document.getElementById("toast")
-    let toastBody = document.getElementById("toast-body")
-
-    let toast = new bootstrap.Toast(toastElement, { delay: 2000 })
-
-    htmx.on("eliminar_gasto", (e) => {
-        console.log("Evento showMessage recibido.")
-        console.log("Data: ",e.detail)
-        toastBody.innerText = e.detail.msg
-        console.log("ID recibido: ",e.detail.id)
-        // Encuentra la fila con el mismo ID y la elimina
-        $('#cuerpo-tabla').find('tr#' + e.detail.id).remove();
-        $('#toast').addClass(e.detail.class)
-        toast.show()
-    })
+    ]
+    });
+    
     // Al hacer clic en el botón Eliminar de la tabla
     $('.eliminarGasto').click(function () {
         
@@ -113,6 +100,9 @@
       // Configura ruta href
       $('#borrarGasto').attr('hx-delete','/hola')
     });
+
+  })
+    
     
     
   </script>

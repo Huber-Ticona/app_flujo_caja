@@ -7,7 +7,7 @@
             <button class="btn btn-secondary" hx-post="/embarque" hx-target="#dashboard-contenido">Registrar Embarque</button>
         </div>
         
-        <table id="myTabla" class="display" style="width:100%">
+        <table id="tabla_embarque" class="display" style="width:100%">
             <thead>
                 <tr>
                     <th scope="col">Embarque</th>
@@ -44,6 +44,7 @@
 <script>
     $(document).ready(function() {
         //$('#miTabla').DataTable();
-        let table = new DataTable('#myTabla');
+        console.log("Creando datatable embarque.")
+        let tabla_embarque = new DataTable('#tabla_embarque');
       }); 
 </script>

@@ -18,13 +18,14 @@
       {% if riegos %}
       <div>ahi riegos </div>
 
-      <table id="tabla" class="display" style="width:100%">
+      <table id="tabla_riego" class="display" style="width:100%">
           <thead>
               <th>ID</th>
               <th>Fecha</th>
               <th>Lugar</th>
               <th>Nave</th>
               <th>Minutos</th>
+              <th>Regador</th>
               <th>accion</th>
           </thead>
           <tbody>
@@ -35,8 +36,11 @@
                   <td>{{riego.lugar}}</td>
                   <td>{{riego.nave}}</td>
                   <td>{{riego.minutos}}</td>
+                  <td>{{riego.regador}}</td>
                   <td>
-                      <button class="btn bg-none rounded-circle border border-2 btn-mod-lq" ><i class="fas fa-pen"></i></button>                   
+                      <button class="btn bg-none rounded-circle border border-2"
+                        hx-get="/api/riegos/{{riego.riego_id}}"
+                        hx-target="#dashboard-contenido" ><i class="fas fa-pen"></i></button>                   
                       <button class="btn bg-none rounded-circle border border-2" hx-delete="/api/riegos/{{riego.riego_id}}" hx-confirm="¿Seguro que desea eliminar el riego {{riego.riego_id}}?">
                         <i class="fas fa-trash"></i>
                       </button>
@@ -54,5 +58,7 @@
   </div>
 
 <script>
-
+  $(document).ready(function() {
+    let tabla_riego = new DataTable('#tabla_riego')
+  })
 </script>

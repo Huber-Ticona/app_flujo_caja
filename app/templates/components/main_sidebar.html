@@ -46,6 +46,10 @@
                 {% endfor %}
             </div>
             {%endif%}
+            <hr class="hr-horizontal-light">
+            <div class="ps-4  section-title">
+                <div class="list-group-item custom-item" hx-get="/api/trabajadores" hx-target=".contenido-principal-body">Trabajadores</div>
+            </div>
         {% endif %}
 
         {%if empresa and periodo %}

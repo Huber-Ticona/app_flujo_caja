@@ -1,3 +1,4 @@
+
 a, a:hover, a:focus, a:active {
     text-decoration: none;
     color: inherit;
@@ -31,8 +32,8 @@ a, a:hover, a:focus, a:active {
     display: none;
   }
 .fondo_oscuro.sidebar-open{
-display: block;
-z-index: 9998; /* sidebar z-index 9999 */
+    display: block;
+    z-index: 9998; /* sidebar z-index 9999 */
 }
 
 
@@ -42,8 +43,14 @@ z-index: 9998; /* sidebar z-index 9999 */
     flex-direction: column;
     border: 1px solid red;
     min-height: 100vh;
+    margin-left: 270px; /* Ajustar según el ancho de la barra lateral y el margen */
+    overflow-x: scroll;
 }
-
+@media (max-width: 992px) {
+    .contenido-principal {
+        margin-left: 0 !important; /* !important se usa para asegurarse de que esta regla prevalezca sobre otras */
+    }
+}
 .contenido-principal-header{
     padding: 3px 3px;
     border: 1px solid blue;
@@ -59,6 +66,7 @@ z-index: 9998; /* sidebar z-index 9999 */
 /* MAIN SIDEBAR */
 .main_sidebar{
     min-width: 250px;
+    width: 250px;
     max-width: 250px;
     min-height: 100vh;
     border-radius: 20px;
@@ -67,6 +75,7 @@ z-index: 9998; /* sidebar z-index 9999 */
     flex-direction: column;
     background: linear-gradient(to bottom, #3b3b42 0%, #1e1e1f 100%);
     color: white;
+    position: fixed;
 }
 .main_sidebar_head{
     margin: 20px 30px;

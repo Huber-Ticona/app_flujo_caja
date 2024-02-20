@@ -35,3 +35,37 @@ $(".main_sidebar").on("click", ".custom-item", function (event) {
  */
     $(this).addClass("active").siblings().removeClass("active");
 });
+
+htmx.on("htmx:afterSwap", (event) => {
+    console.log("afterswap");
+    var msg = event.detail.xhr.response.msg;
+    if (msg) {
+        console.log("msg: ", msg);
+        // Muestra el toast
+        /* var toastBody = document.getElementById("miToastBody");
+        toastBody.innerText = msg;
+        var toast = new bootstrap.Toast(document.getElementById("miToast")); */
+        toast.show();
+    }
+});
+
+htmx.on("eliminar_registro", (e) => {
+    const toastElement = document.getElementById("toast");
+    const toastBody = document.getElementById("toast-body");
+    const toast = new bootstrap.Toast(toastElement, { delay: 2000 });
+
+    console.log("evento: eliminar_registro");
+    console.log("detail: ", e.detail);
+    toastBody.innerText = e.detail.msg;
+    console.log("ID recibido: ", e.detail.id);
+    // Encuentra la fila con el mismo ID y la elimina
+    $("#cuerpo-tabla")
+        .find("tr#" + e.detail.id)
+        .remove();
+    $("#toast").addClass(e.detail.class);
+    toast.show();
+});
+
+/* overflow-y: scroll;
+scrollbar-color: red  #3b3b42 ;
+scrollbar-width: auto; */

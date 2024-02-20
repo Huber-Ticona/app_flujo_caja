@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField,IntegerField,DateField,SelectField
+from wtforms import StringField,IntegerField,DateField,SelectField,HiddenField
 from wtforms.validators import InputRequired, Email, Length
 
 
@@ -66,3 +66,28 @@ class Crear_aplicacion_form(FlaskForm):
     comentario = StringField('comentario') # Tipo de gasto
     # Foreaneas
     periodo_id =IntegerField('periodo_id') # Tipo de gasto
+
+
+""" class Empleado(db.Model):
+    __tablename__ = 'empleado'
+    empleado_id = db.Column(db.Integer, primary_key=True)
+    detalle = db.Column(db.JSON, nullable=False) #{ nombre , apellido, telefono,estado(activo,inactivo),etc}
+    empresa_id = db.Column(db.Integer, nullable=False) # Tipo de gasto
+     """
+class Empleado_form(FlaskForm):
+    url = "/api/trabajadores/registrar"
+    detalle = HiddenField('detalle',name="detalle",default='')
+    empresa_id = IntegerField('empresa_id')
+    tabla = ["nombre","apellido","telefono","estado"]
+    tablas = {"detalle" : {
+                "relacion":"uno", # uno: uno a uno | muchos: uno a muchos
+                "field": "detalle",
+                "inputs" : [
+                    {"name":"nombre", "type":"text"},
+                    {"name":"apellido", "type":"text"},
+                    {"name":"telefono", "type":"number"},
+                    {"name":"estado", "type":"text"}
+                    ]
+            } ,
+            }
+

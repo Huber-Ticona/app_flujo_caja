@@ -21,10 +21,6 @@
 .dashboard-contenido{
     margin: 1px 1px;
     height: 100%;
-    
-    overflow-y: scroll;
-    scrollbar-color: red  #3b3b42 ;
-    scrollbar-width: auto;
 }
 
 /* Eliminar color azul de tab links */

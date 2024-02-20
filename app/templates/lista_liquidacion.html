@@ -6,7 +6,7 @@
             <button class="btn btn-secondary" hx-post="/liquidacion" hx-target="#dashboard-contenido">Registrar Liquidación</button>
         </div>
         {% if lista_liquidacion %}
-        <table id="miTabla" class="display" style="width:100%">
+        <table id="tabla_liquidacion" class="display" style="width:100%">
             <thead>
                 <tr>
                     <th scope="col">Liquidacion</th>
@@ -47,7 +47,7 @@
     $(document).ready(function() {
       //$('#miTabla').DataTable();
       console.log("Creando datatable liquidacion.")
-      let table = new DataTable('#miTabla', {
+      let tabla_liquidacion = new DataTable('#tabla_liquidacion', {
         columnDefs: [
         {
           targets: 2, // Índice de la columna "Total Venta" (empezando desde 0)

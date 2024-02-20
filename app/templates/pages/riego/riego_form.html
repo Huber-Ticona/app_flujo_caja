@@ -1,10 +1,11 @@
 <div>
 
     <div  class="text-center">
+        <h4 style="font-family:'Roboto';font-size:20px;font-weigth:600;">{% if riego %}Actualizar{%else%}Registrar{%endif%} Riego</h4>
 
         <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1">Fecha</span>
-            <input type="date" id="fecha" class="form-control" value="{{fecha}}">
+            <input type="date" id="fecha" class="form-control" value="{% if riego %}{{riego.fecha}}{%else%}{{fecha}}{%endif%}">
             <span class="input-group-text bg-light d-block">
                 <i class="fa fa-calendar"></i>
             </span>
@@ -13,22 +14,22 @@
         <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1">Lugar</span>
             <select class="form-select" id="lugar">
-                <option value="Km 17 Parcela">Km 17 Parcela</option>
-                <option value="Km 17 Olivo">Km 17 Olivo</option>
-                <option value="Km 28 Sobraya">Km 28 Sobraya</option>
+                <option value="Km 17 Parcela" {% if riego and riego.lugar =="Km 17 Parcela" %}selected{%endif%}>Km 17 Parcela</option>
+                <option value="Km 17 Olivo" {% if riego and riego.lugar =="Km 17 Olivo" %}selected{%endif%}>Km 17 Olivo</option>
+                <option value="Km 28 Sobraya" {% if riego and riego.lugar =="Km 28 Sobraya" %}selected{%endif%}>Km 28 Sobraya</option>
             </select>
         </div>
         <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1">Nave</span>
             <select name="" class="form-control" id="nave">
-                <option value="Nave 1">Nave 1</option>
-                <option value="Nave 2">Nave 2</option>
-                <option value="Nave 3">Nave 3</option>
+                <option value="Nave 1" {% if riego and riego.nave =="Nave 1" %}selected{%endif%}>Nave 1</option>
+                <option value="Nave 2" {% if riego and riego.nave =="Nave 2" %}selected{%endif%}>Nave 2</option>
+                <option value="Nave 3" {% if riego and riego.nave =="Nave 3" %}selected{%endif%}>Nave 3</option>
             </select>
         </div>
         <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1">Minutos</span>
-            <input type="number" class="form-control"  id="minutos" value="0">
+            <input type="number" class="form-control"  id="minutos" value="{% if riego %}{{riego.minutos}}{%else%}0{%endif%}">
         </div>
 
         <div class="input-group mb-3">
@@ -43,12 +44,12 @@
 
         <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1">Comentario</span>
-            <textarea type="text" id="comentario" class="form-control"></textarea>
+            <textarea type="text" id="comentario" class="form-control">{% if riego %}{{riego.comentario}}{%endif%}</textarea>
         </div>
 
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm">
-                <input type="submit" value="Registrarse" class="btn btn-primary" id="submit_riego">
+                <input type="submit" value="{% if riego %}Actualizar{%else%}Registrar{%endif%}" class="btn btn-primary" id="submit_riego">
             </div>
         </div>
 
@@ -78,7 +79,7 @@
         }
         $.ajax({
             url : url,
-            method: 'post',
+            method: '{% if riego %}put{%else%}post{%endif%}',
             contentType: 'application/json; charset=utf-8',
             data: JSON.stringify(form_data),
             success: function (res) {
