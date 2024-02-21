@@ -1,59 +1,89 @@
 <div>
     <h3>BASE FORM</h3>
 
-    <form id="base_form" action="{{form.url}}" method="POST">
+    <form id="base_form" action="{{form.endpoint}}{%if entidad %}/{{entidad.id}}{%else%}/registrar{%endif%}" method="{%if entidad %}PUT{%else%}POST{%endif%}" >
 
         {% for field in form %}
-
+        
         {% if field.type != 'CSRFTokenField' and field.type != 'SelectField' and field.type != 'HiddenField' %}
-        <div class="input-group mb-3">
-            <span class="input-group-text" id="basic-addon1"> {{ field.label() }} | {{field.name}}</span>
-            {{ field(class="form-control") }}
+         <!-- INPUTFIELD -->
+         <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1"> {{ field.label() }}</span>
+            {{ field(class="form-control" ,value = "{%if entidad %}{{entidad[field.id]}}{%else%}/registrar{%endif%}")}}
         </div>
         {% endif %}
 
         {% if field.type == 'SelectField' %}
+        <!-- Selectfield -->
         <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1"> {{ field.label() }}</span>
             {{ field(class="form-control") }}
         </div>
         {% endif %}
-
+        
         {% if field.type == 'HiddenField' %}
+            <!-- HIDDENFIELD -->
             <div class="input-group mb-3">
                 {{ field(class="form-control") }}
             </div>
-            {% if field.name in  form.tablas %}
-                {%for input in form.tablas[field.name].inputs %}
-                <div class="input-group mb-3">
-                    <span class="input-group-text text-capitalize">{{ input.name}}</span>
-                    <input type="{{input.type}}" class="form-control" name="" id="{{ input.name}}">
-                </div>
-                {%endfor%}
-            {%endif%}
+            
+                {% if field.name in  form.tablas %}
+                    <!-- uno-uno -->
+                    {% if  form.tablas[field.name].relacion == 'uno' %}
+                        {%for input in form.tablas[field.name].inputs %}
+                            <div class="input-group mb-3">
+                                <span class="input-group-text text-capitalize">{{ input.name}}</span>
+                                {% if not input.choices %}
+                                <input type="{{input.type}}" class="form-control" name="" id="{{input.name}}"
+                                value="{%if entidad and entidad[field.name] %}{{entidad[field.name][input.name]}}{%endif%}">
+                                {%else%}
+                                <select class="form-select" id="{{input.name}}">
+                                    {% for choice in input.choices %}
+                                    <option value="{{choice}}"  {%if entidad and entidad[field.name][input.name]== choice %}selected{%endif%} >{{choice}}</option>
+                                    {%endfor%}
+                                </select>
+                                {%endif%}
+                            </div>
+                        {%endfor%}
+                    {%elif form.tablas[field.name].relacion == 'muchos'%}
+                    <!-- uno-muchos -->
+                    <div>uno a muchs..</div>
+                    <div class="btn btn-secondary add-fila-{{field.name}}">add</div>
+                    <div class="table-responsive">
+                        <table id="tabla-{{field.name}}" class="table">
+                            <thead>
+                               {%for input in form.tablas[field.name].inputs %}
+                               <th>{{input.name}}</th>
+                               {%endfor%}
+                            </thead>
+                            <tbody id="body-tabla-{{field.name}}">
+                                {#%for input in form.tablas[field.name].inputs %}
+                               <td>
+                                {% if not input.choices %}
+                                <input type="{{input.type}}" class="form-control" name="" id="{{input.name}}"
+                                value="{%if entidad and entidad[field.name] %}{{entidad[field.name][input.name]}}{%endif%}">
+                                {%else%}
+                                <select class="form-select" id="{{input.name}}">
+                                    {% for choice in input.choices %}
+                                    <option value="{{choice}}"  {%if entidad and entidad[field.name][input.name]== choice %}selected{%endif%} >{{choice}}</option>
+                                    {%endfor%}
+                                </select>
+                                {%endif%}
+                               </td>
+                               {%endfor%#}
+                            </tbody>
+                        </table>
+                    {%endif%}
+                {%endif%}
         {% endif %}
         
         {% endfor %}
-        <h1>{{form.tabla}}</h1>
 
-        {% if form.tabla %}
-        <div class="table-responsive">
-        <table id="tabla_riego" class="table">
-            <thead>
-               {%for head in form.tabla %}
-               <th>{{head}}</th>
-               {%endfor%}
-            </thead>
-            <tbody id="body-tabla">
-            </tbody>
-        </table>
-    </div>
-        <div class="btn btn-secondary add-fila">add</div>
-        {%endif%}
+
         
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm">
-                <input type="submit" value="Registrar" class="btn btn-primary">
+                <input type="submit" value="{%if entidad %}Actualizar{%else%}Registrar{%endif%}" class="btn btn-primary">
             </div>
         </div>
      </form>
@@ -62,7 +92,7 @@
 /**/
 $('#base_form').on('submit',function(){
     // Prevenir el envío del formulario para manejarlo manualmente
-    //event.preventDefault();
+    event.preventDefault();
    
     console.log("prevenido")
      {% if form.tablas %}
@@ -71,60 +101,134 @@ $('#base_form').on('submit',function(){
             console.log("Tabla: {{key}}")
             console.log("Value: {{value|safe}}")
             // Declarando json
-            let aux = {}
+            var aux;
             // Obteniendo valores de inputs
-            {% for input in value.inputs %}
-                let {{input.name}} = $('#{{input.name}}').val()
-                aux['{{input.name}}'] = {{input.name}}
-            {% endfor %}
-            aux['extra'] = "extraasasdas"
-            console.log(aux)
+            {% if value.relacion == 'uno' %}
+                
+                console.log("RELACION UNO A UNO")
+                aux = {}
+                {% for input in value.inputs %}
+                    let {{input.name}} = $('#{{input.name}}').val()
+                    aux['{{input.name}}'] = {{input.name}}
+                {% endfor %}
+            {% elif value.relacion == 'muchos' %}
+                console.log("RELACION UNO A MUCHOS");
+                aux = [];
+
+                // Iterar sobre cada fila en el body de la tabla
+                $('#body-tabla-{{key}} tr').each(function() {
+                    var fila = {};
+                    var celdas = $(this).find('td');
+                    // Obtener el texto de cada celda y asignarlo a la clave correspondiente
+                    // Iterar sobre cada celda en la fila
+                    celdas.each(function(index) {
+                        var input = $(this).find('input, select, textarea');
+                        if (input.length > 0) {
+                            var nombreColumna = input.attr('id');
+                            var valor = input.val();
+                            
+                            // Asignar el valor al objeto de la fila
+                            fila[nombreColumna] = valor;
+                        }
+                    });
+                    console.log("Fila: ",fila)
+                    aux.push(fila);
+                   
+                    });
+                
+            {% endif %}
+            
+            console.log("Aux: ",aux)
             $('#{{key}}').val(JSON.stringify(aux))
         {% endfor %}
     {% endif %}
+
+    // Obtener los datos del formulario
+    var formData = $(this).serialize();
+
+    // Enviar la solicitud AJAX al servidor
+    $.ajax({
+        url: $(this).attr('action'),
+        type: $(this).attr('method'),
+        data: formData,
+        success: function (res) {
+            // Manejar la respuesta del servidor
+            console.log(res);
+            if (res.status){
+                //$(".dashboard-contenido").empty();
+                //$(".dashboard-contenido").append(aux_dashboard);
+                toastr.success(res.msg, res.title, { timeOut: 3000 });
+            } else {
+                console.log(res.msg);
+                toastr.error(res.msg, res.title, { timeOut: 3000 });
+            }
+        },
+        error: function (xhr, status, error) {
+            // Manejar errores de la solicitud
+            console.error(xhr.responseText);
+        }
+    });
     
 })
-/* FUNCION AGREGAR FILA */
-$(".contenido-principal-body").on("click",".add-fila", function (){
-    console.log("Añadiendo fila generica-...");
-    let data = {
-        id: "0",
-        nombre: "",
-    };
-    var tabla = $("#body-tabla");
-    var numeroDeFilas = tabla.find("tr").length;
 
-    console.log("Número de filas en la tabla: " + numeroDeFilas);
+{%if form.tablas %}
+    {% for key,value in form.tablas.items()%}
+    console.log("item {{key}} in tablas")
+    /* FUNCION AGREGAR FILA */
+    $(".contenido-principal-body").on("click",".add-fila-{{key}}", function (){
+        console.log("Añadiendo fila generica-...");
+        let data = {
+            id: "0",
+            nombre: "",
+        };
+        var tabla = $("#body-tabla-{{key}}");
+        var numeroDeFilas = tabla.find("tr").length;
 
-    var i = numeroDeFilas;
-    
+        console.log("Número de filas en la tabla: " + numeroDeFilas);
 
-    var fila = $("<tr>");
-    {% for input in form.tabla %}
-    var {{input}} = $("<input>")
-        .attr("type", "number")
-        .addClass("input-text")
+        var i = numeroDeFilas;
+        let x = `<div>
+            hola
+            `
 
-    fila.append($("<td>").append({{input}}))
-    {% endfor%}
+        var fila = $("<tr>");
+        {% for input in form.tablas[key].inputs %}
+            var {{input.name}} = `{% if not input.choices %}
+                <input type="{{input.type}}" class="form-control" name="" id="{{input.name}}"
+                value="">
+                {%else%}
+                <select class="form-select" id="{{input.name}}">
+                    {% for choice in input.choices %}
+                    <option value="{{choice}}"   >{{choice}}</option>
+                    {%endfor%}
+                </select>
+                {%endif%}`
+            fila.append($("<td>").append({{input.name}}))
+        {% endfor%}
 
-    var boton = $("<button>")
-        .addClass("btn-remover-fila btn bg-none rounded-circle border border-2")
-        .append('<i class="fas fa-trash"></i>')
+        var boton = $("<button>")
+            .addClass("btn-remover-fila btn bg-none rounded-circle border border-2")
+            .append('<i class="fas fa-trash"></i>')
 
-    fila.append($("<td>").append(boton))
-    tabla.append(fila);
-})
+        fila.append($("<td>").append(boton))
+        tabla.append(fila);
+    })
+    /* FUNCION ELIMINAR FILA */
+    $(".contenido-principal-body").on(
+        "click",
+        ".btn-remover-fila",
+        function () {
+            // Encuentra el elemento padre <tr> de este botón y elimínalo
+            console.log("eliminando fila.");
+            $(this).closest("tr").remove();
+        }
+    );
+    {%endfor%}
+
+{%endif%}
+
+
   
-/* FUNCION ELIMINAR FILA */
-$(".contenido-principal-body").on(
-    "click",
-    ".btn-remover-fila",
-    function () {
-        // Encuentra el elemento padre <tr> de este botón y elimínalo
-        console.log("eliminando fila.");
-        $(this).closest("tr").remove();
-    }
-);
+
 
 </script>

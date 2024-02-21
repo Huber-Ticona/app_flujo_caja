@@ -1,5 +1,5 @@
 from flask import Flask, redirect, url_for, jsonify,render_template
-from .extensions import db, migrate, login_manager,minify
+from .extensions import db, migrate, login_manager,minify,csrf
 from .config import ConfigDevelop,ConfigProduction
 from dotenv import load_dotenv
 
@@ -18,6 +18,7 @@ def create_app():
     # Inicializamos Extensiones
     db.init_app(app)
     migrate.init_app(app, db)
+    #csrf.init_app(app) # Rutas embarque,liquidacion necesitan manejo csrf con wftorms template base_form.
     login_manager.init_app(app)
     login_manager.login_view = "auth_bp.login"
 

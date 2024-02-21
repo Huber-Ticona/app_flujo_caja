@@ -2,7 +2,7 @@
 
     <div  class="text-center">
         <h4 style="font-family:'Roboto';font-size:20px;font-weigth:600;">{% if riego %}Actualizar{%else%}Registrar{%endif%} Riego</h4>
-
+      
         <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1">Fecha</span>
             <input type="date" id="fecha" class="form-control" value="{% if riego %}{{riego.fecha}}{%else%}{{fecha}}{%endif%}">

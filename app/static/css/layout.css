@@ -63,6 +63,15 @@ a, a:hover, a:focus, a:active {
     margin: 2px 2px;
     flex-grow: 1;
 }
+/* test toast */
+#test-toast{
+    position: absolute;
+    width: 200px;
+    height: 50px;
+    border: 1px solid red;
+    right: 0;
+    background-color: aqua;
+}
 /* MAIN SIDEBAR */
 .main_sidebar{
     min-width: 250px;

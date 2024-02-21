@@ -107,7 +107,7 @@ class Gasto(db.Model):
 
 class Aplicacion(db.Model):
     __tablename__ = 'aplicacion'
-    aplicacion_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     
     fecha = db.Column(db.Date, nullable=False)
     lugar = db.Column(db.String(100), nullable=False)
@@ -119,10 +119,24 @@ class Aplicacion(db.Model):
     comentario = db.Column(db.String(255), nullable=False)
      # Foreaneas
     periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto
+    def to_json(self):
+        return {
+            'id': self.id,
+            'fecha': self.fecha,
+            'lugar': self.lugar,
+            'nave': self.nave,
+            'detalle': self.detalle,
+            'aplicador': self.aplicador,
+            'comentario': self.comentario,
+            'periodo_id': self.periodo_id,
+        }
+    def update_from_dict(self, data):
+        for key, value in data.items():
+            setattr(self, key, value)
 
 class Riego(db.Model):
     __tablename__ = 'riego'
-    riego_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     fecha = db.Column(db.Date, nullable=False)
     lugar = db.Column(db.String(100), nullable=False)
     nave = db.Column(db.String(100), nullable=False)
@@ -138,10 +152,19 @@ class Riego(db.Model):
 
 class Empleado(db.Model):
     __tablename__ = 'empleado'
-    empleado_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     detalle = db.Column(db.JSON, nullable=False) #{ nombre , apellido, telefono,estado(activo,inactivo),etc}
     empresa_id = db.Column(db.Integer, nullable=False) # Tipo de gasto
+    def update_from_dict(self, data):
+        for key, value in data.items():
+            setattr(self, key, value)
 
+    def to_json(self):
+        return {
+            'id': self.id,
+            'detalle': self.detalle,
+            'empresa_id': self.empresa_id
+        }
 """ class PagoPersonal(db.Model):
     __tablename__ = 'pago_personal'
     gasto_id = db.Column(db.Integer, primary_key=True)

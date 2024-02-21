@@ -12,18 +12,18 @@
               {%endfor%}
               <th>accion</th>
           </thead>
-          <tbody>
+          <tbody id="cuerpo-tabla">
               {% for empleado in empleados %}
-              <tr id="{{empleado.empleado_id}}">
-                <td>{{empleado.empleado_id}}</td>
+              <tr id="{{empleado.id}}">
+                <td>{{empleado.id}}</td>
                   {% for key2,value2 in empleado.detalle.items() %}
                   <td>{{value2}}</td>
                   {%endfor%}
                   <td>
                     <button class="btn bg-none rounded-circle border border-2"
-                    hx-get="/api/trabajadores/{{empleado.empleado_id}}"
-                    hx-target="#dashboard-contenido" ><i class="fas fa-pen"></i></button>                   
-                  <button class="btn bg-none rounded-circle border border-2" hx-delete="/api/trabajadores/{{empleado.empleado_id}}" hx-confirm="¿Seguro que desea eliminar el trabajador {{empleado.empleado_id}}?">
+                    hx-get="/api/trabajadores/{{empleado.id}}"
+                    hx-target=".contenido-principal-body"><i class="fas fa-pen"></i></button>                   
+                  <button class="btn bg-none rounded-circle border border-2" hx-delete="/api/trabajadores/{{empleado.id}}" hx-confirm="¿Seguro que desea eliminar el trabajador {{empleado.empleado_id}}?">
                     <i class="fas fa-trash"></i>
                   </button>
                   </td>
@@ -36,3 +36,6 @@
       <div>no ahi riegos</div>
       {%endif%}
 </div>
+<script>
+
+</script>

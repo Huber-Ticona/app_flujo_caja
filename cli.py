@@ -1,6 +1,7 @@
 import fire
 from datetime import datetime
 import subprocess
+import pymysql
 
 
 class Backup(object):
@@ -32,6 +33,7 @@ class Backup(object):
 class Restore(object):
 
     def run(self, filename):
+        """ filename = backup/backup-2024-02-19_17-09.sql """
         # datos
         name="app_flujo_caja"
         user="huber"
@@ -39,6 +41,25 @@ class Restore(object):
         host="localhost"
         
         print("|Filename: ",filename)
+        print("|Creando base de datos: ",name)
+        cmd = f"mysql -u {user} -p{password} -h {host} {name} -e 'CREATE DATABASE {name}' "
+        try:
+            # Conectar a MySQL (puedes ajustar la conexión según tus necesidades)
+            connection = pymysql.connect(host=host, user=user, password=password)
+
+            with connection.cursor() as cursor:
+
+              # Comando SQL para crear la base de datos
+              create_db_query = f"CREATE DATABASE {name}"
+              cursor.execute(create_db_query)
+
+              # Confirmar la transacción
+              connection.commit()
+            print(f"Base de datos '{name}' creada exitosamente.")
+        except Exception as e:
+            print (f"Error al restaurar la base de datos: {e}")
+        
+        print("|Restaurando base de datos con backup: ",filename)
         # Restaurando la base de datos desde el archivo SQL
         cmd = f"mysql -u {user} -p{password} -h {host} {name} < {filename}"
         print("|Comando: ",cmd)

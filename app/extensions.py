@@ -2,6 +2,9 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_minify import  Minify
+from flask_wtf.csrf import CSRFProtect
+import json
+
 import datetime
 from sqlalchemy import inspect
 from html import escape
@@ -10,7 +13,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 minify = Minify( passive=True)
-
+csrf = CSRFProtect()
 
 def convertir_fecha(fecha_a):
     # Crear un objeto datetime a partir de la fecha en formato A usando el método strptime
@@ -19,7 +22,18 @@ def convertir_fecha(fecha_a):
     fecha_b = fecha_datetime.strftime("%Y-%m-%d")
     # Devolver la fecha en formato B
     return fecha_b
-
+def convertir_form_a_dict(request_form,form_tablas):
+    new_data = {}
+    for key, value in request_form.items():
+            if key in form_tablas:
+                print(f"|key: {key} | type: {type(request_form[key])} en form.tablas -> Se convierte en json")
+                try:
+                    new_data[key] = json.loads(request_form[key])
+                except json.JSONDecodeError:
+                    pass
+            else:
+                new_data[key] = request_form[key]
+    return new_data
 
 def get_fields_and_types(model):
     mapper = inspect(model)

@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField,IntegerField,DateField,SelectField,HiddenField
 from wtforms.validators import InputRequired, Email, Length
-
+import json
 
 class Login_Form(FlaskForm):
     usuario = StringField('username')
@@ -40,7 +40,7 @@ class Crear_Gasto_Form(FlaskForm):
 """ APLICACION FORM """
 """ class Aplicacion(db.Model):
     __tablename__ = 'aplicacion'
-    aplicacion_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     
     fecha = db.Column(db.Date, nullable=False)
     lugar = db.Column(db.String(100), nullable=False)
@@ -51,21 +51,32 @@ class Crear_Gasto_Form(FlaskForm):
     aplicador = db.Column(db.String(255), nullable=True)
     comentario = db.Column(db.String(255), nullable=False)
      # Foreaneas
-    periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto """
-class Crear_aplicacion_form(FlaskForm):
+    periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto"""
+class Aplicacion_form(FlaskForm):
 
     fecha = DateField('fecha', validators=[InputRequired()])
-    lugar = StringField('prov_empresa')
-    nave = SelectField('prov_documento', choices=[('factura', 'Factura'), ('boleta', 'Boleta'), ('guia', 'Guia')])
-    prov_folio = IntegerField('prov_folio')
-
-    tipo = StringField('tipo',validators=[InputRequired()])
-
-  
+    lugar = SelectField('lugar', choices=[('Km 17 Parcela', 'Km 17 Parcela'), ('Km 17 Olivo', 'Km 17 Olivo'), ('Km 28 Sobraya', 'Km 28 Sobraya')])
+    nave = SelectField('nave', choices=[('Nave 1', 'Nave 1'), ('Nave 2', 'Nave 2'), ('Nave 3', 'Nave 3')])
     
+    detalle = HiddenField("detalle")
+
+    aplicador = StringField('aplicador')
     comentario = StringField('comentario') # Tipo de gasto
     # Foreaneas
-    periodo_id =IntegerField('periodo_id') # Tipo de gasto
+    periodo_id =HiddenField('periodo_id') # Tipo de gasto
+    endpoint = "/api/aplicaciones"
+    tablas = {"detalle" : {
+                "relacion":"muchos", # uno: uno a uno | muchos: uno a muchos
+                "field": "detalle",
+                "inputs" : [
+                    {"name":"insumo", "type":"text"},
+                    {"name":"cantidad", "type":"number"},
+                    {"name":"unidad", "type":"text",
+                     "choices":["Mili-litro (ML)","kilogramo (KG)","Litro (LTS)" ,"Mili-gramo (MG)"]
+                     },
+                    ]
+            } ,
+            }
 
 
 """ class Empleado(db.Model):
@@ -75,9 +86,10 @@ class Crear_aplicacion_form(FlaskForm):
     empresa_id = db.Column(db.Integer, nullable=False) # Tipo de gasto
      """
 class Empleado_form(FlaskForm):
-    url = "/api/trabajadores/registrar"
+    
     detalle = HiddenField('detalle',name="detalle",default='')
-    empresa_id = IntegerField('empresa_id')
+    empresa_id = HiddenField('empresa_id')
+    endpoint = "/api/trabajadores"
     tabla = ["nombre","apellido","telefono","estado"]
     tablas = {"detalle" : {
                 "relacion":"uno", # uno: uno a uno | muchos: uno a muchos
@@ -86,8 +98,17 @@ class Empleado_form(FlaskForm):
                     {"name":"nombre", "type":"text"},
                     {"name":"apellido", "type":"text"},
                     {"name":"telefono", "type":"number"},
-                    {"name":"estado", "type":"text"}
+                    {"name":"estado", "type":"text" ,"choices":["ACTIVO","INACTIVO"]}
                     ]
             } ,
             }
+    def convertir_json_fields(self):
+        for key, value in self.tablas.items():
+            if key in self.data:
+                json_str = self.data[key]
+                try:
+                    json_data = json.loads(json_str)
+                    self.data[key] = json_data
+                except json.JSONDecodeError:
+                    pass
 

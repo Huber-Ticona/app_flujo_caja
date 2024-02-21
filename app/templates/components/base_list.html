@@ -1,0 +1,36 @@
+<div>
+    <button class="btn btn-secondary" hx-get="{{dicc['url_api']}}/registrar" hx-target=".dashboard-contenido">Registrar</button>
+    {% if entidades %}
+    <div>ahi {{dicc["api"]}}:</div>
+    <table id="" class="display" style="width:100%">
+        <thead>
+            {%for key,value in entidades[0].items() %}
+            <th>{{key}}</th>
+            {%endfor%}
+            <th>accion</th>
+        </thead>
+        <tbody id="cuerpo-tabla">
+            {% for item in entidades %}
+            <tr id="{{item.id}}">
+                {% for key2,value2 in item.items() %}
+                <td>{{value2}}</td>
+                {%endfor%}
+                <td>
+                <button class="btn bg-none rounded-circle border border-2"
+                hx-get="{{dicc['url_api']}}/{{item.id}}"
+                hx-target=".dashboard-contenido"><i class="fas fa-pen"></i></button>                   
+                <button class="btn bg-none rounded-circle border border-2" hx-delete="{{dicc['url_api']}}/{{item.id}}" hx-confirm="¿Seguro que desea eliminar el aplicacion {{item.id}}?">
+                <i class="fas fa-trash"></i>
+                </button>
+                </td>
+            </tr>
+            {% endfor %}
+        
+        </tbody>
+    </table>
+    {%else%}
+<div>
+    no ahi {{dicc["api"]}}
+</div>
+    {%endif%}
+</div>
