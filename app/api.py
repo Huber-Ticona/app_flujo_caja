@@ -1,15 +1,15 @@
 from flask import Blueprint,render_template,request,redirect,url_for,jsonify,session,Response,abort,flash
 from flask_login import login_required
-from .forms import Crear_Gasto_Form,Empleado_form,Aplicacion_form
+from .forms import Crear_Gasto_Form,Empleado_form,Aplicacion_form,Riego_form,Gasto_Form
 from .models import Gasto,Riego,Empleado,Aplicacion
-from .extensions import get_fields_and_types,model_to_dict2,db,convertir_form_a_dict
+from .extensions import get_fields_and_types,model_to_dict2,db,convertir_form_a_dict,establecer_valores_por_defecto_formulario
 from html import escape
 from datetime import datetime
 import json
 
 api_bp = Blueprint('api_bp' , __name__,template_folder='templates',static_folder='static')
 
-@api_bp.route('/gasto/<int:periodo_id>')
+""" @api_bp.route('/gasto/<int:periodo_id>')
 @login_required
 def obtener_gasto(periodo_id=None):
 
@@ -94,9 +94,94 @@ def eliminar_gasto(gasto_id=None):
 
 @api_bp.route('/test')
 def test():
-    return 'test'
+    return 'test' """
 
+""" Api Gasto  """
+@api_bp.route('/gastos/registrar', methods=['GET','POST'])
+@login_required
+def crear_gasto():
+    if request.method =='GET':
+        periodo_id = session["periodo_id"]
+        fecha = datetime.now().date()
+        print("|fecha: ",fecha)
+        form = Riego_form()
+        fecha = datetime.now()
+        form.fecha.default = fecha
+        form.periodo_id.default = periodo_id
+        form.process()
+        return render_template("components/base_form.html",form=form)
+    if request.method =='POST':
+        # Registrar Riego
+        try:
+            data = request.form
+            print("form data: ",data)
+            new_data = convertir_form_a_dict(data, Riego_form().tablas)
+            print("new_data: ",new_data)
+            new_aplicacion = Riego(**new_data)
+            print("new aplicacion: ",new_aplicacion)
+            db.session.add(new_aplicacion)
+            db.session.commit() 
+            return jsonify(status=True,title='Exito', msg='Riego registrado exitosamente.')
+        except Exception as e:
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al registrar Riego. Error: {str(e)}')
+       
+        
 
+@api_bp.route('/gastos', methods=['GET'])
+@api_bp.route('/gastos/<int:riego_id>', methods=['GET','DELETE','PUT'])
+@login_required
+def gastos(riego_id = None):
+    print('*'*30 + ' Riegos ' + '*'*30)
+    try:
+        empresa_id = session["empresa_id"]
+        periodo_id = session["periodo_id"]
+    except:
+        return jsonify(status=False,title='Error', msg='Ocurrio un error durante la consulta a la /api/riegos.')
+    
+    print('|(session) Periodo_id: ',periodo_id)
+    print('|(session) Emprsa_id: ',empresa_id)
+    if request.method == 'GET':
+        if not riego_id:
+            # Enviar lista de riegos
+            riegos = Riego.query.filter_by(periodo_id=periodo_id).all()
+            print("|Idea: Mostrar lista riegos.")
+            print("|Riegos: ",riegos)
+            return render_template('pages/riego/riego.html',riegos=riegos)
+    
+        print("|Idea: Mostrar riego_form con datos.")
+        riego = Riego.query.filter_by(riego_id=riego_id).first()
+        print(f'|Riego: {riego}')
+        # Obtener lista de riego o aplicar filtros según sea necesario
+        return render_template('pages/riego/riego_form.html',riego=riego,periodo_id=periodo_id)
+    
+    if request.method == 'PUT':
+         print("|Idea: Actualizar riego con los datos obtenidos mediante PUT.")
+         riego = Riego.query.filter_by(riego_id=riego_id).first()
+         print(f'|Riego: {riego}')
+         data = request.get_json()
+         print("|Data: ", data)
+         riego.update_from_dict(data)
+         db.session.commit()
+         try:
+            return jsonify(status=True,title='Exito', msg='Riego actualizado exitosamente.')
+         except:
+            return jsonify(status=False,title='Error', msg='Ocurrio un error al actualizado.')
+
+    if request.method == 'DELETE':
+         print("|Idea: Eliminar riego.")
+         riego = Riego.query.filter_by(riego_id=riego_id).first()
+         print("|Riego a eliminar: ",riego)
+         db.session.delete(riego)
+         db.session.commit()
+         data = {
+            "class":"success",
+            "msg": f"Exito al eliminar Riego {riego_id}.",
+            "id": riego_id
+         }
+         try:
+            return Response(status=204,headers={'HX-Trigger': json.dumps({"eliminar_registro": data,})})
+         except:
+            return Response(status=204,headers={'HX-Trigger': json.dumps({"eliminar_registro": data,})})
 """ Api Riego (login_required) """
 @api_bp.route('/riegos/registrar', methods=['GET','POST'])
 @login_required
@@ -106,19 +191,27 @@ def crear_riego():
         periodo_id = session["periodo_id"]
         fecha = datetime.now().date()
         print("|fecha: ",fecha)
-        return render_template('pages/riego/riego_form.html',fecha=fecha,periodo_id=periodo_id) 
+        form = Riego_form()
+        fecha = datetime.now()
+        form.fecha.default = fecha
+        form.periodo_id.default = periodo_id
+        form.process()
+        return render_template("components/base_form.html",form=form)
     if request.method =='POST':
-        print("|Idea: Registrar RIEGO.")
-        data = request.get_json()
-        print("|Data: ", data)
-        new_riego = Riego(**data)
-        print("|New riego: ",new_riego)
-        db.session.add(new_riego)
-        db.session.commit()
+        # Registrar Riego
         try:
+            data = request.form
+            print("form data: ",data)
+            new_data = convertir_form_a_dict(data, Riego_form().tablas)
+            print("new_data: ",new_data)
+            new_aplicacion = Riego(**new_data)
+            print("new aplicacion: ",new_aplicacion)
+            db.session.add(new_aplicacion)
+            db.session.commit() 
             return jsonify(status=True,title='Exito', msg='Riego registrado exitosamente.')
-        except:
-            return jsonify(status=False,title='Error', msg='Ocurrio un error al registrar.')
+        except Exception as e:
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al registrar Riego. Error: {str(e)}')
+       
         
 
 @api_bp.route('/riegos', methods=['GET'])
@@ -309,6 +402,8 @@ def aplicaciones(id = None):
         "api":"Aplicaciones",
         "url_api":"/api/aplicaciones"
         }
+    form = Aplicacion_form()
+
     print('*'*30 + f' {dicc["api"]} ' + '*'*30)
     try:
             empresa_id = session["empresa_id"]
@@ -326,12 +421,13 @@ def aplicaciones(id = None):
             entidades = [ item.to_json() for item in entidades ]
             print(f'|Idea: Mostrar lista {dicc["api"]}.')
             print(f'|{dicc["api"]}: ',entidades)
-            return render_template('components/base_list.html',entidades=entidades,dicc=dicc)
+            return render_template('components/base_list.html',entidades=entidades,dicc=dicc,form=form)
     
         print("|Idea: Mostrar aplicaciones con datos.")
         entidad = Aplicacion.query.filter_by(id=id).first()
         print(f'|{dicc["api"]}: {entidad}')
-        form = Aplicacion_form()
+
+        establecer_valores_por_defecto_formulario(form,entidad)
         print("Form: ",form)
         for item in form:
             print(f"|ID: {item.id} |name: {item.name}")
@@ -344,7 +440,7 @@ def aplicaciones(id = None):
          entidad = Aplicacion.query.filter_by(id=id).first()
          data = request.form
          print("|Request form: ", data)
-         new_data = convertir_form_a_dict(data, Aplicacion_form.tablas)
+         new_data = convertir_form_a_dict(data, form.tablas)
          print("Sobrescribiendo datos...")
          entidad.update_from_dict(new_data)
          print(f'|{dicc["api"]}: {entidad.to_json()}')

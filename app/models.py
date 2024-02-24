@@ -87,7 +87,7 @@ class Gasto(db.Model):
     __tablename__ = 'gasto'
     gasto_id = db.Column(db.Integer, primary_key=True)
 
-    fecha = db.Column(db.Date, nullable=False)
+    fecha = db.Column(db.DateTime, nullable=False)
 
     # Datos de empresa proveedora.
     prov_empresa =  db.Column(db.String(255), nullable=True) 
@@ -109,14 +109,14 @@ class Aplicacion(db.Model):
     __tablename__ = 'aplicacion'
     id = db.Column(db.Integer, primary_key=True)
     
-    fecha = db.Column(db.Date, nullable=False)
+    fecha = db.Column(db.DateTime, nullable=False)
     lugar = db.Column(db.String(100), nullable=False)
     nave = db.Column(db.String(100), nullable=False)
 
     detalle = db.Column(db.JSON, nullable=False) #(insumo,cantidad, unidad (saco ,litro))
 
     aplicador = db.Column(db.String(255), nullable=True)
-    comentario = db.Column(db.String(255), nullable=False)
+    comentario = db.Column(db.String(255), nullable=True)
      # Foreaneas
     periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto
     def to_json(self):
@@ -137,13 +137,13 @@ class Aplicacion(db.Model):
 class Riego(db.Model):
     __tablename__ = 'riego'
     id = db.Column(db.Integer, primary_key=True)
-    fecha = db.Column(db.Date, nullable=False)
+    fecha = db.Column(db.DateTime, nullable=False)
     lugar = db.Column(db.String(100), nullable=False)
     nave = db.Column(db.String(100), nullable=False)
     minutos = db.Column(db.Integer, nullable=False)
     regador = db.Column(db.String(100), nullable=True)
 
-    comentario = db.Column(db.String(255), nullable=False)
+    comentario = db.Column(db.String(255), nullable=True)
      # Foreaneas
     periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto
     def update_from_dict(self, data):
@@ -153,6 +153,8 @@ class Riego(db.Model):
 class Empleado(db.Model):
     __tablename__ = 'empleado'
     id = db.Column(db.Integer, primary_key=True)
+    fecha_ingreso = db.Column(db.DateTime, nullable=True)
+    fecha_retiro = db.Column(db.DateTime, nullable=True)
     detalle = db.Column(db.JSON, nullable=False) #{ nombre , apellido, telefono,estado(activo,inactivo),etc}
     empresa_id = db.Column(db.Integer, nullable=False) # Tipo de gasto
     def update_from_dict(self, data):
@@ -165,13 +167,19 @@ class Empleado(db.Model):
             'detalle': self.detalle,
             'empresa_id': self.empresa_id
         }
-""" class PagoPersonal(db.Model):
+class PagoPersonal(db.Model):
     __tablename__ = 'pago_personal'
-    gasto_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    fecha = db.Column(db.DateTime, nullable=False)
+    personal = db.Column(db.String(100), nullable=False)
+    suple = db.Column(db.Integer, nullable=False)
+    periodo_id = db.Column(db.Integer, nullable=False)
 
 class RegistroLaboral(db.Model):
     __tablename__ = 'registro_laboral'
-    gasto_id = db.Column(db.Integer, primary_key=True) """
+    id = db.Column(db.Integer, primary_key=True) 
+    detalle = db.Column(db.JSON, nullable=False)
+    periodo_id = db.Column(db.Integer, nullable=False)
 
 
 

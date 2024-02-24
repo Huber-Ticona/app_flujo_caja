@@ -22,6 +22,17 @@ def convertir_fecha(fecha_a):
     fecha_b = fecha_datetime.strftime("%Y-%m-%d")
     # Devolver la fecha en formato B
     return fecha_b
+def establecer_valores_por_defecto_formulario(formulario, modelo):
+    for campo in formulario:
+        print(f"-> Analisando Campo: {campo}")
+        if hasattr(modelo, campo.name):
+            valor_por_defecto = getattr(modelo, campo.name)
+            campo.default = valor_por_defecto
+            print(f"-> Campo: {campo} pertenece a la entidad: * |Defecto: {valor_por_defecto}")
+            campo.process_data(campo.default)
+        else:
+            print(f"-> Campo: {campo} NO pertenece a la entidad: * |Defecto: {valor_por_defecto}")
+
 def convertir_form_a_dict(request_form,form_tablas):
     new_data = {}
     for key, value in request_form.items():

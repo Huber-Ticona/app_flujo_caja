@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField,IntegerField,DateField,SelectField,HiddenField
+from wtforms import StringField,IntegerField,DateField,SelectField,HiddenField,DateTimeField
 from wtforms.validators import InputRequired, Email, Length
 import json
 
@@ -18,24 +18,65 @@ class Crear_Periodo_Form(FlaskForm):
     periodo_fiscal = StringField('periodo_fiscal')
     inicio = StringField('inicio')
     termino = StringField('termino')
+""" class Gasto(db.Model):
+    __tablename__ = 'gasto'
+    gasto_id = db.Column(db.Integer, primary_key=True)
 
-class Crear_Gasto_Form(FlaskForm):
+    fecha = db.Column(db.DateTime, nullable=False)
 
-    fecha = DateField('fecha', validators=[InputRequired()])
+    # Datos de empresa proveedora.
+    prov_empresa =  db.Column(db.String(255), nullable=True) 
+    prov_documento = db.Column(db.String(50), nullable=True)
+    prov_folio = db.Column(db.Integer, nullable=True)
+
+    tipo = db.Column(db.String(255), nullable=False) # Tipo de gasto
+    detalle = db.Column(db.JSON, nullable=False) # Tipo de gasto (descripcion,cantidad,unidad,precio,etc)
+    total = db.Column(db.Integer, nullable=False) # Tipo de gasto
+    comentario =  db.Column(db.String(255), nullable=True) # Tipo de gasto
+    # Foreaneas
+    periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto """
+class Gasto_Form(FlaskForm):
+
+    fecha = DateTimeField('fecha', validators=[InputRequired()])
 
     # Datos de empresa proveedora.
     prov_empresa = StringField('prov_empresa')
-
     prov_documento = SelectField('prov_documento', choices=[('factura', 'Factura'), ('boleta', 'Boleta'), ('guia', 'Guia')])
     prov_folio = IntegerField('prov_folio')
-
     tipo = StringField('tipo',validators=[InputRequired()])
+    detalle = HiddenField("detalle")
+    comentario = StringField('comentario') 
+    # Foreaneas
+    periodo_id =IntegerField('periodo_id') 
+    endpoint = "/api/gastos"
+    tablas = {"detalle":{
+        
+    }}
 
-  
-    
+""" Riego form  class Riego(db.Model):
+    __tablename__ = 'riego'
+    id = db.Column(db.Integer, primary_key=True)
+    fecha = db.Column(db.DateTime, nullable=False)
+    lugar = db.Column(db.String(100), nullable=False)
+    nave = db.Column(db.String(100), nullable=False)
+    minutos = db.Column(db.Integer, nullable=False)
+    regador = db.Column(db.String(100), nullable=True)
+
+    comentario = db.Column(db.String(255), nullable=True)
+     # Foreaneas
+    periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto """
+class Riego_form(FlaskForm):
+    fecha = DateTimeField('fecha', validators=[InputRequired()])
+    lugar = SelectField('lugar', choices=[('Km 17 Parcela', 'Km 17 Parcela'), ('Km 17 Olivo', 'Km 17 Olivo'), ('Km 28 Sobraya', 'Km 28 Sobraya')])
+    nave = SelectField('nave', choices=[('Nave 1', 'Nave 1'), ('Nave 2', 'Nave 2'), ('Nave 3', 'Nave 3')])
+    minutos = IntegerField('minutos')
+    regador = StringField('regador')
+
     comentario = StringField('comentario') # Tipo de gasto
     # Foreaneas
-    periodo_id =IntegerField('periodo_id') # Tipo de gasto
+    periodo_id = HiddenField('periodo_id') # Tipo de gasto
+    endpoint = "/api/riegos"
+    tablas = {}
 
 """ APLICACION FORM """
 """ class Aplicacion(db.Model):
@@ -54,7 +95,7 @@ class Crear_Gasto_Form(FlaskForm):
     periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto"""
 class Aplicacion_form(FlaskForm):
 
-    fecha = DateField('fecha', validators=[InputRequired()])
+    fecha = DateTimeField('fecha', validators=[InputRequired()])
     lugar = SelectField('lugar', choices=[('Km 17 Parcela', 'Km 17 Parcela'), ('Km 17 Olivo', 'Km 17 Olivo'), ('Km 28 Sobraya', 'Km 28 Sobraya')])
     nave = SelectField('nave', choices=[('Nave 1', 'Nave 1'), ('Nave 2', 'Nave 2'), ('Nave 3', 'Nave 3')])
     
@@ -77,15 +118,22 @@ class Aplicacion_form(FlaskForm):
                     ]
             } ,
             }
+    show_in_table = ["fecha","lugar","nave","detalle","aplicador"]
+    
 
 
 """ class Empleado(db.Model):
     __tablename__ = 'empleado'
-    empleado_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    fecha_ingreso = db.Column(db.DateTime, nullable=True)
+    fecha_retiro = db.Column(db.DateTime, nullable=True)
     detalle = db.Column(db.JSON, nullable=False) #{ nombre , apellido, telefono,estado(activo,inactivo),etc}
     empresa_id = db.Column(db.Integer, nullable=False) # Tipo de gasto
      """
 class Empleado_form(FlaskForm):
+    fecha_ingreso = DateTimeField('fecha_ingreso', validators=[InputRequired()])
+    
+    fecha_retiro = DateTimeField('fecha_retiro', validators=[InputRequired()])
     
     detalle = HiddenField('detalle',name="detalle",default='')
     empresa_id = HiddenField('empresa_id')
@@ -102,13 +150,3 @@ class Empleado_form(FlaskForm):
                     ]
             } ,
             }
-    def convertir_json_fields(self):
-        for key, value in self.tablas.items():
-            if key in self.data:
-                json_str = self.data[key]
-                try:
-                    json_data = json.loads(json_str)
-                    self.data[key] = json_data
-                except json.JSONDecodeError:
-                    pass
-
