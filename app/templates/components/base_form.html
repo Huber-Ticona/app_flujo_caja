@@ -1,15 +1,23 @@
 <div>
-    <h3>BASE FORM</h3>
+    <h3>{%if entidad %}{{dicc['api']}} : {{entidad.id}} {%else%}Formulario{%endif%}</h3>
 
     <form id="base_form" action="{{form.endpoint}}{%if entidad %}/{{entidad.id}}{%else%}/registrar{%endif%}" method="{%if entidad %}PUT{%else%}POST{%endif%}" >
 
         {% for field in form %}
         
-        {% if field.type != 'CSRFTokenField' and field.type != 'SelectField' and field.type != 'HiddenField' %}
+        {% if field.type != 'CSRFTokenField' and field.type != 'DateTimeField' and field.type != 'SelectField' and field.type != 'HiddenField' %}
          <!-- INPUTFIELD -->
          <div class="input-group mb-3">
             <span class="input-group-text" id="basic-addon1"> {{ field.label() }}</span>
             {{ field(class="form-control")}}
+        </div>
+        {% endif %}
+
+        {% if field.type == 'DateTimeField' %}
+        <!-- DateTimeField -->
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="basic-addon1"> {{ field.label() }}</span>
+            {{ field(class="form-control",type="datetime-local") }}
         </div>
         {% endif %}
 
@@ -35,7 +43,11 @@
                                 <span class="input-group-text text-capitalize">{{ input.name}}</span>
                                 {% if not input.choices %}
                                 <input type="{{input.type}}" class="form-control" name="" id="{{input.name}}"
-                                value="{%if entidad and entidad[field.name] %}{{entidad[field.name][input.name]}}{%endif%}">
+                                value="{%if entidad and entidad[field.name] %}
+                                {{-entidad[field.name][input.name]-}}
+                                {%elif input.default %}
+                                {{-input.default-}}
+                                {%endif %}">
                                 {%else%}
                                 <select class="form-select" id="{{input.name}}">
                                     {% for choice in input.choices %}
@@ -47,9 +59,8 @@
                         {%endfor%}
                     {%elif form.tablas[field.name].relacion == 'muchos'%}
                     <!-- uno-muchos -->
-                    <div>uno a muchs..</div>
-                    <div class="btn btn-secondary add-fila-{{field.name}}">add</div>
-                    <div class="table-responsive">
+                    
+                    <div class="text-center border border-sm m-3">
                         <table id="tabla-{{field.name}}" class="table">
                             <thead>
                                {%for input in form.tablas[field.name].inputs %}
@@ -57,22 +68,12 @@
                                {%endfor%}
                             </thead>
                             <tbody id="body-tabla-{{field.name}}">
-                                {#%for input in form.tablas[field.name].inputs %}
-                               <td>
-                                {% if not input.choices %}
-                                <input type="{{input.type}}" class="form-control" name="" id="{{input.name}}"
-                                value="{%if entidad and entidad[field.name] %}{{entidad[field.name][input.name]}}{%endif%}">
-                                {%else%}
-                                <select class="form-select" id="{{input.name}}">
-                                    {% for choice in input.choices %}
-                                    <option value="{{choice}}"  {%if entidad and entidad[field.name][input.name]== choice %}selected{%endif%} >{{choice}}</option>
-                                    {%endfor%}
-                                </select>
-                                {%endif%}
-                               </td>
-                               {%endfor%#}
+                               
                             </tbody>
                         </table>
+                        <div class="btn btn-secondary add-fila-{{field.name}}">Añadir Fila</div>
+                    </div>
+                    
                     {%endif%}
                 {%endif%}
         {% endif %}
@@ -90,12 +91,11 @@
 </div>
 <script>
 /**/
+
 $('#base_form').on('submit',function(){
     // Prevenir el envío del formulario para manejarlo manualmente
     event.preventDefault();
-   
-    console.log("prevenido")
-     {% if form.tablas %}
+    {% if form.tablas %}
     console.log({{form.tablas|safe}})
         {% for key,value in form.tablas.items() %}
             console.log("Tabla: {{key}}")
@@ -104,7 +104,6 @@ $('#base_form').on('submit',function(){
             var aux;
             // Obteniendo valores de inputs
             {% if value.relacion == 'uno' %}
-                
                 console.log("RELACION UNO A UNO")
                 aux = {}
                 {% for input in value.inputs %}
@@ -114,7 +113,6 @@ $('#base_form').on('submit',function(){
             {% elif value.relacion == 'muchos' %}
                 console.log("RELACION UNO A MUCHOS");
                 aux = [];
-
                 // Iterar sobre cada fila en el body de la tabla
                 $('#body-tabla-{{key}} tr').each(function() {
                     var fila = {};
@@ -135,9 +133,7 @@ $('#base_form').on('submit',function(){
                     aux.push(fila);
                    
                     });
-                
             {% endif %}
-            
             console.log("Aux: ",aux)
             $('#{{key}}').val(JSON.stringify(aux))
         {% endfor %}
@@ -174,23 +170,46 @@ $('#base_form').on('submit',function(){
 {%if form.tablas %}
     {% for key,value in form.tablas.items()%}
     console.log("item {{key}} in tablas")
+    // Si existen valores se deben cargar en filas.
+   {% if entidad and entidad[key] and form.tablas[key].relacion =='muchos' %}
+
+   console.log("|Tabla {{key}}: ", {{entidad[key]|safe}} )
+   var tabla = $("#body-tabla-{{key}}");
+   {% for item in entidad[key] %}
+   console.log("|Item encontrado -> se añade a Tabla {{key}}: ")
+   var fila = $("<tr>");
+   {% for input in form.tablas[key].inputs %}
+            var {{input.name}} = `{% if not input.choices %}
+                <input type="{{input.type}}" class="form-control" name="" id="{{input.name}}"
+                value="{{ item[input.name] }}">
+                {%else%}
+                <select class="form-select" id="{{input.name}}">
+                    {% for choice in input.choices %}
+                    <option value="{{choice}}" {%if choice == item[input.name] %}selected {%endif%}>{{choice}}</option>
+                    {%endfor%}
+                </select>
+                {%endif%}`
+            fila.append($("<td>").append({{input.name}}))
+    {% endfor%}
+    var boton = $("<button>")
+        .addClass("btn-remover-fila btn bg-none rounded-circle border border-2")
+        .append('<i class="fas fa-trash"></i>')
+
+    fila.append($("<td>").append(boton))
+    tabla.append(fila);
+   {%endfor%}
+ 
+   {% endif %}
+
+    // Antes de cargar el nuevo componente, desvincula el evento anterior
+    $(".contenido-principal-body").off("click", ".add-fila-{{key}}");
     /* FUNCION AGREGAR FILA */
     $(".contenido-principal-body").on("click",".add-fila-{{key}}", function (){
-        console.log("Añadiendo fila generica-...");
-        let data = {
-            id: "0",
-            nombre: "",
-        };
+        console.log("Añadiendo fila a tabla {{key}}-...");
         var tabla = $("#body-tabla-{{key}}");
         var numeroDeFilas = tabla.find("tr").length;
-
         console.log("Número de filas en la tabla: " + numeroDeFilas);
-
         var i = numeroDeFilas;
-        let x = `<div>
-            hola
-            `
-
         var fila = $("<tr>");
         {% for input in form.tablas[key].inputs %}
             var {{input.name}} = `{% if not input.choices %}

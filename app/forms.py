@@ -2,6 +2,9 @@ from flask_wtf import FlaskForm
 from wtforms import StringField,IntegerField,DateField,SelectField,HiddenField,DateTimeField
 from wtforms.validators import InputRequired, Email, Length
 import json
+from datetime import datetime,timedelta
+from .models import Empleado
+
 
 class Login_Form(FlaskForm):
     usuario = StringField('username')
@@ -37,21 +40,34 @@ class Crear_Periodo_Form(FlaskForm):
     periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto """
 class Gasto_Form(FlaskForm):
 
-    fecha = DateTimeField('fecha', validators=[InputRequired()])
+    fecha = DateTimeField('fecha', validators=[InputRequired()],default=datetime.now())
 
     # Datos de empresa proveedora.
     prov_empresa = StringField('prov_empresa')
     prov_documento = SelectField('prov_documento', choices=[('factura', 'Factura'), ('boleta', 'Boleta'), ('guia', 'Guia')])
-    prov_folio = IntegerField('prov_folio')
-    tipo = StringField('tipo',validators=[InputRequired()])
+    prov_folio = IntegerField('prov_folio',default=0)
+    tipo = SelectField('tipo', choices=[('HERRAMIENTA', 'HERRAMIENTA'), ('MATERIAL', 'MATERIAL'), ('FERTILIZANTE', 'FERTILIZANTE'), ('CONTROL-PLAGAS', 'CONTROL-PLAGAS'), ('MANTENCION-AUTOMOTRIZ','MANTENCION-AUTOMOTRIZ'), ('ALIMENTACION', 'ALIMENTACION')])
     detalle = HiddenField("detalle")
+    total = IntegerField('total',validators=[InputRequired()])
     comentario = StringField('comentario') 
     # Foreaneas
-    periodo_id =IntegerField('periodo_id') 
+    periodo_id =HiddenField('periodo_id',validators=[InputRequired()])
     endpoint = "/api/gastos"
     tablas = {"detalle":{
+        "relacion":"muchos",
+        "field":"detalle",
+        "inputs":[
+            {"name":"cantidad" ,"type": "number" },
+            {"name":"unidad", "type":"text",
+             "choices":["UND","SACO","CAJA","PACK (Bolsa)","kilogramo (KG)","Litro (LT)" ,"Mili-gramo (MG)","Mili-litro (ML)"]
+            },
+            {"name":"descripcion", "type":"text"},
+            {"name":"precio_unitario", "type":"number"},
+            {"name":"precio_total", "type":"number"},
+        ]
         
     }}
+    show_in_table = ["fecha","tipo","total"]
 
 """ Riego form  class Riego(db.Model):
     __tablename__ = 'riego'
@@ -90,6 +106,7 @@ class Riego_form(FlaskForm):
     detalle = db.Column(db.JSON, nullable=False) #(insumo,cantidad, unidad (saco ,litro))
 
     aplicador = db.Column(db.String(255), nullable=True)
+    tipo_aplicacion = db.Column(db.String(255), nullable=False)
     comentario = db.Column(db.String(255), nullable=False)
      # Foreaneas
     periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto"""
@@ -102,6 +119,7 @@ class Aplicacion_form(FlaskForm):
     detalle = HiddenField("detalle")
 
     aplicador = StringField('aplicador')
+    tipo_aplicacion = SelectField('tipo_aplicacion',choices=[('VIA RIEGO', 'VIA RIEGO'), ('VIA FOLIAR', 'VIA FOLIAR')])
     comentario = StringField('comentario') # Tipo de gasto
     # Foreaneas
     periodo_id =HiddenField('periodo_id') # Tipo de gasto
@@ -118,7 +136,7 @@ class Aplicacion_form(FlaskForm):
                     ]
             } ,
             }
-    show_in_table = ["fecha","lugar","nave","detalle","aplicador"]
+    show_in_table = ["fecha","lugar","nave","detalle","aplicador","tipo_aplicacion"]
     
 
 
@@ -131,9 +149,9 @@ class Aplicacion_form(FlaskForm):
     empresa_id = db.Column(db.Integer, nullable=False) # Tipo de gasto
      """
 class Empleado_form(FlaskForm):
-    fecha_ingreso = DateTimeField('fecha_ingreso', validators=[InputRequired()])
+    fecha_ingreso = DateTimeField('fecha_ingreso', validators=[InputRequired()],default=datetime.now())
     
-    fecha_retiro = DateTimeField('fecha_retiro', validators=[InputRequired()])
+    fecha_retiro = DateTimeField('fecha_retiro', default=lambda: datetime.now() + timedelta(days=5*365))
     
     detalle = HiddenField('detalle',name="detalle",default='')
     empresa_id = HiddenField('empresa_id')
@@ -150,3 +168,44 @@ class Empleado_form(FlaskForm):
                     ]
             } ,
             }
+
+""" class PagoPersonal(db.Model):
+    __tablename__ = 'pago_personal'
+    id = db.Column(db.Integer, primary_key=True)
+    fecha = db.Column(db.DateTime, nullable=False)
+    personal = db.Column(db.String(100), nullable=False)
+    pago = db.Column(db.Integer, nullable=False)
+    periodo_id = db.Column(db.Integer, nullable=False) """
+class PagoPersonal_form(FlaskForm):
+    fecha = DateTimeField('fecha', validators=[InputRequired()],default=datetime.now())
+    
+    personal = SelectField('personal')
+    pago = IntegerField('pago')
+    periodo_id = HiddenField("detalle")
+
+    endpoint = "/api/pagos_personal"
+    tablas = {}
+    show_in_table = ["fecha","personal","pago"]
+
+
+""" class RegistroLaboral(db.Model):
+    __tablename__ = 'registro_laboral'
+    id = db.Column(db.Integer, primary_key=True) 
+    detalle = db.Column(db.JSON, nullable=False)
+    periodo_id = db.Column(db.Integer, nullable=False) """
+
+class RegistroLaboral_form(FlaskForm):
+    detalle = HiddenField('detalle', )
+    periodo_id = HiddenField("periodo_id")
+
+    endpoint = "/api/registros_laborales"
+    tablas = {"detalle" : {
+                "relacion":"uno", # uno: uno a uno | muchos: uno a muchos
+                "field": "detalle",
+                "inputs" : [
+                    {"name":"fecha", "type":"datetime-local" ,"default":str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))},
+                    {"name":"descripcion", "type":"text"},
+                    ]
+            } ,
+            }
+    show_in_table = ["detalle","periodo_id"]

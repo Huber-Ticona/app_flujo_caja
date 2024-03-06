@@ -1,187 +1,111 @@
 from flask import Blueprint,render_template,request,redirect,url_for,jsonify,session,Response,abort,flash
 from flask_login import login_required
-from .forms import Crear_Gasto_Form,Empleado_form,Aplicacion_form,Riego_form,Gasto_Form
-from .models import Gasto,Riego,Empleado,Aplicacion
-from .extensions import get_fields_and_types,model_to_dict2,db,convertir_form_a_dict,establecer_valores_por_defecto_formulario
-from html import escape
+from .forms import Empleado_form,Aplicacion_form,Riego_form,Gasto_Form,PagoPersonal_form,RegistroLaboral_form
+from .models import Gasto,Riego,Empleado,Aplicacion,PagoPersonal,RegistroLaboral
+from .extensions import model_to_dict2,db,convertir_form_a_dict,establecer_valores_por_defecto_formulario,sanitize_json
 from datetime import datetime
 import json
+import requests
 
 api_bp = Blueprint('api_bp' , __name__,template_folder='templates',static_folder='static')
 
-""" @api_bp.route('/gasto/<int:periodo_id>')
-@login_required
-def obtener_gasto(periodo_id=None):
-
-    return  render_template('pages/gasto/gasto.html',periodo_id=periodo_id)
-
-@api_bp.route('/gasto/<int:periodo_id>/lista')
-@login_required
-def lista_gasto(periodo_id=None):
-    gastos = Gasto.query.filter_by(periodo_id=periodo_id).all()
-    
-    print(f"|{'-'*10} Lista de gastos | periodo: {periodo_id} {'-'*10}| ")
-    print(f"|Gastos: {gastos}")
-    print(f"|{'-'*10} END {'-'*10}|")
-    return  render_template('pages/gasto/lista_gasto.html',gastos=gastos)
-
-@api_bp.route('/gasto/<int:periodo_id>/registrar' , methods=['GET', 'POST'])
-@login_required
-def registrar_gasto(periodo_id=None):
-    model_gasto_json = model_to_dict2(Gasto)
-    list_gasto_form = get_fields_and_types(Gasto)
-
-    print("(Form model_to_dict) : ",model_gasto_json)
-
-    if request.method == 'POST':
-        print("|post registrar gasto ...")
-        data = request.get_json()
-        print("|data: ",data)
-        try:
-            for key,value in data.items():
-                if model_gasto_json[key] and model_gasto_json[key]['type'] == 'int':
-                    data[key] = int(data[key])
-                    print(f"|key: {key} -> value: {value} | type esperado: {model_gasto_json[key]['type']} |sanitized: {data[key]}")
-                elif model_gasto_json[key]  and model_gasto_json[key]['type'] == 'str':
-                    data[key] = escape(data[key])
-                    print(f"|key: {key} -> value: {value} | type esperado: {model_gasto_json[key]['type']} |sanitized: {data[key]}")
-                
-                #data[key] = int(data[key]) if list_gasto_form[key][]
-            print("|data sanitisado: ",data)
-            new_gasto = Gasto(**data)
-            db.session.add(new_gasto)
-            db.session.commit()
-
-            print("new gasto: ",new_gasto)
-            return  jsonify( status = True,msg='Gasto Registrado correctamente')
-        except Exception as e:
-            print(str(e))
-            return  jsonify( status = False,msg='Error al Registrar Gasto.')
-
-
-        
-    
-
-    print("|get registrar gasto ...")
-    fecha = datetime.now().date()
-    print("|fecha: ",fecha)
-    return render_template('pages/gasto/registrar_gasto.html' ,form_gasto = model_gasto_json,list_gasto = list_gasto_form,periodo_id=periodo_id ,fecha=fecha)
-
-@api_bp.route('/gasto/<int:gasto_id>' ,methods=['DELETE'])
-@login_required
-def eliminar_gasto(gasto_id=None):
-    print("|eliminar gasto: ",gasto_id)
-    data = {
-            "class":"",
-            "msg": f"Error al eliminar Gasto {gasto_id}.",
-            "id": gasto_id
-        }
-    
-    try:
-        gasto = Gasto.query.filter_by(gasto_id=gasto_id).first()
-        print("|gasto obj: ", gasto)
-
-        db.session.delete(gasto)
-        db.session.commit()
-        print("|Gasto eliminado.")
-        data['msg'] =  f"Gasto {gasto_id} eliminado correctamente."
-        data['class'] = "bg-success"
-    except:
-        data['msg'] =  f"Gasto {gasto_id} no encontrado en la DB."
-        data['class'] = "bg-danger"
-
-    return Response(status=204,headers={'HX-Trigger': json.dumps({"eliminar_registro": data,})})
-
-@api_bp.route('/test')
-def test():
-    return 'test' """
-
-""" Api Gasto  """
-@api_bp.route('/gastos/registrar', methods=['GET','POST'])
+""" Api gastos """
+@api_bp.route('/gastos/registrar', methods=['GET', 'POST'])
 @login_required
 def crear_gasto():
-    if request.method =='GET':
-        periodo_id = session["periodo_id"]
-        fecha = datetime.now().date()
-        print("|fecha: ",fecha)
-        form = Riego_form()
-        fecha = datetime.now()
-        form.fecha.default = fecha
-        form.periodo_id.default = periodo_id
+    if request.method == 'GET':
+        print("GET, enviando formulario")
+        form = Gasto_Form()
+        form.periodo_id.default = session['periodo_id']
         form.process()
         return render_template("components/base_form.html",form=form)
-    if request.method =='POST':
-        # Registrar Riego
+    elif request.method == 'POST':
+        # Registrar
         try:
             data = request.form
             print("form data: ",data)
-            new_data = convertir_form_a_dict(data, Riego_form().tablas)
+            new_data = convertir_form_a_dict(data, Gasto_Form().tablas)
             print("new_data: ",new_data)
-            new_aplicacion = Riego(**new_data)
-            print("new aplicacion: ",new_aplicacion)
-            db.session.add(new_aplicacion)
+            sanitized_json = sanitize_json(new_data)
+            new_entidad = Gasto(**sanitized_json)
+            print("new entidad: ",new_entidad)
+            db.session.add(new_entidad)
             db.session.commit() 
-            return jsonify(status=True,title='Exito', msg='Riego registrado exitosamente.')
+            return jsonify(status=True,title='Exito', msg='Aplicacaion registrado exitosamente.')
         except Exception as e:
-            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al registrar Riego. Error: {str(e)}')
-       
-        
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al registrar Aplicacaion. Error: {str(e)}')
 
 @api_bp.route('/gastos', methods=['GET'])
-@api_bp.route('/gastos/<int:riego_id>', methods=['GET','DELETE','PUT'])
+@api_bp.route('/gastos/<int:id>', methods=['GET','DELETE','PUT'])
 @login_required
-def gastos(riego_id = None):
-    print('*'*30 + ' Riegos ' + '*'*30)
+def gastos(id = None):
+    dicc = {
+        "api":"Gastos",
+        "url_api":"/api/gastos"
+        }
+    form = Gasto_Form()
+    print('*'*30 + f' {dicc["api"]} ' + '*'*30)
+
     try:
         empresa_id = session["empresa_id"]
         periodo_id = session["periodo_id"]
     except:
-        return jsonify(status=False,title='Error', msg='Ocurrio un error durante la consulta a la /api/riegos.')
+        return jsonify(status=False,title='Error', msg=f'Ocurrio un error durante la consulta a la {dicc["url_api"]}.')
     
-    print('|(session) Periodo_id: ',periodo_id)
-    print('|(session) Emprsa_id: ',empresa_id)
     if request.method == 'GET':
-        if not riego_id:
+        
+        print('|(session) Periodo_id: ',periodo_id)
+        print('|(session) Emprsa_id: ',empresa_id)
+        if not id:
             # Enviar lista de riegos
-            riegos = Riego.query.filter_by(periodo_id=periodo_id).all()
-            print("|Idea: Mostrar lista riegos.")
-            print("|Riegos: ",riegos)
-            return render_template('pages/riego/riego.html',riegos=riegos)
+            entidades = Gasto.query.filter_by(periodo_id=periodo_id).all()
+            entidades = [ item.to_json() for item in entidades ]
+            print(f'|Idea: Mostrar lista {dicc["api"]}.')
+            print(f'|{dicc["api"]}: ',entidades)
+            return render_template('components/base_list.html',entidades=entidades,dicc=dicc,form=form)
     
-        print("|Idea: Mostrar riego_form con datos.")
-        riego = Riego.query.filter_by(riego_id=riego_id).first()
-        print(f'|Riego: {riego}')
+        print("|Idea: Mostrar aplicaciones con datos.")
+        entidad = Gasto.query.filter_by(id=id).first()
+        print(f'|{dicc["api"]}: {entidad}')
+
+        establecer_valores_por_defecto_formulario(form,entidad)
+        #print("|empleado detalle: ",empleado.detalle)
         # Obtener lista de riego o aplicar filtros según sea necesario
-        return render_template('pages/riego/riego_form.html',riego=riego,periodo_id=periodo_id)
+        return render_template('components/base_form.html',form=form,entidad=entidad,dicc=dicc)
     
     if request.method == 'PUT':
-         print("|Idea: Actualizar riego con los datos obtenidos mediante PUT.")
-         riego = Riego.query.filter_by(riego_id=riego_id).first()
-         print(f'|Riego: {riego}')
-         data = request.get_json()
-         print("|Data: ", data)
-         riego.update_from_dict(data)
-         db.session.commit()
-         try:
-            return jsonify(status=True,title='Exito', msg='Riego actualizado exitosamente.')
-         except:
-            return jsonify(status=False,title='Error', msg='Ocurrio un error al actualizado.')
+        try:
+            print(f'|Idea: Actualizar {dicc["api"]} con los datos obtenidos mediante PUT.')
+            entidad = Gasto.query.filter_by(id=id).first()
+            data = request.form
+            print("|Request form: ", data)
+            new_data = convertir_form_a_dict(data, form.tablas)
+            sanitized_json = sanitize_json(new_data)
+            print("Sobrescribiendo datos...")
+            entidad.update_from_dict(sanitized_json)
+            print(f'|{dicc["api"]}: {entidad.to_json()}')
+            db.session.commit()
+            return jsonify(status=True,title='Exito', msg=f'{dicc["api"]} actualizado exitosamente.')
+        except:
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al actualizado.')
 
     if request.method == 'DELETE':
-         print("|Idea: Eliminar riego.")
-         riego = Riego.query.filter_by(riego_id=riego_id).first()
-         print("|Riego a eliminar: ",riego)
-         db.session.delete(riego)
-         db.session.commit()
-         data = {
-            "class":"success",
-            "msg": f"Exito al eliminar Riego {riego_id}.",
-            "id": riego_id
-         }
          try:
+            print(f'|Idea: Eliminar {dicc["api"]}.')
+            entidad = Gasto.query.filter_by(id=id).first()
+            print(f'|{dicc["api"]} a eliminar: ',entidad)
+            db.session.delete(entidad)
+            db.session.commit()
+            data = {
+                "class":"danger",
+                "msg": f"Error al eliminar {dicc['api']} {id}.",
+                "id": id
+            }
             return Response(status=204,headers={'HX-Trigger': json.dumps({"eliminar_registro": data,})})
          except:
             return Response(status=204,headers={'HX-Trigger': json.dumps({"eliminar_registro": data,})})
+
+
 """ Api Riego (login_required) """
 @api_bp.route('/riegos/registrar', methods=['GET','POST'])
 @login_required
@@ -203,8 +127,9 @@ def crear_riego():
             data = request.form
             print("form data: ",data)
             new_data = convertir_form_a_dict(data, Riego_form().tablas)
+            sanitized_json = sanitize_json(new_data)
             print("new_data: ",new_data)
-            new_aplicacion = Riego(**new_data)
+            new_aplicacion = Riego(**sanitized_json)
             print("new aplicacion: ",new_aplicacion)
             db.session.add(new_aplicacion)
             db.session.commit() 
@@ -218,7 +143,13 @@ def crear_riego():
 @api_bp.route('/riegos/<int:riego_id>', methods=['GET','DELETE','PUT'])
 @login_required
 def riego(riego_id = None):
-    print('*'*30 + ' Riegos ' + '*'*30)
+    dicc = {
+        "entidad" : "Riego",
+        "api":"Riegos",
+        "url_api":"/api/riegos"
+        }
+    form = Riego_form()
+    print('*'*30 + f' {dicc["entidad"]} ' + '*'*30)
     try:
         empresa_id = session["empresa_id"]
         periodo_id = session["periodo_id"]
@@ -236,18 +167,22 @@ def riego(riego_id = None):
             return render_template('pages/riego/riego.html',riegos=riegos)
     
         print("|Idea: Mostrar riego_form con datos.")
-        riego = Riego.query.filter_by(riego_id=riego_id).first()
-        print(f'|Riego: {riego}')
+        entidad = Riego.query.filter_by(id=riego_id).first()
+        print(f'|{dicc["entidad"]}: {entidad}')
+
+        establecer_valores_por_defecto_formulario(form,entidad)
         # Obtener lista de riego o aplicar filtros según sea necesario
-        return render_template('pages/riego/riego_form.html',riego=riego,periodo_id=periodo_id)
+        return render_template('components/base_form.html',form=form,entidad=entidad,dicc=dicc)
     
     if request.method == 'PUT':
          print("|Idea: Actualizar riego con los datos obtenidos mediante PUT.")
-         riego = Riego.query.filter_by(riego_id=riego_id).first()
+         riego = Riego.query.filter_by(id=riego_id).first()
          print(f'|Riego: {riego}')
-         data = request.get_json()
-         print("|Data: ", data)
-         riego.update_from_dict(data)
+         data = request.form
+         print("|Request form: ", data)
+         
+         sanitized_json = sanitize_json(data)
+         riego.update_from_dict(sanitized_json)
          db.session.commit()
          try:
             return jsonify(status=True,title='Exito', msg='Riego actualizado exitosamente.')
@@ -288,12 +223,14 @@ def crear_trabajadores():
         try:
             data = request.form
             print("form data: ",data)
-            detalle = json.loads(request.form.get('detalle'))
+            new_data = convertir_form_a_dict(data, Empleado_form().tablas)
+            print("new_data: ",new_data)
+            sanitized_json = sanitize_json(new_data)
             empresa_id = request.form.get('empresa_id')
             aux_empresa_id = session['empresa_id']
             print(f"Empresa_id: {empresa_id} | session empresa_id: {aux_empresa_id}")
-            print(f"detalle: {detalle} | type: {type(detalle)}")
-            new_empleado = Empleado(detalle = detalle, empresa_id=empresa_id)
+            print(f"detalle: {sanitized_json} | type: {type(sanitized_json)}")
+            new_empleado = Empleado(**sanitized_json)
             print("new empleado: ",new_empleado)
             db.session.add(new_empleado)
             db.session.commit() 
@@ -305,7 +242,12 @@ def crear_trabajadores():
 @api_bp.route('/trabajadores/<int:empleado_id>', methods=['GET','DELETE','PUT'])
 @login_required
 def trabajadores(empleado_id = None):
-    print('*'*30 + ' Trabajadores ' + '*'*30)
+    dicc = {
+        "entidad" : "Trabajador",
+        "api":"Trabajadores",
+        "url_api":"/api/trabajadores"
+        }
+    print('*'*30 + f' {dicc["entidad"]} ' + '*'*30)
     
     if request.method == 'GET':
         try:
@@ -330,11 +272,10 @@ def trabajadores(empleado_id = None):
         
         form.process()
         print("Form: ",form)
-        for item in form:
-            print(f"|ID: {item.id} |name: {item.name}")
         print("|empleado detalle: ",empleado.detalle)
+        establecer_valores_por_defecto_formulario(form,empleado)
         # Obtener lista de riego o aplicar filtros según sea necesario
-        return render_template('components/base_form.html',form=form,entidad=empleado)
+        return render_template('components/base_form.html',form=form,entidad=empleado,dicc=dicc)
     
     if request.method == 'PUT':
          print("|Idea: Actualizar empleado con los datos obtenidos mediante PUT.")
@@ -342,8 +283,13 @@ def trabajadores(empleado_id = None):
          data = request.form
          print("|Request form: ", data)
          new_data = convertir_form_a_dict(data, Empleado_form().tablas)
+         #print(json.dumps(new_data, indent=2))
+         # Llamar a la función para sanitizar el JSON completo
+         sanitized_json = sanitize_json(new_data)
+         # Imprimir el JSON sanitizado
+         #print(json.dumps(sanitized_json, indent=2))
          print("Sobrescribiendo datos...")
-         empleado.update_from_dict(new_data)
+         empleado.update_from_dict(sanitized_json)
          print(f'|Empleado: {empleado.to_json()}')
          db.session.commit()
          try:
@@ -371,6 +317,7 @@ def trabajadores(empleado_id = None):
 @api_bp.route('/aplicaciones/registrar', methods=['GET', 'POST'])
 @login_required
 def crear_aplicaciones():
+    dicc = { "api":"Aplicaciones" ,"entidad":"Aplicacion" }
     if request.method == 'GET':
         print("GET, enviando formulario")
         form = Aplicacion_form()
@@ -378,7 +325,7 @@ def crear_aplicaciones():
         form.fecha.default = fecha
         form.periodo_id.default = session['periodo_id']
         form.process()
-        return render_template("components/base_form.html",form=form)
+        return render_template("components/base_form.html",form=form,dicc=dicc)
     elif request.method == 'POST':
         # Registrar Trabajador
         try:
@@ -386,11 +333,16 @@ def crear_aplicaciones():
             print("form data: ",data)
             new_data = convertir_form_a_dict(data, Aplicacion_form().tablas)
             print("new_data: ",new_data)
-            new_aplicacion = Aplicacion(**new_data)
+            #print(json.dumps(new_data, indent=2))
+            # Llamar a la función para sanitizar el JSON completo
+            sanitized_json = sanitize_json(new_data)
+            # Imprimir el JSON sanitizado
+            #print(json.dumps(sanitized_json, indent=2))
+            new_aplicacion = Aplicacion(**sanitized_json)
             print("new aplicacion: ",new_aplicacion)
             db.session.add(new_aplicacion)
             db.session.commit() 
-            return jsonify(status=True,title='Exito', msg='Aplicacaion registrado exitosamente.')
+            return jsonify(status=True,title='Exito', msg='Aplicacion registrado exitosamente.')
         except Exception as e:
             return jsonify(status=False,title='Error', msg=f'Ocurrio un error al registrar Aplicacaion. Error: {str(e)}')
 
@@ -399,69 +351,325 @@ def crear_aplicaciones():
 @login_required
 def aplicaciones(id = None):
     dicc = {
+        "entidad" : "Aplicacion",
         "api":"Aplicaciones",
         "url_api":"/api/aplicaciones"
         }
     form = Aplicacion_form()
 
-    print('*'*30 + f' {dicc["api"]} ' + '*'*30)
+    print('*'*30 + f' API: {dicc["entidad"]} ' + '*'*30)
     try:
             empresa_id = session["empresa_id"]
             periodo_id = session["periodo_id"]
     except:
-        return jsonify(status=False,title='Error', msg='Ocurrio un error durante la consulta a la /api/aplicaciones.')
+        return jsonify(status=False,title='Error', msg=f'Ocurrio un error durante la consulta a la {dicc["url_api"]}.')
     
     if request.method == 'GET':
         
         print('|(session) Periodo_id: ',periodo_id)
-        print('|(session) Emprsa_id: ',empresa_id)
+        print('|(session) Empresa_id: ',empresa_id)
         if not id:
-            # Enviar lista de riegos
+            # Enviar lista
             entidades = Aplicacion.query.filter_by(periodo_id=periodo_id).all()
             entidades = [ item.to_json() for item in entidades ]
             print(f'|Idea: Mostrar lista {dicc["api"]}.')
             print(f'|{dicc["api"]}: ',entidades)
             return render_template('components/base_list.html',entidades=entidades,dicc=dicc,form=form)
     
-        print("|Idea: Mostrar aplicaciones con datos.")
+        print(f"|Idea: Mostrar {dicc['entidad']} con datos.")
         entidad = Aplicacion.query.filter_by(id=id).first()
-        print(f'|{dicc["api"]}: {entidad}')
+        print(f'|{dicc["entidad"]}: {entidad}')
 
         establecer_valores_por_defecto_formulario(form,entidad)
-        print("Form: ",form)
-        for item in form:
-            print(f"|ID: {item.id} |name: {item.name}")
-        #print("|empleado detalle: ",empleado.detalle)
         # Obtener lista de riego o aplicar filtros según sea necesario
-        return render_template('components/base_form.html',form=form,entidad=entidad)
+        return render_template('components/base_form.html',form=form,entidad=entidad,dicc=dicc)
     
     if request.method == 'PUT':
-         print(f'|Idea: Actualizar {dicc["api"]} con los datos obtenidos mediante PUT.')
-         entidad = Aplicacion.query.filter_by(id=id).first()
-         data = request.form
-         print("|Request form: ", data)
-         new_data = convertir_form_a_dict(data, form.tablas)
-         print("Sobrescribiendo datos...")
-         entidad.update_from_dict(new_data)
-         print(f'|{dicc["api"]}: {entidad.to_json()}')
-         db.session.commit()
+         print(f'|Idea: Actualizar {dicc["entidad"]} : {id}. con los datos obtenidos mediante PUT.')
          try:
-            return jsonify(status=True,title='Exito', msg=f'{dicc["api"]} actualizado exitosamente.')
+            entidad = Aplicacion.query.filter_by(id=id).first()
+            data = request.form
+            print("|Request form: ", data)
+            new_data = convertir_form_a_dict(data, form.tablas)
+            #print(json.dumps(new_data, indent=2))
+            # Llamar a la función para sanitizar el JSON completo
+            sanitized_json = sanitize_json(new_data)
+            # Imprimir el JSON sanitizado
+            #print(json.dumps(sanitized_json, indent=2))
+            print("Sobrescribiendo datos...")
+            entidad.update_from_dict(sanitized_json)
+            print(f'|{dicc["entidad"]}: {entidad.to_json()}')
+            db.session.commit()
+            return jsonify(status=True,title='Exito', msg=f'{dicc["entidad"]} actualizado exitosamente.')
          except:
-            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al actualizado.')
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al actualizar {dicc["entidad"]} : {id}.')
 
     if request.method == 'DELETE':
-         print(f'|Idea: Eliminar {dicc["api"]}.')
-         entidad = Aplicacion.query.filter_by(id=id).first()
-         print(f'|{dicc["api"]} a eliminar: ',entidad)
-         db.session.delete(entidad)
-         db.session.commit()
-         data = {
-            "class":"danger",
-            "msg": f"Error al eliminar {dicc['api']} {id}.",
-            "id": id
-         }
+         print(f'|Idea: Eliminar {dicc["entidad"]} : {id}.')
          try:
-            return Response(status=204,headers={'HX-Trigger': json.dumps({"eliminar_registro": data,})})
+            entidad = Aplicacion.query.filter_by(id=id).first()
+            print(f'|{dicc["entidad"]} a eliminar: ',entidad)
+            db.session.delete(entidad)
+            db.session.commit()
+            return jsonify(status=True,title='Exito', msg=f'{dicc["entidad"]} : {id} eliminado exitosamente.')
          except:
-            return Response(status=204,headers={'HX-Trigger': json.dumps({"eliminar_registro": data,})})
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al eliminar {dicc["entidad"]} : {id}.')
+
+""" Api pago personal """
+@api_bp.route('/pagos_personal/registrar', methods=['GET', 'POST'])
+@login_required
+def crear_pago_personal():
+    dicc = { "api":"Pagos_personal" ,"entidad":"Pago_personal" }
+    form = PagoPersonal_form()
+    if request.method == 'GET':
+        print("GET, enviando formulario")
+        form.personal.choices = [(f"{empleado.detalle['nombre']} {empleado.detalle['apellido']}",
+                                f"{empleado.detalle['nombre']} {empleado.detalle['apellido']}") for empleado in Empleado.query.all()]
+        form.periodo_id.default = session['periodo_id']
+        form.process()
+        return render_template("components/base_form.html",form=form,dicc=dicc)
+    elif request.method == 'POST':
+        # Registrar Trabajador
+        try:
+            data = request.form
+            print("form data: ",data)
+            new_data = convertir_form_a_dict(data, form.tablas)
+            print("new_data: ",new_data)
+            new_aplicacion = PagoPersonal(**new_data)
+            print("new aplicacion: ",new_aplicacion)
+            db.session.add(new_aplicacion)
+            db.session.commit() 
+            return jsonify(status=True,title='Exito', msg=f'{dicc["entidad"]} registrado exitosamente.')
+        except Exception as e:
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al registrar {dicc["entidad"]}. Error: {str(e)}')
+
+@api_bp.route('/pagos_personal', methods=['GET'])
+@api_bp.route('/pagos_personal/<int:id>', methods=['GET','DELETE','PUT'])
+@login_required
+def pagos_personal(id = None):
+    dicc = {
+        "entidad" : "Pago_personal",
+        "api":"Pagos_personal",
+        "url_api":"/api/pagos_personal"
+        }
+    form = PagoPersonal_form()
+
+    print('*'*30 + f' API: {dicc["entidad"]} ' + '*'*30)
+    try:
+            empresa_id = session["empresa_id"]
+            periodo_id = session["periodo_id"]
+    except:
+        return jsonify(status=False,title='Error', msg=f'Ocurrio un error durante la consulta a la {dicc["url_api"]}.')
+    
+    if request.method == 'GET':
+        
+        print('|(session) Periodo_id: ',periodo_id)
+        print('|(session) Empresa_id: ',empresa_id)
+        if not id:
+            # Enviar lista
+            entidades = PagoPersonal.query.filter_by(periodo_id=periodo_id).all()
+            entidades = [ item.to_json() for item in entidades ]
+            print(f'|Idea: Mostrar lista {dicc["api"]}.')
+            print(f'|{dicc["api"]}: ',entidades)
+            return render_template('components/base_list.html',entidades=entidades,dicc=dicc,form=form)
+    
+        print(f"|Idea: Mostrar {dicc['entidad']} con datos.")
+        entidad = PagoPersonal.query.filter_by(id=id).first()
+        print(f'|{dicc["entidad"]}: {entidad}')
+
+        establecer_valores_por_defecto_formulario(form,entidad)
+        # Obtener lista de riego o aplicar filtros según sea necesario
+        return render_template('components/base_form.html',form=form,entidad=entidad,dicc=dicc)
+    
+    if request.method == 'PUT':
+         print(f'|Idea: Actualizar {dicc["entidad"]} : {id}. con los datos obtenidos mediante PUT.')
+         try:
+            entidad = PagoPersonal.query.filter_by(id=id).first()
+            data = request.form
+            print("|Request form: ", data)
+            new_data = convertir_form_a_dict(data, form.tablas)
+            print("Sobrescribiendo datos...")
+            entidad.update_from_dict(new_data)
+            print(f'|{dicc["entidad"]}: {entidad.to_json()}')
+            db.session.commit()
+            return jsonify(status=True,title='Exito', msg=f'{dicc["entidad"]} actualizado exitosamente.')
+         except:
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al actualizar {dicc["entidad"]} : {id}.')
+
+    if request.method == 'DELETE':
+         print(f'|Idea: Eliminar {dicc["entidad"]} : {id}.')
+         try:
+            entidad = PagoPersonal.query.filter_by(id=id).first()
+            print(f'|{dicc["entidad"]} a eliminar: ',entidad)
+            db.session.delete(entidad)
+            db.session.commit()
+            return jsonify(status=True,title='Exito', msg=f'{dicc["entidad"]} : {id} eliminado exitosamente.')
+         except:
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al eliminar {dicc["entidad"]} : {id}.')
+
+""" Api pago personal """
+@api_bp.route('/registros_laborales/registrar', methods=['GET', 'POST'])
+@login_required
+def crear_registro_laboral():
+    dicc = { "api":"Registros_laborales" ,"entidad":"Registro_laboral" }
+    print(datetime.now())
+    form = RegistroLaboral_form()
+    if request.method == 'GET':
+        print("GET, enviando formulario")
+        form.periodo_id.default = session['periodo_id']
+        form.process()
+        return render_template("components/base_form.html",form=form,dicc=dicc)
+    elif request.method == 'POST':
+        # Registrar 
+        try:
+            data = request.form
+            print("|form data: ",data)
+            new_data = convertir_form_a_dict(data, form.tablas)
+            print("|new_data: ",new_data)
+            #print(json.dumps(new_data, indent=2))
+            # Llamar a la función para sanitizar el JSON completo
+            sanitized_json = sanitize_json(new_data)
+            # Imprimir el JSON sanitizado
+            #print(json.dumps(sanitized_json, indent=2))
+            new_aplicacion = RegistroLaboral(**sanitized_json)
+            print(f"|new {dicc['entidad']}: ",new_aplicacion)
+            db.session.add(new_aplicacion)
+            db.session.commit() 
+            return jsonify(status=True,title='Exito', msg=f'{dicc["entidad"]} registrado exitosamente.')
+        except Exception as e:
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al registrar {dicc["entidad"]}. Error: {str(e)}')
+
+@api_bp.route('/registros_laborales', methods=['GET'])
+@api_bp.route('/registros_laborales/<int:id>', methods=['GET','DELETE','PUT'])
+@login_required
+def registro_laboral(id = None):
+    dicc = {
+        "entidad" : "Registro_laboral",
+        "api":"Registros_laborales",
+        "url_api":"/api/registros_laborales"
+        }
+    form = RegistroLaboral_form()
+
+    print('*'*30 + f' API: {dicc["entidad"]} ' + '*'*30)
+    try:
+            empresa_id = session["empresa_id"]
+            periodo_id = session["periodo_id"]
+    except:
+        return jsonify(status=False,title='Error', msg=f'Ocurrio un error durante la consulta a la {dicc["url_api"]}.')
+    
+    if request.method == 'GET':
+        
+        print('|(session) Periodo_id: ',periodo_id)
+        print('|(session) Empresa_id: ',empresa_id)
+        if not id:
+            # Enviar lista
+            entidades = RegistroLaboral.query.filter_by(periodo_id=periodo_id).all()
+            entidades = [ item.to_json() for item in entidades ]
+            print(f'|Idea: Mostrar lista {dicc["api"]}.')
+            print(f'|{dicc["api"]}: ',entidades)
+            return render_template('components/base_list.html',entidades=entidades,dicc=dicc,form=form)
+    
+        print(f"|Idea: Mostrar {dicc['entidad']} con datos.")
+        entidad = RegistroLaboral.query.filter_by(id=id).first()
+        print(f'|{dicc["entidad"]}: {entidad}')
+
+        establecer_valores_por_defecto_formulario(form,entidad)
+        # Obtener lista de riego o aplicar filtros según sea necesario
+        return render_template('components/base_form.html',form=form,entidad=entidad,dicc=dicc)
+    
+    if request.method == 'PUT':
+         print(f'|Idea: Actualizar {dicc["entidad"]} : {id}. con los datos obtenidos mediante PUT.')
+         try:
+            entidad = RegistroLaboral.query.filter_by(id=id).first()
+            data = request.form
+            print("|Request form: ", data)
+            new_data = convertir_form_a_dict(data, form.tablas)
+            print("Sobrescribiendo datos...")
+            #print(json.dumps(new_data, indent=2))
+            # Llamar a la función para sanitizar el JSON completo
+            sanitized_json = sanitize_json(new_data)
+            # Imprimir el JSON sanitizado
+            #print(json.dumps(sanitized_json, indent=2))
+            entidad.update_from_dict(sanitized_json)
+            print(f'|{dicc["entidad"]}: {entidad.to_json()}')
+            db.session.commit()
+            return jsonify(status=True,title='Exito', msg=f'{dicc["entidad"]} actualizado exitosamente.')
+         except:
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al actualizar {dicc["entidad"]} : {id}.')
+
+    if request.method == 'DELETE':
+         print(f'|Idea: Eliminar {dicc["entidad"]} : {id}.')
+         try:
+            entidad = RegistroLaboral.query.filter_by(id=id).first()
+            print(f'|{dicc["entidad"]} a eliminar: ',entidad)
+            db.session.delete(entidad)
+            db.session.commit()
+            return jsonify(status=True,title='Exito', msg=f'{dicc["entidad"]} : {id} eliminado exitosamente.')
+         except:
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al eliminar {dicc["entidad"]} : {id}.')
+
+@api_bp.route('/odepa')
+@login_required
+def odepa():
+    
+    fecha_search = datetime.now().date() 
+    try:
+        print("arg: ",request.args)
+        print("arg fecha: ",request.args['fechaInput'])
+
+        if request.args['fechaInput']:
+            fecha_search =  datetime.strptime(request.args['fechaInput'], "%Y-%m-%d").date()
+    except:
+        print('|--> Error en la fecha. Defecto fecha actual.')
+        return render_template("components/odepa.html",fecha=fecha_search)
+    
+    print("|Fecha busqueda: ",fecha_search)
+    url_token = 'https://api-token.odepa.gob.cl/oauth/token'
+    headers_token = {
+        'Authorization': 'Basic b2F1dGgyLXJlcG9ydGVzOjEyMzQ1Njc4OTA=',
+        'Content-Type': 'application/x-www-form-urlencoded '
+    }
+    data_token = {
+        'grant_type': 'password',
+        'username': 'dev-user-r',
+        'password': '12345678'
+    }
+    print('*'*15 + f' Obteniendo datos api TOKEN '+ '*'*15 )
+    response = requests.post(url_token,headers=headers_token,data=data_token)
+    if response.status_code == 200:
+        print("|- Mostrando datos token ...")
+        # La solicitud fue exitosa, puedes procesar los datos de la respuesta
+        data = response.json()
+        print(f"|Exito - Token valido hasta: {data['expires_in']} segundos.")
+        print('*'*15 + f' Obteniendo datos api REPORTES '+ '*'*15 )
+        # URL de la API
+        url = f"https://api-reportes.odepa.gob.cl/apps-odepa/v1/noticias-mercado/precio-volumen-diario-fruta-hortaliza?fechaInicio={fecha_search}&fechaTermino={fecha_search}&mercados=3002,3001,3011,3004,3022,3023,3021,3009,3013,3020,3024,3025&subSector=4&productos=2,3,10,9,11,12,29,35,51,55,262,59,942,68,79,501,946,91,81,93,102,947,132,131,950,150,160,166,944,192,214,220,229,230,233,239,246,247,251,255,948,263,201,271,287,311,312,314&mostrarMercado=true&mostrarVariedad=true&mostrarCalidad=true&mostrarOrigen=true&mostrarPrecioIva=true"
+
+    
+        # Encabezados de la solicitud, incluyendo el token de autorización
+        token = data["access_token"]
+        refresh_token = data["refresh_token"]
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'Accept': 'application/json, text/plain, */*'
+        }
+
+        # Realizar la solicitud GET
+        response = requests.get(url,headers=headers)
+        print("|- Enviando request...")
+        # Verificar el código de estado de la respuesta
+        if response.status_code == 200:
+            print("|- Obteniendo datos...")
+            # La solicitud fue exitosa, puedes procesar los datos de la respuesta
+            data = response.json()
+            print("|Exito: ",data['success'])
+            return render_template("components/odepa.html",fecha=fecha_search,data = data['objParams'])
+        else:
+            # La solicitud falló, imprime el código de estado y el mensaje de error
+            print(f"Error {response.status_code}: {response.text}")
+            return 'error'
+    else:
+        # La solicitud falló, imprime el código de estado y el mensaje de error
+        print(f"Error {response.status_code}: {response.text}")
+        return 'error'
+    

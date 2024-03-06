@@ -2,7 +2,7 @@
     <h2>Lista de Empleados</h2>
     <button class="btn btn-secondary" hx-get="/api/trabajadores/registrar" hx-target=".contenido-principal-body">Registrar nuevo empleado</button>
     {% if empleados %}
-      <div>ahi riegos </div>
+      <div>ahi empleados </div>
 
       <table id="tabla_riego" class="display" style="width:100%">
           <thead>
@@ -33,7 +33,7 @@
           </tbody>
       </table>
       {%else%}
-      <div>no ahi riegos</div>
+      <div>no ahi empleados</div>
       {%endif%}
 </div>
 <script>

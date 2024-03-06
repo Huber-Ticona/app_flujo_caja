@@ -6,7 +6,7 @@
     </div>
     
     <h5>showintable: {{form.show_in_table}}</h5>
-    <table>
+    <table id="datatable" class="display" style="width:100%">
         <thead>
         <tr>
             <th>ID</th>
@@ -16,9 +16,9 @@
             <th>Accion</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody id="cuerpo-tabla">
             {% for entidad in entidades %}
-                <tr>
+                <tr id="{{entidad.id}}">
                     <td>{{entidad.id}}</td>
 
                     {%for key,value in entidad.items() if key in form.show_in_table %}
@@ -28,8 +28,10 @@
                         <button class="btn bg-none rounded-circle border border-2"
                         hx-get="{{dicc['url_api']}}/{{entidad.id}}"
                         hx-target=".dashboard-contenido"><i class="fas fa-pen"></i></button>                   
-                        <button class="btn bg-none rounded-circle border border-2" hx-delete="{{dicc['url_api']}}/{{entidad.id}}" hx-confirm="¿Seguro que desea eliminar el aplicacion {{entidad.id}}?">
-                        <i class="fas fa-trash"></i>
+                        <!-- <button class="btn bg-none rounded-circle border border-2" hx-delete="{{dicc['url_api']}}/{{entidad.id}}" hx-confirm="¿Seguro que desea eliminar el aplicacion {{entidad.id}}?">
+                         -->
+                         <button class="btn bg-none rounded-circle border border-2 remover-fila" data-id="{{entidad.id}}">
+                            <i class="fas fa-trash"></i>
                         </button>
                     </td>
                 </tr>
@@ -62,6 +64,7 @@
         
         </tbody>
     </table> -->
+    
     {%else%}
 <div>
     No se han registrado {{dicc["api"]}}
@@ -70,3 +73,40 @@
 </div>
     {%endif%}
 </div>
+<script>
+    $(document).ready(function() {
+      let datatable = new DataTable('#datatable')
+
+      // Antes de cargar el nuevo componente, desvincula el evento anterior
+    $(".contenido-principal-body").off("click", ".remover-fila");
+    /* FUNCION AGREGAR FILA */
+    $(".contenido-principal-body").on("click",".remover-fila", function (){
+        let id = $(this).data("id") 
+        console.log("Eliminando item..",id );
+       // Enviar la solicitud AJAX al servidor
+        $.ajax({
+            url: '{{dicc["url_api"]}}/'+ id,
+            type: 'DELETE',
+            success: function (res) {
+                // Manejar la respuesta del servidor
+                console.log(res);
+                if (res.status){
+                    //$(".dashboard-contenido").empty();
+                    //$(".dashboard-contenido").append(aux_dashboard);
+                    $("#cuerpo-tabla")
+                    .find("tr#" +id)
+                    .remove();
+                    toastr.success(res.msg, res.title, { timeOut: 3000 });
+                } else {
+                    console.log(res.msg);
+                    toastr.error(res.msg, res.title, { timeOut: 3000 });
+                }
+            },
+            error: function (xhr, status, error) {
+                // Manejar errores de la solicitud
+                console.error(xhr.responseText);
+            }
+        });
+    })
+    })
+  </script>

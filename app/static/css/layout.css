@@ -62,6 +62,7 @@ a, a:hover, a:focus, a:active {
     border: 1px solid purple;
     margin: 2px 2px;
     flex-grow: 1;
+    overflow: scroll;
 }
 /* test toast */
 #test-toast{

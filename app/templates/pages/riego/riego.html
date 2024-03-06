@@ -30,8 +30,8 @@
           </thead>
           <tbody id="cuerpo-tabla">
               {% for riego in riegos %}
-              <tr id="{{riego.riego_id}}">
-                  <td>{{riego.riego_id}}</td>
+              <tr id="{{riego.id}}">
+                  <td>{{riego.id}}</td>
                   <td>{{riego.fecha}}</td>
                   <td>{{riego.lugar}}</td>
                   <td>{{riego.nave}}</td>
@@ -39,9 +39,9 @@
                   <td>{{riego.regador}}</td>
                   <td>
                       <button class="btn bg-none rounded-circle border border-2"
-                        hx-get="/api/riegos/{{riego.riego_id}}"
+                        hx-get="/api/riegos/{{riego.id}}"
                         hx-target="#dashboard-contenido" ><i class="fas fa-pen"></i></button>                   
-                      <button class="btn bg-none rounded-circle border border-2" hx-delete="/api/riegos/{{riego.riego_id}}" hx-confirm="¿Seguro que desea eliminar el riego {{riego.riego_id}}?">
+                      <button class="btn bg-none rounded-circle border border-2" hx-delete="/api/riegos/{{riego.id}}" hx-confirm="¿Seguro que desea eliminar el riego {{riego.id}}?">
                         <i class="fas fa-trash"></i>
                       </button>
                   </td>

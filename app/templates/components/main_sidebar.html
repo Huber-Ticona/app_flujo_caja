@@ -62,16 +62,18 @@
             <div class="list-group-item custom-item" hx-post="/lista/embarque" hx-target="#dashboard-contenido">Embarque</div>
             <div class="list-group-item custom-item" hx-post="/lista/liquidacion" hx-target="#dashboard-contenido">Liquidacion</div>
 
-            <div class="list-group-item custom-item" hx-get="/api/gasto/{{periodo_id}}" hx-target="#dashboard-contenido">Gasto</div>
+            <div class="list-group-item custom-item" hx-get="/api/gastos" hx-target="#dashboard-contenido">Gasto</div>
             <div class="list-group-item custom-item" hx-get="/api/riegos" hx-target="#dashboard-contenido">Riego</div>
             <div class="list-group-item custom-item" hx-get="/api/aplicaciones" hx-target="#dashboard-contenido">Aplicaciones</div>
-            <div class="list-group-item custom-item" hx-get="/api/gasto/{{periodo_id}}" hx-target="#dashboard-contenido">Registro Laboral</div>
+            <div class="list-group-item custom-item" hx-get="/api/pagos_personal" hx-target="#dashboard-contenido">Pago Personal</div>
+            <div class="list-group-item custom-item" hx-get="/api/registros_laborales" hx-target="#dashboard-contenido">Registro Laboral</div>
         
         </div>
         {%endif%}
 
     </div>
-    
+    <hr class="hr-horizontal-light">
+    <div class="list-group-item custom-item" hx-get="/api/odepa" hx-target=".contenido-principal-body">Odepa Precios</div>
     <!-- sidebar FOOTER -->
     <hr class="hr-horizontal-light">
     <div class="main_sidebar_footer">

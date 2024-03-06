@@ -2,7 +2,11 @@ import fire
 from datetime import datetime
 import subprocess
 import pymysql
+import time
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
 class Backup(object):
     """ Comando para generar un respaldo de la base de datos.
@@ -10,10 +14,10 @@ class Backup(object):
     """
     def run(self):
       # Generar el backup mysql+pymysql://huber:huber123@localhost/app_flujo_caja'
-      name="app_flujo_caja"
-      user="huber"
-      password="huber123"
-      host="localhost"
+      name= os.getenv('DB')
+      user=os.getenv('USER')
+      password=os.getenv('PASSWORD')
+      host=os.getenv('HOST')
 
       date = datetime.now()
       filename = f"backup/backup-{date.strftime('%Y-%m-%d_%H-%M')}.sql"
@@ -33,13 +37,33 @@ class Backup(object):
 class Restore(object):
 
     def run(self, filename):
-        """ filename = backup/backup-2024-02-19_17-09.sql """
+        """ py cli.py restore run backup/backup-2024-03-06_01-12.sql """
         # datos
-        name="app_flujo_caja"
-        user="huber"
-        password="huber123"
-        host="localhost"
-        
+        name= os.getenv('DB')
+        user=os.getenv('USER')
+        password=os.getenv('PASSWORD')
+        host=os.getenv('HOST')
+
+        print("|Eliminando base de datos: ",filename)
+        # eliminar la base de datos desde el archivo SQL
+        cmd = f"mysql -u {user} -p{password} -h {host} {name} < {filename}"
+        print("|Comando: ",cmd)
+        try:
+            # Conectar a MySQL (puedes ajustar la conexión según tus necesidades)
+            connection = pymysql.connect(host=host, user=user, password=password)
+
+            with connection.cursor() as cursor:
+
+              # Comando SQL para crear la base de datos
+              create_db_query = f"DROP DATABASE {name}"
+              cursor.execute(create_db_query)
+
+              # Confirmar la transacción
+              connection.commit()
+            print(f"Base de datos '{name}' ELIMINADA exitosamente.")
+        except Exception as e:
+            print (f"Error al ELIMINAR la base de datos: {e}")
+        time.sleep(1)
         print("|Filename: ",filename)
         print("|Creando base de datos: ",name)
         cmd = f"mysql -u {user} -p{password} -h {host} {name} -e 'CREATE DATABASE {name}' "
@@ -57,8 +81,9 @@ class Restore(object):
               connection.commit()
             print(f"Base de datos '{name}' creada exitosamente.")
         except Exception as e:
-            print (f"Error al restaurar la base de datos: {e}")
-        
+            print (f"Error al CREAR la base de datos: {e}")
+
+        time.sleep(1)
         print("|Restaurando base de datos con backup: ",filename)
         # Restaurando la base de datos desde el archivo SQL
         cmd = f"mysql -u {user} -p{password} -h {host} {name} < {filename}"

@@ -36,20 +36,7 @@ $(".main_sidebar").on("click", ".custom-item", function (event) {
     $(this).addClass("active").siblings().removeClass("active");
 });
 
-htmx.on("htmx:afterSwap", (event) => {
-    console.log("afterswap");
-    var msg = event.detail.xhr.response.msg;
-    if (msg) {
-        console.log("msg: ", msg);
-        // Muestra el toast
-        /* var toastBody = document.getElementById("miToastBody");
-        toastBody.innerText = msg;
-        var toast = new bootstrap.Toast(document.getElementById("miToast")); */
-        toast.show();
-    }
-});
-
-htmx.on("eliminar_registro", (e) => {
+/* htmx.on("eliminar_registro", (e) => {
     const toastElement = document.getElementById("toast");
     const toastBody = document.getElementById("toast-body");
     const toast = new bootstrap.Toast(toastElement, { delay: 2000 });
@@ -64,7 +51,7 @@ htmx.on("eliminar_registro", (e) => {
         .remove();
     $("#toast").addClass(e.detail.class);
     toast.show();
-});
+}); */
 
 /* overflow-y: scroll;
 scrollbar-color: red  #3b3b42 ;

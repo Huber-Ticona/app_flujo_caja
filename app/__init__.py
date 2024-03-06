@@ -4,6 +4,8 @@ from .config import ConfigDevelop,ConfigProduction
 from dotenv import load_dotenv
 
 
+
+
 def create_app():
     load_dotenv()  # Carga las variables de entorno desde el archivo .env
     app = Flask(__name__)

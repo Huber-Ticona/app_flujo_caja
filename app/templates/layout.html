@@ -45,6 +45,11 @@
       rel="stylesheet">
   <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Estilos de DataTables (CSS) -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/2.0.0/css/dataTables.dataTables.css">
+
+  <!-- DataTables (JS) -->
+  <script src="https://cdn.datatables.net/2.0.0/js/dataTables.min.js"></script>
   {% block encabezado %}
   {% endblock %}
 
@@ -66,7 +71,7 @@
     </div>
     <!-- toast -->
     <!-- TOAST COMPONENT  -->
-<div class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+<div class="position-fixed top-0 end-0 p-3" style="z-index: -1;">
   <div id="toast" class="toast align-items-center text-white  border-0" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="d-flex">
       <div id="toast-body" class="toast-body"></div>

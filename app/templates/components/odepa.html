@@ -1,0 +1,59 @@
+
+<div>
+    <div class="text-center">
+        <form hx-get="/api/odepa" hx-target=".contenido-principal-body">
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1">Selecciona una fecha:</span>
+                <input type="date" id="fechaInput" class="form-control" name="fechaInput" value="{{fecha}}" required>
+                <button type="submit" class="btn btn-secondary">Consultar Precios</button>
+            </div>
+
+          </form>
+    </div>
+  
+    {% if data %}
+    <div class="d-flex gap-5 m-3">
+        <h3>Lista Precios {{fecha.strftime('%d-%m-%Y')}}</h3>
+    </div>
+    
+    <table id="datatable" class="display" style="width:100%">
+        <thead>
+        <tr>
+            {% for key,value  in data[0].items()  %}
+            <th>{{key}}</th>
+            {% endfor %}
+        </tr>
+        </thead>
+        <tbody id="cuerpo-tabla">
+            {% for fila in data %}
+                <tr id="">
+                    {%for key,value in fila.items()  %}
+                    <td>{{value}}</td>
+                    {%endfor%}
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {%endif%}
+</div>
+<script>
+    $(document).ready(function() {
+      let datatable = new DataTable('#datatable',{
+        columnDefs: [
+        {
+          targets: [5,6,7], // Índice de la columna "Total Venta" (empezando desde 0)
+          orderData: [5,6,7] , // Índice de la columna de datos subyacente para ordenar
+          render: function(data, type, row) {
+            // Se formatea para mostrar como moneda
+            if (type === 'display') {
+                data = parseInt(data)
+              return '$' + data.toLocaleString({currency:"CLP"})
+            }
+            return data;
+          }
+        }
+      ]
+        })
+    })
+   
+</script>

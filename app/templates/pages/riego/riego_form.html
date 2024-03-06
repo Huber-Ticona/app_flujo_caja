@@ -59,7 +59,7 @@
 <script>
     $('#submit_riego').on("click",function(){
         console.log("Riego xd")
-        url = "{% if riego %}/api/riegos/{{riego.riego_id}}{% else %} /api/riegos/registrar {%endif%}"
+        url = "{% if riego %}/api/riegos/{{riego.id}}{% else %} /api/riegos/registrar {%endif%}"
         console.log("|url: ", url)
         let fecha = $('#fecha').val()
         let lugar = $("#lugar").val()

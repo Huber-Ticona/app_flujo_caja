@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 from flask_minify import  Minify
 from flask_wtf.csrf import CSRFProtect
 import json
-
+import bleach
 import datetime
 from sqlalchemy import inspect
 from html import escape
@@ -14,6 +14,21 @@ migrate = Migrate()
 login_manager = LoginManager()
 minify = Minify( passive=True)
 csrf = CSRFProtect()
+
+
+def sanitize_json(input_json):
+    if isinstance(input_json, list):
+        # Si es una lista, aplicar la sanitización a cada elemento
+        return [sanitize_json(item) for item in input_json]
+    elif isinstance(input_json, dict):
+        # Si es un diccionario, aplicar la sanitización a cada valor de forma recursiva
+        return {key: sanitize_json(value) for key, value in input_json.items()}
+    elif isinstance(input_json, str):
+        # Si es una cadena, sanitizar el contenido HTML
+        return bleach.clean(input_json, tags=[], attributes={})
+    else:
+        # Mantener otros tipos de datos sin cambios
+        return input_json
 
 def convertir_fecha(fecha_a):
     # Crear un objeto datetime a partir de la fecha en formato A usando el método strptime

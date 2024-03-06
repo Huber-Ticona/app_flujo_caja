@@ -85,7 +85,7 @@ class Liquidacion(db.Model):
 
 class Gasto(db.Model):
     __tablename__ = 'gasto'
-    gasto_id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
 
     fecha = db.Column(db.DateTime, nullable=False)
 
@@ -95,27 +95,37 @@ class Gasto(db.Model):
     prov_folio = db.Column(db.Integer, nullable=True)
 
     tipo = db.Column(db.String(255), nullable=False) # Tipo de gasto
-
-
     detalle = db.Column(db.JSON, nullable=False) # Tipo de gasto (descripcion,cantidad,unidad,precio,etc)
-
     total = db.Column(db.Integer, nullable=False) # Tipo de gasto
-
     comentario =  db.Column(db.String(255), nullable=True) # Tipo de gasto
     # Foreaneas
     periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto
+    def to_json(self):
+        return {
+            'id': self.id,
+            'fecha': self.fecha,
+            'prov_empresa': self.prov_empresa,
+            'prov_documento': self.prov_documento,
+            'prov_folio': self.prov_folio,
+            'tipo': self.tipo,
+            'detalle': self.detalle,
+            'total': self.total,
+            'comentario': self.comentario,
+            'periodo_id': self.periodo_id
+        }
+    def update_from_dict(self, data):
+        for key, value in data.items():
+            setattr(self, key, value)
 
 class Aplicacion(db.Model):
     __tablename__ = 'aplicacion'
     id = db.Column(db.Integer, primary_key=True)
-    
     fecha = db.Column(db.DateTime, nullable=False)
     lugar = db.Column(db.String(100), nullable=False)
     nave = db.Column(db.String(100), nullable=False)
-
     detalle = db.Column(db.JSON, nullable=False) #(insumo,cantidad, unidad (saco ,litro))
-
     aplicador = db.Column(db.String(255), nullable=True)
+    tipo_aplicacion = db.Column(db.String(255), nullable=False)
     comentario = db.Column(db.String(255), nullable=True)
      # Foreaneas
     periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto
@@ -127,6 +137,7 @@ class Aplicacion(db.Model):
             'nave': self.nave,
             'detalle': self.detalle,
             'aplicador': self.aplicador,
+            'tipo_aplicacion': self.tipo_aplicacion,
             'comentario': self.comentario,
             'periodo_id': self.periodo_id,
         }
@@ -149,6 +160,17 @@ class Riego(db.Model):
     def update_from_dict(self, data):
         for key, value in data.items():
             setattr(self, key, value)
+    def to_json(self):
+        return {
+            'id': self.id,
+            'fecha': self.fecha,
+            'lugar': self.lugar,
+            'nave': self.nave,
+            'minutos': self.minutos,
+            'regador': self.regador,
+            'comentario': self.comentario,
+            'periodo_id': self.periodo_id
+        }
 
 class Empleado(db.Model):
     __tablename__ = 'empleado'
@@ -164,6 +186,8 @@ class Empleado(db.Model):
     def to_json(self):
         return {
             'id': self.id,
+            'fecha_ingreso': self.fecha_ingreso,
+            'fecha_retiro': self.fecha_retiro,
             'detalle': self.detalle,
             'empresa_id': self.empresa_id
         }
@@ -172,14 +196,36 @@ class PagoPersonal(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fecha = db.Column(db.DateTime, nullable=False)
     personal = db.Column(db.String(100), nullable=False)
-    suple = db.Column(db.Integer, nullable=False)
+    pago = db.Column(db.Integer, nullable=False)
     periodo_id = db.Column(db.Integer, nullable=False)
+    def update_from_dict(self, data):
+        for key, value in data.items():
+            setattr(self, key, value)
 
+    def to_json(self):
+        return {
+            'id': self.id,
+            'fecha': self.fecha,
+            'personal': self.personal,
+            'pago': self.pago,
+            'periodo_id': self.periodo_id
+        }
 class RegistroLaboral(db.Model):
     __tablename__ = 'registro_laboral'
     id = db.Column(db.Integer, primary_key=True) 
-    detalle = db.Column(db.JSON, nullable=False)
+    detalle = db.Column(db.JSON, nullable=False) #(fecha,descripcion)
     periodo_id = db.Column(db.Integer, nullable=False)
+
+    def update_from_dict(self, data):
+        for key, value in data.items():
+            setattr(self, key, value)
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'detalle': self.detalle,
+            'periodo_id': self.periodo_id
+        }
 
 
 
