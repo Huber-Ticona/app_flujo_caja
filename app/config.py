@@ -7,7 +7,11 @@ class Config():
 class ConfigDevelop(Config):
 
     # BASE DE DATOS CONFIGURACION
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://huber:huber123@localhost/app_flujo_caja'
+    DB= os.getenv('DB')
+    USER=os.getenv('USER')
+    PASSWORD=os.getenv('PASSWORD')
+    HOST=os.getenv('HOST')
+    SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{USER}:{PASSWORD}@{HOST}/{DB}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG  = True
 
@@ -15,6 +19,11 @@ class ConfigDevelop(Config):
 
 class ConfigProduction(Config):
     
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://huber:huber123@localhost/app_flujo_caja'
+    # BASE DE DATOS CONFIGURACION
+    DB= os.getenv('DB')
+    USER=os.getenv('USER')
+    PASSWORD=os.getenv('PASSWORD')
+    HOST=os.getenv('HOST')
+    SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{USER}:{PASSWORD}@{HOST}/{DB}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG  = False
