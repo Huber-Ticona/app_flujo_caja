@@ -40,6 +40,7 @@ def crear_gasto():
 @login_required
 def gastos(id = None):
     dicc = {
+        "entidad": "Gasto",
         "api":"Gastos",
         "url_api":"/api/gastos"
         }
@@ -101,9 +102,9 @@ def gastos(id = None):
                 "msg": f"Error al eliminar {dicc['api']} {id}.",
                 "id": id
             }
-            return Response(status=204,headers={'HX-Trigger': json.dumps({"eliminar_registro": data,})})
+            return jsonify(status=True,title='Exito', msg=f'{dicc["entidad"]} : {id} eliminado exitosamente.')
          except:
-            return Response(status=204,headers={'HX-Trigger': json.dumps({"eliminar_registro": data,})})
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al eliminar {dicc["entidad"]} : {id}.')
 
 
 """ Api Riego (login_required) """
@@ -191,7 +192,7 @@ def riego(riego_id = None):
 
     if request.method == 'DELETE':
          print("|Idea: Eliminar riego.")
-         riego = Riego.query.filter_by(riego_id=riego_id).first()
+         riego = Riego.query.filter_by(id=riego_id).first()
          print("|Riego a eliminar: ",riego)
          db.session.delete(riego)
          db.session.commit()
@@ -258,7 +259,7 @@ def trabajadores(empleado_id = None):
         print('|(session) Periodo_id: ',periodo_id)
         print('|(session) Emprsa_id: ',empresa_id)
         if not empleado_id:
-            # Enviar lista de riegos
+            # Enviar lista
             empleados = Empleado.query.filter_by(empresa_id=empresa_id).all()
             print("|Idea: Mostrar lista Trabajadores.")
             print("|Trabajadores: ",empleados)
@@ -274,7 +275,7 @@ def trabajadores(empleado_id = None):
         print("Form: ",form)
         print("|empleado detalle: ",empleado.detalle)
         establecer_valores_por_defecto_formulario(form,empleado)
-        # Obtener lista de riego o aplicar filtros según sea necesario
+        # Obtener lista  o aplicar filtros según sea necesario
         return render_template('components/base_form.html',form=form,entidad=empleado,dicc=dicc)
     
     if request.method == 'PUT':
