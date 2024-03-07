@@ -4,3 +4,4 @@ venv
 liquidaciones
 migrations
 .env
+app/__pycache__

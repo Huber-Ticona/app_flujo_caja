@@ -62,6 +62,7 @@ def comercio(tipo=None):
  """
 
 @main_bp.route('/embarque', methods=['POST'])
+@login_required
 def embarque():
     if request.method == 'POST':
         return render_template('registrar_embarque.html')
@@ -78,6 +79,7 @@ def lista_embarque():
 
 
 @main_bp.route('/embarque/registrar', methods=['POST','GET'])
+@login_required
 def registrar_embarque():
     if request.method == 'POST':
 

@@ -6,6 +6,9 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{{url_for('auth_bp.static', filename = 'css/login.css')}}">
+  <!-- BOOTSTRAP CSS 5.0 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
   <title>Login</title>
 </head>
 
@@ -53,9 +56,19 @@
           <div class="formbg">
             <div class="formbg-inner padding-horizontal--48">
               <span class="padding-bottom--15">Ingresa a tu cuenta</span>
+             
               <!-- FORMULARIO LOGIN -->
               
               <form id="stripe-login" action="{{url_for('auth_bp.login')}}" method="post">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                  {% for category, message in messages %}
+                  <div class="alert alert-{{category}}" role="alert">
+                    {{message}}
+                  </div>
+                  {% endfor %}
+                {% endif %}
+              {% endwith %}
                 {{form.csrf_token}}
 
                 <!-- CAMPO USUARIO  -->
