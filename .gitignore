@@ -5,3 +5,4 @@ liquidaciones
 migrations
 .env
 app/__pycache__
+app/auth/__pycache__

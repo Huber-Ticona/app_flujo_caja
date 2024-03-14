@@ -48,7 +48,7 @@ class Gasto_Form(FlaskForm):
     prov_folio = IntegerField('prov_folio',default=0)
     tipo = SelectField('tipo', choices=[('HERRAMIENTA', 'HERRAMIENTA'), ('MATERIAL', 'MATERIAL'), ('FERTILIZANTE', 'FERTILIZANTE'), ('CONTROL-PLAGAS', 'CONTROL-PLAGAS'), ('MANTENCION-AUTOMOTRIZ','MANTENCION-AUTOMOTRIZ'), ('ALIMENTACION', 'ALIMENTACION')])
     detalle = HiddenField("detalle")
-    total = IntegerField('total',validators=[InputRequired()])
+    total = IntegerField('total',validators=[InputRequired()],default=0)
     comentario = StringField('comentario') 
     # Foreaneas
     periodo_id =HiddenField('periodo_id',validators=[InputRequired()])
@@ -85,7 +85,7 @@ class Riego_form(FlaskForm):
     fecha = DateTimeField('fecha', validators=[InputRequired()])
     lugar = SelectField('lugar', choices=[('Km 17 Parcela', 'Km 17 Parcela'), ('Km 17 Olivo', 'Km 17 Olivo'), ('Km 28 Sobraya', 'Km 28 Sobraya')])
     nave = SelectField('nave', choices=[('Nave 1', 'Nave 1'), ('Nave 2', 'Nave 2'), ('Nave 3', 'Nave 3')])
-    minutos = IntegerField('minutos')
+    minutos = IntegerField('minutos',default=30)
     regador = StringField('regador')
 
     comentario = StringField('comentario') # Tipo de gasto
@@ -180,7 +180,7 @@ class PagoPersonal_form(FlaskForm):
     fecha = DateTimeField('fecha', validators=[InputRequired()],default=datetime.now())
     
     personal = SelectField('personal')
-    pago = IntegerField('pago')
+    pago = IntegerField('pago',default=0)
     periodo_id = HiddenField("detalle")
 
     endpoint = "/api/pagos_personal"
