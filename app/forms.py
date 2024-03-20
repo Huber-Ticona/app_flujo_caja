@@ -129,8 +129,12 @@ class Aplicacion_form(FlaskForm):
                 "field": "detalle",
                 "inputs" : [
                     {"name":"insumo", "type":"text"},
-                    {"name":"cantidad", "type":"number"},
-                    {"name":"unidad", "type":"text",
+                    {"name":"cantidad_x_riego", "type":"number"},
+                    {"name":"unidad_de_cantidad", "type":"text",
+                     "choices":["Mili-litro (ML)","kilogramo (KG)","Litro (LTS)" ,"Mili-gramo (MG)"]
+                     },
+                    {"name":"total_aplicado", "type":"number"},
+                    {"name":"unidad_de_total", "type":"text",
                      "choices":["Mili-litro (ML)","kilogramo (KG)","Litro (LTS)" ,"Mili-gramo (MG)"]
                      },
                     ]
