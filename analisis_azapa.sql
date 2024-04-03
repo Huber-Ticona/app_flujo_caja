@@ -25,7 +25,30 @@ CROSS JOIN JSON_TABLE(l.detalle, '$[*]' COLUMNS (
     total VARCHAR(255) PATH '$.total'
 )) d
 -- where periodo_id = 3
+),
+vista_aplicacion as (
+SELECT l.id,l.fecha ,l.lugar, l.nave ,l.comentario, d.*
+FROM aplicacion l
+CROSS JOIN JSON_TABLE(l.detalle, '$[*]' COLUMNS (
+    insumo VARCHAR(255) PATH '$.insumo',
+    total_aplicado float PATH '$.total_aplicado',
+    unidad_de_total varchar(255) PATH '$.unidad_de_total'
+)) d
+-- where periodo_id = 3
 )
+-- select * from aplicacion
+select v.* ,
+case
+	when v.unidad_de_total IN  ('kilogramo (KG)' ,'Litro (LTS)') then (v.total_aplicado)
+    when v.unidad_de_total = 'Mili-litro (ML)' then (v.total_aplicado/1000)
+    when v.unidad_de_total = 'Mili-gramo (MG)' then (v.total_aplicado/1000)
+end as total_final,
+case 
+	when v.unidad_de_total = 'Mili-litro (ML)' then 'kilogramo (KG)'
+    when v.unidad_de_total = 'Mili-gramo (MG)' then 'Litro (LTS)'
+    ELSE v.unidad_de_total
+
+end as unidad_final from vista_aplicacion v
 -- ANALISIS EMBARQUE 
 -- 1. TOTAL DE GAMELAS PRODUCIDAS POR PERIODO,PARCELA Y NAVE.
 -- select p.periodo_fiscal,v.periodo_id, v.parcela, sum(v.total) from vista_embarque v  inner join periodo p on v.periodo_id = p.periodo_id

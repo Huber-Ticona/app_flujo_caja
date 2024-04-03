@@ -122,9 +122,10 @@ $('#base_form').on('submit',function(){
                     celdas.each(function(index) {
                         var input = $(this).find('input, select, textarea');
                         if (input.length > 0) {
-                            var nombreColumna = input.attr('id');
+                            var nombreColumna = input.attr('id').split('-');
+                            console.log("Nombre columna after: ", nombreColumna)
+                            nombreColumna = nombreColumna[0]
                             var valor = input.val();
-                            
                             // Asignar el valor al objeto de la fila
                             fila[nombreColumna] = valor;
                         }
@@ -166,40 +167,48 @@ $('#base_form').on('submit',function(){
     });
     
 })
-
+// Se registran los valores si existe entidad y la funcion agregar,remover fila.
 {%if form.tablas %}
+    var filas_tabla = {}
     {% for key,value in form.tablas.items()%}
-    console.log("item {{key}} in tablas")
-    // Si existen valores se deben cargar en filas.
-   {% if entidad and entidad[key] and form.tablas[key].relacion =='muchos' %}
+        console.log("item {{key}} in tablas")
+        filas_tabla['{{key}}'] = parseInt(0)
+        // Si existen valores se deben cargar en filas.
+        {% if entidad and entidad[key] and form.tablas[key].relacion =='muchos' %}
+            filas_tabla['{{key}}'] = parseInt('{{entidad[key]|length}}')
+            console.log("|Tabla {{key}}: ", {{entidad[key]|safe}} )
+            var tabla = $("#body-tabla-{{key}}");
+            // Se crean los input y se agregan a la tabla.
+            {% for item in entidad[key] %}
+                    {% set outer_loop = loop.index %}
+                    console.log("|Item encontrado -> se añade a Tabla {{key}}: ")
+                    var fila = $("<tr>");
+                    {% for input in form.tablas[key].inputs %}
+                            var {{input.name}} = `{% if not input.choices %}
+                                <input type="{{input.type}}" class="form-control" name="" id="{{input.name}}-{{outer_loop}}"
+                                value="{{ item[input.name] }}">
+                                {%else%}
+                                <select class="form-select" id="{{input.name}}">
+                                    {% for choice in input.choices %}
+                                    <option value="{{choice}}" {%if choice == item[input.name] %}selected {%endif%}>{{choice}}</option>
+                                    {%endfor%}
+                                </select>
+                                {%endif%}`
+                                $(".contenido-principal-body").on('change','#{{input.name}}-{{outer_loop}}',function(){
+                                    console.log("Val: ",$('#{{input.name}}').val())
+                                    console.log("Entidad: {{key}} , leng: {{entidad[key]|length}}")
+                                })
+                            fila.append($("<td>").append({{input.name}}))
+                    {% endfor%}
+                    var boton = $("<button>")
+                        .addClass("btn-remover-fila btn bg-none rounded-circle border border-2")
+                        .append('<i class="fas fa-trash"></i>')
 
-   console.log("|Tabla {{key}}: ", {{entidad[key]|safe}} )
-   var tabla = $("#body-tabla-{{key}}");
-   {% for item in entidad[key] %}
-   console.log("|Item encontrado -> se añade a Tabla {{key}}: ")
-   var fila = $("<tr>");
-   {% for input in form.tablas[key].inputs %}
-            var {{input.name}} = `{% if not input.choices %}
-                <input type="{{input.type}}" class="form-control" name="" id="{{input.name}}"
-                value="{{ item[input.name] }}">
-                {%else%}
-                <select class="form-select" id="{{input.name}}">
-                    {% for choice in input.choices %}
-                    <option value="{{choice}}" {%if choice == item[input.name] %}selected {%endif%}>{{choice}}</option>
-                    {%endfor%}
-                </select>
-                {%endif%}`
-            fila.append($("<td>").append({{input.name}}))
-    {% endfor%}
-    var boton = $("<button>")
-        .addClass("btn-remover-fila btn bg-none rounded-circle border border-2")
-        .append('<i class="fas fa-trash"></i>')
-
-    fila.append($("<td>").append(boton))
-    tabla.append(fila);
-   {%endfor%}
- 
-   {% endif %}
+                    fila.append($("<td>").append(boton))
+                    tabla.append(fila);
+            {%endfor%}
+        
+        {% endif %}
 
     // Antes de cargar el nuevo componente, desvincula el evento anterior
     $(".contenido-principal-body").off("click", ".add-fila-{{key}}");
@@ -207,14 +216,18 @@ $('#base_form').on('submit',function(){
     $(".contenido-principal-body").on("click",".add-fila-{{key}}", function (){
         console.log("Añadiendo fila a tabla {{key}}-...");
         var tabla = $("#body-tabla-{{key}}");
-        var numeroDeFilas = tabla.find("tr").length;
+        //var numeroDeFilas = tabla.find("tr").length;
+        filas_tabla['{{key}}'] = filas_tabla['{{key}}'] + 1
+        var numeroDeFilas = filas_tabla['{{key}}']
         console.log("Número de filas en la tabla: " + numeroDeFilas);
+        console.log('filas_tabla: ',filas_tabla)
         var i = numeroDeFilas;
         var fila = $("<tr>");
         {% for input in form.tablas[key].inputs %}
+            
             var {{input.name}} = `{% if not input.choices %}
-                <input type="{{input.type}}" class="form-control" name="" id="{{input.name}}"
-                value="">
+                <input type="{{input.type}}" class="form-control" name="" id={{input.name}}-`+ (numeroDeFilas).toString() + `
+                value="{{-input.default-}}">
                 {%else%}
                 <select class="form-select" id="{{input.name}}">
                     {% for choice in input.choices %}
@@ -222,6 +235,10 @@ $('#base_form').on('submit',function(){
                     {%endfor%}
                 </select>
                 {%endif%}`
+            $(".contenido-principal-body").on('change','#{{input.name}}-'+(numeroDeFilas).toString(),function(){
+                console.log("Val: ",$('#{{input.name}}-'+(numeroDeFilas).toString()).val())
+                //$('#precio_total-'+(numeroDeFilas).toString()).val( $('#{{input.name}}-'+(numeroDeFilas).toString()).val() * 2 )
+            })
             fila.append($("<td>").append({{input.name}}))
         {% endfor%}
 
