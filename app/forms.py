@@ -62,12 +62,14 @@ class Gasto_Form(FlaskForm):
              "choices":["UND","SACO","CAJA","PACK (Bolsa)","kilogramo (KG)","Litro (LT)" ,"Mili-gramo (MG)","Mili-litro (ML)"]
             },
             {"name":"descripcion", "type":"text"},
-            {"name":"precio_unitario", "type":"number","default":0},
+            {"name":"precio_unitario", "type":"number","default":0 ,
+             "onchange":{"target":"precio_total",
+                          "result":["cantidad","*","precio_unitario"]}},
             {"name":"precio_total", "type":"number","default":0},
-        ]
+        ],
         
     }}
-    show_in_table = ["fecha","tipo","total","detalle","prov_empresa","prov_documento","comentario"]
+    show_in_table = ["fecha","tipo","total","detalle","prov_empresa","prov_documento","prov_folio","comentario"]
 
 """ Riego form  class Riego(db.Model):
     __tablename__ = 'riego'

@@ -237,6 +237,10 @@ $('#base_form').on('submit',function(){
                 {%endif%}`
             $(".contenido-principal-body").on('change','#{{input.name}}-'+(numeroDeFilas).toString(),function(){
                 console.log("Val: ",$('#{{input.name}}-'+(numeroDeFilas).toString()).val())
+                {%if input.onchange %}
+                $("#{{input.onchange.target}}-"+(numeroDeFilas).toString() ).val(
+                    $("#{{input.onchange.result[0]}}-"+(numeroDeFilas).toString()).val() {{input.onchange.result[1]|safe}} $("#{{input.onchange.result[2]}}-"+(numeroDeFilas).toString()).val())
+                {%endif%}
                 //$('#precio_total-'+(numeroDeFilas).toString()).val( $('#{{input.name}}-'+(numeroDeFilas).toString()).val() * 2 )
             })
             fila.append($("<td>").append({{input.name}}))
