@@ -3,9 +3,9 @@
     <button class="btn bg-none border border-lg rounded-pill" hx-get="{{prev}}" hx-target="#dashboard-contenido"><i class="fas fa-arrow-left"></i> Volver a {{prev}} </button>
     {%else%}{%endif%} 
     <!-- FIX EMBARQUE ID -->
-    <h3>{%if entidad %}{{dicc['api']}} :{% if entidad.id%} {{entidad.id}} {%else%} {{entidad.embarque_id}}{%endif%} {%else%}Formulario{%endif%}</h3>
+    <h3>{%if entidad %}{{dicc['api']}} :{% if entidad.id%}{{entidad.id}} {%else%}{{entidad.embarque_id}}{%endif%} {%else%}Formulario{%endif%}</h3>
 
-    <form id="base_form" action="{{form.endpoint}}{%if entidad %}/{{entidad.id}}{%else%}/registrar{%endif%}" method="{%if entidad %}PUT{%else%}POST{%endif%}" >
+    <form id="base_form" action="{{form.endpoint}}{%if entidad %}/{% if entidad.id%}{{entidad.id}}{%else%}{{entidad.embarque_id}}{%endif%}{%else%}/registrar{%endif%}" method="{%if entidad %}PUT{%else%}POST{%endif%}" >
 
         {% for field in form %}
         
