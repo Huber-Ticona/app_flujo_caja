@@ -10,7 +10,28 @@
 
           </form>
     </div>
-  
+
+    <h3>Grafico: Producto-Variedad-Calidad</h3>
+    <div>
+      <div class="input-group">
+          <span class="input-group-text" id="addon-producto">Producto</span>
+          <input type="text" class="form-control" id="input-producto" value="Tomate">
+      </div>
+      <div class="input-group">
+          <span class="input-group-text" id="addon-variedad">Variedad</span>
+          <input type="text" class="form-control" id="input-variedad" value="Larga vida">
+      </div>
+      <div class="input-group">
+          <span class="input-group-text" id="addon-calidad">Calidad</span>
+          <input type="text" class="form-control" id="input-calidad" value="Primera">
+      </div>
+      <button class="btn btn-outline-secondary" type="button" id="button-crear">Crear Grafico</button>
+  </div>
+    <canvas id="canvas" width="400" height="300" aria-label="Hello ARIA World" role="img" style="border: 1px solid red;"></canvas>
+
+    
+ 
+
     {% if data %}
     <div class="d-flex gap-5 m-3">
         <h3>Lista Precios {{fecha.strftime('%d-%m-%Y')}}</h3>
@@ -34,26 +55,138 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <!-- Script -->
+    <script>
+      $(document).ready(function(){
+        // OBJparams
+        const objParams = {{data|safe}};
+        console.log("|OBJPARAMS: ",objParams);
+        
+        // Capturar elementos del DOM
+        const buttonCrear = document.getElementById('button-crear');
+        const inputProducto = document.getElementById('input-producto');
+        const inputVariedad = document.getElementById('input-variedad');
+        const inputCalidad = document.getElementById('input-calidad');
+
+        // Agregar evento click al botón "Crear Gráfico"
+        buttonCrear.addEventListener('click', crear_grafico) 
+
+        function crear_grafico(){
+
+          console.log("Creando nuevo grafico.")
+           
+
+            // Obtener valores de los inputs
+            const producto = inputProducto.value;
+            const variedad = inputVariedad.value;
+            const calidad = inputCalidad.value;
+
+            // Filtrar los datos según los valores de los inputs
+            const filteredData = objParams.filter(item => {
+                return item.product === producto &&
+                       item.variety === variedad &&
+                       item.quality === calidad;
+            });
+
+            // Obtener nombres únicos de mercados
+            const markets = Array.from(new Set(filteredData.map(item => item.market)));
+
+            // Calcular los precios mínimos, máximos y promedio por mercado
+            const pricesByMarket = {};
+            markets.forEach(market => {
+                const prices = filteredData.filter(item => item.market === market)
+                                           .map(item => [item.minPrice, item.maxPrice, item.proPoPrice]);
+                const minPrices = prices.map(price => price[0]);
+                const maxPrices = prices.map(price => price[1]);
+                const avgPrices = prices.map(price => price[2]);
+                pricesByMarket[market] = {
+                    minPrice: Math.min(...minPrices),
+                    maxPrice: Math.max(...maxPrices),
+                    avgPrice: avgPrices.reduce((acc, val) => acc + val, 0) / avgPrices.length
+                };
+            });
+          
+      
+            // Datos para el gráfico
+            const data = {
+                labels: markets,
+                datasets: [{
+                    label: 'Precio Mínimo',
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                    data: markets.map(market => pricesByMarket[market].minPrice)
+                }, {
+                    label: 'Precio Máximo',
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    data: markets.map(market => pricesByMarket[market].maxPrice)
+                }, {
+                    label: 'Precio Promedio',
+                    backgroundColor: 'rgba(255, 206, 86, 0.5)',
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    borderWidth: 1,
+                    data: markets.map(market => pricesByMarket[market].avgPrice)
+                }]
+            };
+
+            // Opciones del gráfico
+            const options = {
+              responsive: true, // Habilitar el modo responsive
+              scales: {
+                  yAxes: [{
+                      ticks: {
+                          beginAtZero: true
+                      },
+                      scaleLabel: {
+                          display: true,
+                          labelString: 'Precio' // Etiqueta del eje Y
+                      }
+                  }]
+              }
+            };
+
+           
+            // Obtener el contexto del canvas
+            const ctx = document.getElementById('canvas').getContext('2d');
+            
+            // Verificar si ya existe un gráfico y destruirlo
+            if (window.myChart) {
+                window.myChart.destroy();
+            }
+
+            // Crear un nuevo gráfico
+            window.myChart = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: options
+            });
+
+          }
+        
+        // CREAR GRAFICO AL INSTANTE
+        crear_grafico()
+        // DATATABLE JS
+        const datatable = new DataTable('#datatable',{
+          columnDefs: [
+            {
+              targets: [5,6,7], // Índice de la columna "Total Venta" (empezando desde 0)
+              orderData: [5,6,7] , // Índice de la columna de datos subyacente para ordenar
+              render: function(data, type, row) {
+                // Se formatea para mostrar como moneda
+                if (type === 'display') {
+                    data = parseInt(data)
+                  return '$' + data.toLocaleString({currency:"CLP"})
+                }
+                return data;
+              }
+            }
+          ]
+        })
+      })
+     
+  </script>
     {%endif%}
 </div>
-<script>
-    $(document).ready(function() {
-      let datatable = new DataTable('#datatable',{
-        columnDefs: [
-        {
-          targets: [5,6,7], // Índice de la columna "Total Venta" (empezando desde 0)
-          orderData: [5,6,7] , // Índice de la columna de datos subyacente para ordenar
-          render: function(data, type, row) {
-            // Se formatea para mostrar como moneda
-            if (type === 'display') {
-                data = parseInt(data)
-              return '$' + data.toLocaleString({currency:"CLP"})
-            }
-            return data;
-          }
-        }
-      ]
-        })
-    })
-   
-</script>

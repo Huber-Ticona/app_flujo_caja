@@ -1,11 +1,12 @@
 from flask import Blueprint,render_template,request,redirect,url_for,jsonify,session,Response,abort,flash
 from flask_login import login_required
-from .forms import Empleado_form,Aplicacion_form,Riego_form,Gasto_Form,PagoPersonal_form,RegistroLaboral_form
-from .models import Gasto,Riego,Empleado,Aplicacion,PagoPersonal,RegistroLaboral
+from .forms import Empleado_form,Aplicacion_form,Riego_form,Gasto_Form,PagoPersonal_form,RegistroLaboral_form,Embarque_form
+from .models import Gasto,Riego,Empleado,Aplicacion,PagoPersonal,RegistroLaboral,Embarque
 from .extensions import model_to_dict2,db,convertir_form_a_dict,establecer_valores_por_defecto_formulario,sanitize_json
 from datetime import datetime
 import json
 import requests
+from sqlalchemy import func
 
 api_bp = Blueprint('api_bp' , __name__,template_folder='templates',static_folder='static')
 
@@ -18,7 +19,7 @@ def crear_gasto():
         form = Gasto_Form()
         form.periodo_id.default = session['periodo_id']
         form.process()
-        return render_template("components/base_form.html",form=form)
+        return render_template("components/base_form.html",form=form, prev="/api/gastos")
     elif request.method == 'POST':
         # Registrar
         try:
@@ -60,6 +61,14 @@ def gastos(id = None):
         if not id:
             # Enviar lista de riegos
             entidades = Gasto.query.filter_by(periodo_id=periodo_id).all()
+            #TEST GROUP BY DATA
+            data = Gasto.query \
+                .filter_by(periodo_id=periodo_id) \
+                .group_by(Gasto.tipo) \
+                .add_columns(Gasto.tipo, func.sum(Gasto.total).label("total_gasto_agrupado"))\
+                .all()
+            print(f"(DATA): ",data)
+            # END TEST
             entidades = [ item.to_json() for item in entidades ]
             print(f'|Idea: Mostrar lista {dicc["api"]}.')
             print(f'|{dicc["api"]}: ',entidades)
@@ -121,7 +130,7 @@ def crear_riego():
         form.fecha.default = fecha
         form.periodo_id.default = periodo_id
         form.process()
-        return render_template("components/base_form.html",form=form)
+        return render_template("components/base_form.html",form=form,prev="/api/riegos")
     if request.method =='POST':
         # Registrar Riego
         try:
@@ -218,7 +227,7 @@ def crear_trabajadores():
         form = Empleado_form()
         form.empresa_id.default = empresa_id
         form.process()
-        return render_template("components/base_form.html",form=form)
+        return render_template("components/base_form.html",form=form,prev="/api/trabajadores")
     elif request.method == 'POST':
         # Registrar Trabajador
         try:
@@ -326,7 +335,7 @@ def crear_aplicaciones():
         form.fecha.default = fecha
         form.periodo_id.default = session['periodo_id']
         form.process()
-        return render_template("components/base_form.html",form=form,dicc=dicc)
+        return render_template("components/base_form.html",form=form,prev="/api/aplicaciones",dicc=dicc)
     elif request.method == 'POST':
         # Registrar Trabajador
         try:
@@ -428,7 +437,7 @@ def crear_pago_personal():
                                 f"{empleado.detalle['nombre']} {empleado.detalle['apellido']}") for empleado in Empleado.query.all()]
         form.periodo_id.default = session['periodo_id']
         form.process()
-        return render_template("components/base_form.html",form=form,dicc=dicc)
+        return render_template("components/base_form.html",form=form,prev="/api/pagos_personal",dicc=dicc)
     elif request.method == 'POST':
         # Registrar Trabajador
         try:
@@ -508,7 +517,7 @@ def pagos_personal(id = None):
          except:
             return jsonify(status=False,title='Error', msg=f'Ocurrio un error al eliminar {dicc["entidad"]} : {id}.')
 
-""" Api pago personal """
+""" Api registro laboral """
 @api_bp.route('/registros_laborales/registrar', methods=['GET', 'POST'])
 @login_required
 def crear_registro_laboral():
@@ -519,7 +528,7 @@ def crear_registro_laboral():
         print("GET, enviando formulario")
         form.periodo_id.default = session['periodo_id']
         form.process()
-        return render_template("components/base_form.html",form=form,dicc=dicc)
+        return render_template("components/base_form.html",form=form,prev="/api/registros_laborales",dicc=dicc)
     elif request.method == 'POST':
         # Registrar 
         try:
@@ -605,6 +614,104 @@ def registro_laboral(id = None):
             print(f'|{dicc["entidad"]} a eliminar: ',entidad)
             db.session.delete(entidad)
             db.session.commit()
+            return jsonify(status=True,title='Exito', msg=f'{dicc["entidad"]} : {id} eliminado exitosamente.')
+         except:
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al eliminar {dicc["entidad"]} : {id}.')
+
+""" Api EMBARQUE """
+@api_bp.route('/embarques/registrar', methods=['GET', 'POST'])
+@login_required
+def crear_embarque():
+    if request.method == 'GET':
+        print("GET, enviando formulario")
+        form = Embarque_form()
+        form.periodo_id.default = session['periodo_id']
+        form.process()
+        return render_template("components/base_form.html",form=form, prev="/api/embarques")
+    elif request.method == 'POST':
+        # Registrar
+        try:
+            data = request.form
+            print("form data: ",data)
+            new_data = convertir_form_a_dict(data, Embarque_form().tablas)
+            print("new_data: ",new_data)
+            sanitized_json = sanitize_json(new_data)
+            new_entidad = Embarque(**sanitized_json)
+            print("new entidad: ",new_entidad)
+            #db.session.add(new_entidad)
+            #db.session.commit() 
+            return jsonify(status=True,title='Exito', msg='Embarque registrado exitosamente.')
+        except Exception as e:
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al registrar Embarque. Error: {str(e)}')
+
+@api_bp.route('/embarques', methods=['GET'])
+@api_bp.route('/embarques/<int:id>', methods=['GET','DELETE','PUT'])
+@login_required
+def embarques(id = None):
+    dicc = {
+        "entidad": "Embarque",
+        "api":"Embarques",
+        "url_api":"/api/embarques"
+        }
+    form = Embarque_form()
+    print('*'*30 + f' {dicc["api"]} ' + '*'*30)
+
+    try:
+        empresa_id = session["empresa_id"]
+        periodo_id = session["periodo_id"]
+    except:
+        return jsonify(status=False,title='Error', msg=f'Ocurrio un error durante la consulta a la {dicc["url_api"]}.')
+    
+    if request.method == 'GET':
+        
+        print('|(session) Periodo_id: ',periodo_id)
+        print('|(session) Emprsa_id: ',empresa_id)
+        if not id:
+            # Enviar lista de riegos
+            entidades = Embarque.query.filter_by(periodo_id=periodo_id).all()
+           
+            entidades = [ item.to_json() for item in entidades ]
+            print(f'|Idea: Mostrar lista {dicc["api"]}.')
+            print(f'|{dicc["api"]}: ',entidades)
+            return render_template('components/base_list.html',entidades=entidades,dicc=dicc,form=form)
+    
+        print("|Idea: Mostrar aplicaciones con datos.")
+        entidad = Embarque.query.filter_by(embarque_id=id).first()
+        print(f'|{dicc["api"]}: {entidad}')
+
+        establecer_valores_por_defecto_formulario(form,entidad)
+        #print("|empleado detalle: ",empleado.detalle)
+        # Obtener lista de riego o aplicar filtros según sea necesario
+        return render_template('components/base_form.html',form=form,entidad=entidad,dicc=dicc)
+    
+    if request.method == 'PUT':
+        try:
+            print(f'|Idea: Actualizar {dicc["api"]} con los datos obtenidos mediante PUT.')
+            entidad = Embarque.query.filter_by(embarque_id=id).first()
+            data = request.form
+            print("|Request form: ", data)
+            new_data = convertir_form_a_dict(data, form.tablas)
+            sanitized_json = sanitize_json(new_data)
+            print("Sobrescribiendo datos...")
+            entidad.update_from_dict(sanitized_json)
+            print(f'|{dicc["api"]}: {entidad.to_json()}')
+            db.session.commit()
+            return jsonify(status=True,title='Exito', msg=f'{dicc["api"]} actualizado exitosamente.')
+        except:
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al actualizado.')
+
+    if request.method == 'DELETE':
+         try:
+            print(f'|Idea: Eliminar {dicc["api"]}.')
+            entidad = Embarque.query.filter_by(embarque_id=id).first()
+            print(f'|{dicc["api"]} a eliminar: ',entidad)
+            db.session.delete(entidad)
+            db.session.commit()
+            data = {
+                "class":"danger",
+                "msg": f"Error al eliminar {dicc['api']} {id}.",
+                "id": id
+            }
             return jsonify(status=True,title='Exito', msg=f'{dicc["entidad"]} : {id} eliminado exitosamente.')
          except:
             return jsonify(status=False,title='Error', msg=f'Ocurrio un error al eliminar {dicc["entidad"]} : {id}.')

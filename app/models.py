@@ -67,6 +67,18 @@ class Embarque(db.Model):
     extra = db.Column(db.JSON)
 
     periodo_id = db.Column(db.Integer, db.ForeignKey('periodo.periodo_id'))
+    def to_json(self):
+        return {
+            'id': self.embarque_id,
+            'fecha': self.fecha,
+            'detalle': self.detalle,
+            'detalle_totales': self.detalle_totales,
+            'extra': self.extra,
+            'periodo_id': self.periodo_id
+        }
+    def update_from_dict(self, data):
+        for key, value in data.items():
+            setattr(self, key, value)
 
 
 class Liquidacion(db.Model):

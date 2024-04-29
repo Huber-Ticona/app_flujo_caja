@@ -116,7 +116,8 @@ class Aplicacion_form(FlaskForm):
 
     fecha = DateTimeField('fecha', validators=[InputRequired()])
     lugar = SelectField('lugar', choices=[('Km 17 Parcela', 'Km 17 Parcela'), ('Km 17 Olivo', 'Km 17 Olivo'), ('Km 28 Sobraya', 'Km 28 Sobraya')])
-    nave = SelectField('nave', choices=[('Nave 1', 'Nave 1'), ('Nave 2', 'Nave 2'), ('Nave 3', 'Nave 3')])
+    nave = SelectField('nave', choices=[('Nave 1', 'Nave 1'), ('Nave 2', 'Nave 2'), ('Nave 3', 'Nave 3'), 
+                                        ('Nave 1 y 2', 'Nave 1 y 2'), ('Nave 2 y 3', 'Nave 2 y 3'), ('Nave 1 y 3', 'Nave 1 y 3')])
     
     detalle = HiddenField("detalle")
 
@@ -215,3 +216,63 @@ class RegistroLaboral_form(FlaskForm):
             } ,
             }
     show_in_table = ["detalle","periodo_id"]
+
+
+""" __tablename__ = "embarque"
+    embarque_id = db.Column(db.Integer, primary_key=True)
+
+    fecha = db.Column(db.Date, nullable=False)
+    detalle = db.Column(db.JSON)
+    detalle_totales = db.Column(db.JSON)  # total_terreno , total_procesado
+    extra = db.Column(db.JSON)
+
+    periodo_id = db.Column(db.Integer, db.ForeignKey('periodo.periodo_id')) """
+class Embarque_form(FlaskForm):
+
+
+    fecha = DateField('fecha', validators=[InputRequired()],default=datetime.now())
+    
+    detalle = HiddenField("detalle")
+    detalle_totales = HiddenField("detalle_totales")
+    extra = HiddenField("extra")
+    # Foreaneas
+    periodo_id =HiddenField('periodo_id') 
+
+    endpoint = "/api/embarques"
+    tablas = {"detalle" : {
+                "relacion":"muchos", # uno: uno a uno | muchos: uno a muchos
+                "field": "detalle",
+                "inputs" : [
+                    {"name":"parcela", "type":"text",
+                     "choices":["Km 17 Parcela","Km 17 Olivo","Km 28 Sobraya" ]
+                     },
+                    {"name":"nave", "type":"text",
+                     "choices":["1","2","3" ]
+                     },
+                    {"name":"hortaliza", "type":"text",
+                     "choices":["Tomate Bola","Tomate Cherry"]
+                     },
+                    {"name":"total","type":"number"}
+                    ]
+            } ,
+            "detalle_totales" : {
+                "relacion":"muchos", # uno: uno a uno | muchos: uno a muchos
+                "field": "detalle_totales",
+                "inputs" : [
+                    {"name":"total_terreno", "type":"number",},
+                    {"name":"total_procesado", "type":"number"},
+                    {"name":"hortaliza", "type":"text",
+                     "choices":["Tomate Bola","Tomate Cherry"]
+                     }
+                   
+                    ]
+            } ,
+            "extra" : {
+                "relacion":"uno", # uno: uno a uno | muchos: uno a muchos
+                "field": "extra",
+                "inputs" : [
+                    {"name":"observacion", "type":"text"},
+                    ]
+            } ,
+            }
+    show_in_table = ["detalle","detalle_totales","extra"]

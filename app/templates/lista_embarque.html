@@ -20,11 +20,16 @@
                 {% if lista_embarque %}
                 {% for item in lista_embarque %}
                 <tr>
-                    <td>Embarque {{loop.index}}</td>
+                    <td>Embarque {{item.embarque_id}}</td>
                     <td>{{item.fecha}}</td>
                     <td>
-                        <button class="btn bg-none rounded-circle border border-2"><i class="fas fa-pen"></i></button>
-                        <button class="btn bg-none rounded-circle border border-2"><i class="fas fa-trash"></i></button>
+                        <button class="btn bg-none rounded-circle border border-2"
+                        hx-get="/api/embarques/{{item.embarque_id}}"
+                        hx-target=".dashboard-contenido"><i class="fas fa-pen"></i></button>                   
+                       
+                         <button class="btn bg-none rounded-circle border border-2 remover-fila" data-id="{{item.embarque_id}}">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </td>
                 </tr>
                 {% endfor %}

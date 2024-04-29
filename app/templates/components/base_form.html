@@ -1,5 +1,9 @@
 <div>
-    <h3>{%if entidad %}{{dicc['api']}} : {{entidad.id}} {%else%}Formulario{%endif%}</h3>
+    {% if prev %}
+    <button class="btn bg-none border border-lg rounded-pill" hx-get="{{prev}}" hx-target="#dashboard-contenido"><i class="fas fa-arrow-left"></i> Volver a {{prev}} </button>
+    {%else%}{%endif%} 
+    <!-- FIX EMBARQUE ID -->
+    <h3>{%if entidad %}{{dicc['api']}} :{% if entidad.id%} {{entidad.id}} {%else%} {{entidad.embarque_id}}{%endif%} {%else%}Formulario{%endif%}</h3>
 
     <form id="base_form" action="{{form.endpoint}}{%if entidad %}/{{entidad.id}}{%else%}/registrar{%endif%}" method="{%if entidad %}PUT{%else%}POST{%endif%}" >
 
@@ -89,8 +93,13 @@
         </div>
      </form>
 </div>
-<script>
+<script type="module">
 /**/
+import Autocomplete from "https://cdn.jsdelivr.net/gh/lekoala/bootstrap5-autocomplete@master/autocomplete.js";
+  const opts = {
+    onSelectItem: console.log,
+  };
+new Autocomplete(document.getElementById("descripcion-1"), opts);
 
 $('#base_form').on('submit',function(){
     // Prevenir el envío del formulario para manejarlo manualmente
@@ -226,8 +235,15 @@ $('#base_form').on('submit',function(){
         {% for input in form.tablas[key].inputs %}
             
             var {{input.name}} = `{% if not input.choices %}
-                <input type="{{input.type}}" class="form-control" name="" id={{input.name}}-`+ (numeroDeFilas).toString() + `
+                <input list="test" type="{{input.type}}" class="form-control" name="" id={{input.name}}-`+ (numeroDeFilas).toString() + `
                 value="{{-input.default-}}">
+                <datalist id="test">
+                    <option value="Chocolate">
+                    <option value="Coconut">
+                    <option value="Mint">
+                    <option value="Strawberry">
+                    <option value="Vanilla">
+                </datalist>
                 {%else%}
                 <select class="form-select" id="{{input.name}}">
                     {% for choice in input.choices %}
@@ -266,9 +282,5 @@ $('#base_form').on('submit',function(){
     {%endfor%}
 
 {%endif%}
-
-
-  
-
 
 </script>

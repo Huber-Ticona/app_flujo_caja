@@ -60,6 +60,11 @@ def comercio(tipo=None):
 
     return render_template('dashboard.html', tipo=tipo, empresas=empresas)
  """
+@main_bp.route('/test', methods=['get'])
+@login_required
+def test2():
+    
+    return render_template('test/test2.html')
 
 @main_bp.route('/embarque', methods=['POST'])
 @login_required

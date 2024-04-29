@@ -1,0 +1,1 @@
+mysql -u root -h localhost -p test_app_flujo < app_flujo_caja_14-04-24.sql

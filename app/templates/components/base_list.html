@@ -6,7 +6,7 @@
     </div>
     
     <h5>showintable: {{form.show_in_table}}</h5>
-    <table id="datatable" class="display" style="width:100%">
+    <table id="datatable" class="display" style="width:100%" data-page-length='50'>
         <thead>
         <tr>
             <th>ID</th>
@@ -76,7 +76,6 @@
 <script>
     $(document).ready(function() {
       let datatable = new DataTable('#datatable')
-
       // Antes de cargar el nuevo componente, desvincula el evento anterior
     $(".contenido-principal-body").off("click", ".remover-fila");
     /* FUNCION AGREGAR FILA */
