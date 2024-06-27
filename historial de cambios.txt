@@ -1,0 +1,4 @@
+27-06-2024
+- se arreglo bug al registrar gasto , la alerta decia aplicacion registrada enves de gasto.
+- se añadio el qcompleter basado en todos los registros de gastos, en el base_form.
+- se implemento la mejora en el base_form para definir multiples qcompleter en cada campo uno a muchos.

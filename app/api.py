@@ -6,7 +6,8 @@ from .extensions import model_to_dict2,db,convertir_form_a_dict,establecer_valor
 from datetime import datetime
 import json
 import requests
-from sqlalchemy import func
+from sqlalchemy import func,text, column,select, literal_column,JSON,cast,String,Integer
+from sqlalchemy.orm import aliased
 
 api_bp = Blueprint('api_bp' , __name__,template_folder='templates',static_folder='static')
 
@@ -14,12 +15,41 @@ api_bp = Blueprint('api_bp' , __name__,template_folder='templates',static_folder
 @api_bp.route('/gastos/registrar', methods=['GET', 'POST'])
 @login_required
 def crear_gasto():
+    dicc = { "api":"Gastos" ,"entidad":"Gasto" }
     if request.method == 'GET':
         print("GET, enviando formulario")
         form = Gasto_Form()
         form.periodo_id.default = session['periodo_id']
         form.process()
-        return render_template("components/base_form.html",form=form, prev="/api/gastos")
+        query = text("""
+            SELECT g.fecha,g.prov_empresa, d.* 
+            FROM gasto g 
+            CROSS JOIN JSON_TABLE(g.detalle, '$[*]' COLUMNS(
+                unidad varchar(255) path '$.unidad',
+                cantidad int path '$.cantidad',
+                descripcion VARCHAR(255) PATH '$.descripcion',
+                precio_unitario int path '$.precio_unitario',
+                precio_total int path '$.precio_total'
+            )) d
+            group by d.descripcion
+            order by g.fecha desc
+            """)
+
+        # Ejecución de la consulta y obtención de los resultados
+        results = db.session.execute(query).fetchall()
+        lista = []
+        for i in results:
+            lista.append(i[4])
+        print(lista)
+        extras = {"uno_uno":{},
+                  "uno_muchos":[{"tabla" : "detalle",
+                                 "input" : "descripcion",
+                                 "lista": lista} ,
+                                 {"tabla" : "detalle",
+                                 "input" : "cantidad",
+                                 "lista": [150,900,1500]} 
+                                 ] }
+        return render_template("components/base_form.html",form=form, prev="/api/gastos",extras=extras)
     elif request.method == 'POST':
         # Registrar
         try:
@@ -32,9 +62,9 @@ def crear_gasto():
             print("new entidad: ",new_entidad)
             db.session.add(new_entidad)
             db.session.commit() 
-            return jsonify(status=True,title='Exito', msg='Aplicacaion registrado exitosamente.')
+            return jsonify(status=True,title='Exito', msg=f'{dicc["entidad"]} registrado exitosamente.')
         except Exception as e:
-            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al registrar Aplicacaion. Error: {str(e)}')
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al registrar {dicc["entidad"]}. Error: {str(e)}')
 
 @api_bp.route('/gastos', methods=['GET'])
 @api_bp.route('/gastos/<int:id>', methods=['GET','DELETE','PUT'])
@@ -61,17 +91,21 @@ def gastos(id = None):
         if not id:
             # Enviar lista de riegos
             entidades = Gasto.query.filter_by(periodo_id=periodo_id).all()
-            #TEST GROUP BY DATA
-            data = Gasto.query \
+            # Obtener lista de descripciones de gastos
+            
+
+            # Consulta para obtener descripciones únicas
+            descripciones_unicas = Gasto.query \
                 .filter_by(periodo_id=periodo_id) \
-                .group_by(Gasto.tipo) \
-                .add_columns(Gasto.tipo, func.sum(Gasto.total).label("total_gasto_agrupado"))\
+                .group_by(Gasto.prov_empresa) \
                 .all()
-            print(f"(DATA): ",data)
+            for i in descripciones_unicas:
+                print("empresa: ",i.prov_empresa)
+            
             # END TEST
             entidades = [ item.to_json() for item in entidades ]
             print(f'|Idea: Mostrar lista {dicc["api"]}.')
-            print(f'|{dicc["api"]}: ',entidades)
+            #print(f'|{dicc["api"]}: ',entidades)
             return render_template('components/base_list.html',entidades=entidades,dicc=dicc,form=form)
     
         print("|Idea: Mostrar aplicaciones con datos.")
