@@ -44,7 +44,7 @@ a, a:hover, a:focus, a:active {
     border: 1px solid red;
     min-height: 100vh;
     margin-left: 270px; /* Ajustar según el ancho de la barra lateral y el margen */
-    overflow-x: scroll;
+    overflow-x: hidden;
 }
 @media (max-width: 992px) {
     .contenido-principal {
@@ -62,7 +62,8 @@ a, a:hover, a:focus, a:active {
     border: 1px solid purple;
     margin: 2px 2px;
     flex-grow: 1;
-    overflow: scroll;
+    overflow-y: hidden;
+    
 }
 /* test toast */
 #test-toast{

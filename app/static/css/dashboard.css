@@ -37,3 +37,11 @@
     font-weight: 500;
   }
   
+  #base_form{
+    /* border: 1px solid orange; */
+    overflow-x: hidden;
+  }
+
+  #base_form table{
+    border: 1px solid blue;
+  }

@@ -66,6 +66,9 @@ class Gasto_Form(FlaskForm):
              "onchange":{"target":"precio_total",
                           "result":["cantidad","*","precio_unitario"]}},
             {"name":"precio_total", "type":"number","default":0},
+            {"name":"tipo", "type":"text" ,
+             "choices":["HERRAMIENTA","MATERIAL","FERTILIZANTE","CONTROL-PLAGAS","MANTENCION-AUTOMOTRIZ","ALIMENTACION"]
+            }
         ],
         
     }}

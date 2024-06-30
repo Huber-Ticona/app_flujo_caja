@@ -41,15 +41,26 @@ def crear_gasto():
         for i in results:
             lista.append(i[4])
         print(lista)
-        extras = {"uno_uno":{},
-                  "uno_muchos":[{"tabla" : "detalle",
-                                 "input" : "descripcion",
-                                 "lista": lista} ,
-                                 {"tabla" : "detalle",
-                                 "input" : "cantidad",
-                                 "lista": [150,900,1500]} 
-                                 ] }
-        return render_template("components/base_form.html",form=form, prev="/api/gastos",extras=extras)
+
+        # Consulta para obtener descripciones únicas
+        descripciones_unicas = Gasto.query \
+            .filter_by(periodo_id=session["periodo_id"]) \
+            .group_by(Gasto.prov_empresa) \
+            .all()
+        lista_empresa = []
+        for i in descripciones_unicas:
+            lista_empresa.append(i.prov_empresa)
+            print("empresa: ",i.prov_empresa)
+
+        dicc["extras"] = {
+            "uno_uno": {"prov_empresa": lista_empresa,
+                        "prov_folio": [500, 2000, 7500]
+                        },
+            "uno_muchos": {
+                "detalle": {"descripcion": lista,
+                            "cantidad": [9, 99, 999]}
+            }}
+        return render_template("components/base_form.html",form=form, prev="/api/gastos",dicc=dicc)
     elif request.method == 'POST':
         # Registrar
         try:
@@ -91,24 +102,12 @@ def gastos(id = None):
         if not id:
             # Enviar lista de riegos
             entidades = Gasto.query.filter_by(periodo_id=periodo_id).all()
-            # Obtener lista de descripciones de gastos
-            
-
-            # Consulta para obtener descripciones únicas
-            descripciones_unicas = Gasto.query \
-                .filter_by(periodo_id=periodo_id) \
-                .group_by(Gasto.prov_empresa) \
-                .all()
-            for i in descripciones_unicas:
-                print("empresa: ",i.prov_empresa)
-            
-            # END TEST
             entidades = [ item.to_json() for item in entidades ]
             print(f'|Idea: Mostrar lista {dicc["api"]}.')
             #print(f'|{dicc["api"]}: ',entidades)
             return render_template('components/base_list.html',entidades=entidades,dicc=dicc,form=form)
     
-        print("|Idea: Mostrar aplicaciones con datos.")
+        print("|Idea: Mostrar Gastos con datos.")
         entidad = Gasto.query.filter_by(id=id).first()
         print(f'|{dicc["api"]}: {entidad}')
 
@@ -369,6 +368,29 @@ def crear_aplicaciones():
         form.fecha.default = fecha
         form.periodo_id.default = session['periodo_id']
         form.process()
+        query = text("""
+        SELECT l.id,l.fecha ,l.lugar, l.nave ,l.comentario, d.*,
+            CASE
+            WHEN d.unidad_de_total IN ('kilogramo (KG)', 'Litro (LTS)') THEN d.total_aplicado
+            WHEN d.unidad_de_total = 'Mili-litro (ML)' THEN d.total_aplicado / 1000
+            WHEN d.unidad_de_total = 'Mili-gramo (MG)' THEN d.total_aplicado / 1000
+            ELSE NULL
+            END AS total_kg_lt
+        FROM aplicacion l
+        CROSS JOIN JSON_TABLE(l.detalle, '$[*]' COLUMNS (
+            insumo VARCHAR(255) PATH '$.insumo',
+            total_aplicado float PATH '$.total_aplicado',
+            unidad_de_total varchar(255) PATH '$.unidad_de_total'
+)) d
+                     GROUP BY d.insumo
+        """)
+
+        # Ejecución de la consulta y obtención de los resultados
+        results = db.session.execute(query).fetchall()
+        lista = []
+        for i in results:
+            lista.append(i[5])
+        print(lista)
         return render_template("components/base_form.html",form=form,prev="/api/aplicaciones",dicc=dicc)
     elif request.method == 'POST':
         # Registrar Trabajador
