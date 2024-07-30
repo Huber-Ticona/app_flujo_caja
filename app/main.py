@@ -29,7 +29,7 @@ def empresa(id=None):
     periodos = Periodo.query.filter_by(empresa_id=id).all()
 
     print(f"******** EMPRESA: {id} *********")
-    print(f'Empresa: {empresa} | nombre: {empresa.nombre_empresa}')
+    print(f'Empresa: {empresa} | nombre: {empresa.nombre_empresa} | rubro: {empresa.rubro_empresa}')
     print('Periodos: ', periodos)
     print(f"*****************")
     return render_template('empresa.html', periodos=periodos, id=id,empresa=empresa)
@@ -178,9 +178,86 @@ def crear_periodo(id=None):
 
     return render_template('crear_periodo.html', form=form)
 
+
+@main_bp.route('/empresa/<int:id>/crear-parametros', methods=['GET', 'POST'])
+@login_required
+def crear_parametro(id=None):
+    if request.method == 'POST':
+        dato = request.get_json()
+        print("Dato: ",dato)
+        empresa = Empresa.query.filter_by(empresa_id=id).first()
+        print(f'Empresa: {empresa} | nombre: {empresa.nombre_empresa} | rubro: {empresa.rubro_empresa}')
+        print("|Parametros: ",empresa.parametros)
+
+        if empresa.parametros == None:
+            print("No existen parametros. -> Se procede a registrar.")
+            empresa.parametros = {} 
+
+        print("existe parametros. > se agrega nuevo parametros.")
+
+        new_parametros = {}
+        for key,value in empresa.parametros.items():
+            print(f"key:{key} | val: {value}")
+            new_parametros[key] = value
+
+        if dato['tipo'] == 'lista':
+            new_parametros[dato['nombre']] = {"tipo": "lista",
+                                                "valor": []}
+        elif dato['tipo'] == 'constante':
+            new_parametros[dato['nombre']] = {"tipo": "constante",
+                                                "valor": 0}
+        else: 
+            print("|Tipo de parametro no autorizado.")
+
+        print("|New parametros: ", new_parametros)
+        
+        empresa.parametros = new_parametros
+        db.session.commit()
+        return jsonify(exito=True ,msg = "exito bro")
+    
+
+@main_bp.route('/empresa/<int:id>/parametros', methods=['GET', 'POST'])
+@login_required
+def parametros(id=None):
+    if request.method == 'POST':
+        print("args",request.args)
+        empresa = Empresa.query.filter_by(empresa_id=id).first()
+        print(f'Empresa: {empresa} | nombre: {empresa.nombre_empresa} | rubro: {empresa.rubro_empresa}')
+        print("|Parametros: ",empresa.parametros)
+        print("key: ",request.args.get('key'))
+        print("|new value: ", request.args.get('new_value'))
+        new_key = request.args.get('key')
+        new_value = request.args.get('new_value')
+        if not new_value or not new_key:
+            print("Key no ingresada")
+            return jsonify(exito=False , msg=True)
+        
+        if not new_key in empresa.parametros:
+            print("key no existe en parametros.")
+        
+        new_parametros = dict(empresa.parametros)
+        
+        if new_parametros[new_key]['tipo'] == 'lista':
+            print(f"Agregando {new_value} a value key: {new_key}")
+            new_parametros[new_key]['valor'].append(new_value)
+            
+        
+        dicc = {"parametros" : new_parametros}
+        print("|Final parametros: ", new_parametros)
+        #empresa.update_from_dict(dicc)
+        
+        
+        empresa.parametros = {}
+        db.session.commit()
+        print("|Final empresa.parametros: ", empresa.parametros)
+        empresa.parametros = new_parametros
+        db.session.commit()
+        return jsonify(exito=True , msg=True)
+        
+    
+    
+    
 # Liquidacion
-
-
 @main_bp.route('/liquidacion', methods=['POST'])
 @login_required
 def liquidacion():

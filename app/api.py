@@ -1,15 +1,17 @@
 from flask import Blueprint,render_template,request,redirect,url_for,jsonify,session,Response,abort,flash
 from flask_login import login_required
 from .forms import Empleado_form,Aplicacion_form,Riego_form,Gasto_Form,PagoPersonal_form,RegistroLaboral_form,Embarque_form
-from .models import Gasto,Riego,Empleado,Aplicacion,PagoPersonal,RegistroLaboral,Embarque
+from .models import Gasto,Riego,Empleado,Aplicacion,PagoPersonal,RegistroLaboral,Embarque,Empresa
 from .extensions import model_to_dict2,db,convertir_form_a_dict,establecer_valores_por_defecto_formulario,sanitize_json
 from datetime import datetime
 import json
 import requests
 from sqlalchemy import func,text, column,select, literal_column,JSON,cast,String,Integer
 from sqlalchemy.orm import aliased
-
+from .cosecha import cosecha_bp
 api_bp = Blueprint('api_bp' , __name__,template_folder='templates',static_folder='static')
+
+api_bp.register_blueprint(cosecha_bp)
 
 """ Api gastos """
 @api_bp.route('/gastos/registrar', methods=['GET', 'POST'])
@@ -25,11 +27,7 @@ def crear_gasto():
             SELECT g.fecha,g.prov_empresa, d.* 
             FROM gasto g 
             CROSS JOIN JSON_TABLE(g.detalle, '$[*]' COLUMNS(
-                unidad varchar(255) path '$.unidad',
-                cantidad int path '$.cantidad',
-                descripcion VARCHAR(255) PATH '$.descripcion',
-                precio_unitario int path '$.precio_unitario',
-                precio_total int path '$.precio_total'
+                descripcion VARCHAR(255) PATH '$.descripcion'
             )) d
             group by d.descripcion
             order by g.fecha desc
@@ -37,9 +35,10 @@ def crear_gasto():
 
         # Ejecución de la consulta y obtención de los resultados
         results = db.session.execute(query).fetchall()
+        print("Results: ",results)
         lista = []
         for i in results:
-            lista.append(i[4])
+            lista.append(i[2])
         print(lista)
 
         # Consulta para obtener descripciones únicas
@@ -52,7 +51,7 @@ def crear_gasto():
             lista_empresa.append(i.prov_empresa)
             print("empresa: ",i.prov_empresa)
 
-        dicc["extras"] = {
+        dicc["completer"] = {
             "uno_uno": {"prov_empresa": lista_empresa,
                         "prov_folio": [500, 2000, 7500]
                         },
@@ -153,17 +152,32 @@ def gastos(id = None):
 @api_bp.route('/riegos/registrar', methods=['GET','POST'])
 @login_required
 def crear_riego():
+    dicc = {}
     if request.method =='GET':
         print("|Idea: Mostrar RIEGO_FORM.")
+        empresa_id = session["empresa_id"]
+        empresa = Empresa.query.filter_by(empresa_id=empresa_id).first()
+        print("empresa param: ", empresa.parametros)
         periodo_id = session["periodo_id"]
         fecha = datetime.now().date()
         print("|fecha: ",fecha)
         form = Riego_form()
-        fecha = datetime.now()
-        form.fecha.default = fecha
+        print("|form type: ", type(form))
+        print("|form fields: ", form._fields)
+        print("-"*20)
+        for key,value in empresa.parametros.items():
+            print(f"|param| key: {key} - value: {value}")
+            if key in form._fields:
+                print(f"|KEY: {key} in form.")
+                form[key].choices = value['valor'] # Se pasa el valor del parametro. Tipo Lista en su mayoria. 
+            print("-"*20)
+            
+        
+        print("-"*20)
+
         form.periodo_id.default = periodo_id
         form.process()
-        return render_template("components/base_form.html",form=form,prev="/api/riegos")
+        return render_template("components/base_form.html",form=form,prev="/api/riegos",dicc=dicc)
     if request.method =='POST':
         # Registrar Riego
         try:
@@ -252,6 +266,11 @@ def riego(riego_id = None):
 @api_bp.route('/trabajadores/registrar', methods=['GET', 'POST'])
 @login_required
 def crear_trabajadores():
+    dicc = {
+        "entidad" : "Trabajador",
+        "api":"Trabajadores",
+        "url_api":"/api/trabajadores"
+        }
     if request.method == 'GET':
         print("GET, enviando formulario")
         model_form = model_to_dict2(Empleado)
@@ -260,7 +279,7 @@ def crear_trabajadores():
         form = Empleado_form()
         form.empresa_id.default = empresa_id
         form.process()
-        return render_template("components/base_form.html",form=form,prev="/api/trabajadores")
+        return render_template("components/base_form.html",form=form,prev="/api/trabajadores",dicc=dicc)
     elif request.method == 'POST':
         # Registrar Trabajador
         try:
@@ -369,28 +388,24 @@ def crear_aplicaciones():
         form.periodo_id.default = session['periodo_id']
         form.process()
         query = text("""
-        SELECT l.id,l.fecha ,l.lugar, l.nave ,l.comentario, d.*,
-            CASE
-            WHEN d.unidad_de_total IN ('kilogramo (KG)', 'Litro (LTS)') THEN d.total_aplicado
-            WHEN d.unidad_de_total = 'Mili-litro (ML)' THEN d.total_aplicado / 1000
-            WHEN d.unidad_de_total = 'Mili-gramo (MG)' THEN d.total_aplicado / 1000
-            ELSE NULL
-            END AS total_kg_lt
-        FROM aplicacion l
-        CROSS JOIN JSON_TABLE(l.detalle, '$[*]' COLUMNS (
-            insumo VARCHAR(255) PATH '$.insumo',
-            total_aplicado float PATH '$.total_aplicado',
-            unidad_de_total varchar(255) PATH '$.unidad_de_total'
-)) d
-                     GROUP BY d.insumo
-        """)
+            SELECT l.fecha ,l.lugar, l.nave , d.*
+            FROM aplicacion l
+            CROSS JOIN JSON_TABLE(l.detalle, '$[*]' COLUMNS (
+                insumo VARCHAR(255) PATH '$.insumo'
+            )) d
+            GROUP BY d.insumo
+            """)
 
         # Ejecución de la consulta y obtención de los resultados
         results = db.session.execute(query).fetchall()
         lista = []
         for i in results:
-            lista.append(i[5])
+            lista.append(i[3])
         print(lista)
+        dicc["completer"] = {
+            "uno_muchos": {
+                "detalle": {"insumo": lista,}
+            }}
         return render_template("components/base_form.html",form=form,prev="/api/aplicaciones",dicc=dicc)
     elif request.method == 'POST':
         # Registrar Trabajador

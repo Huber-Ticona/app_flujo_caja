@@ -41,8 +41,12 @@ class Empresa(db.Model):
     empresa_id = db.Column(db.Integer, primary_key=True)
     nombre_empresa = db.Column(db.String(255))
     rubro_empresa = db.Column(db.String(255))
+    parametros = db.Column(db.JSON, nullable=False) #{ "ID_PARAM" : {"NOMBRE" : "HORTALIZAS","TIPO":"(lista,constante,json)" ,"VALOR": []}}
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.usuario_id'))
-
+    def update_from_dict(self, data):
+        for key, value in data.items():
+            print(f"|MODEL| Key : {key} -> value: {value} |actualizado")
+            setattr(self, key, value)
 
 
 class Periodo(db.Model):
@@ -106,12 +110,11 @@ class Gasto(db.Model):
     prov_documento = db.Column(db.String(50), nullable=True)
     prov_folio = db.Column(db.Integer, nullable=True)
 
-    tipo = db.Column(db.String(255), nullable=False) # Tipo de gasto
-    detalle = db.Column(db.JSON, nullable=False) # Tipo de gasto (descripcion,cantidad,unidad,precio,etc)
-    total = db.Column(db.Integer, nullable=False) # Tipo de gasto
-    comentario =  db.Column(db.String(255), nullable=True) # Tipo de gasto
+    detalle = db.Column(db.JSON, nullable=False) # (descripcion,cantidad,unidad,precio,tipo_gasto)
+    total = db.Column(db.Integer, nullable=False) # 
+    comentario =  db.Column(db.String(255), nullable=True) # 
     # Foreaneas
-    periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto
+    periodo_id = db.Column(db.Integer, nullable=False) #
     def to_json(self):
         return {
             'id': self.id,
@@ -119,7 +122,6 @@ class Gasto(db.Model):
             'prov_empresa': self.prov_empresa,
             'prov_documento': self.prov_documento,
             'prov_folio': self.prov_folio,
-            'tipo': self.tipo,
             'detalle': self.detalle,
             'total': self.total,
             'comentario': self.comentario,
@@ -189,6 +191,12 @@ class Empleado(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fecha_ingreso = db.Column(db.DateTime, nullable=True)
     fecha_retiro = db.Column(db.DateTime, nullable=True)
+    
+    """ Pendiente (quisas) """
+    """ nombres = db.Column(db.String(100), nullable=False)
+    apellidos = db.Column(db.String(100), nullable=False)
+    telefono = db.Column(db.Integer, nullable=True) """
+
     detalle = db.Column(db.JSON, nullable=False) #{ nombre , apellido, telefono,estado(activo,inactivo),etc}
     empresa_id = db.Column(db.Integer, nullable=False) # Tipo de gasto
     def update_from_dict(self, data):
@@ -238,6 +246,40 @@ class RegistroLaboral(db.Model):
             'detalle': self.detalle,
             'periodo_id': self.periodo_id
         }
+
+
+
+class Cosecha(db.Model):
+    __tablename__ = 'cosecha'
+    id = db.Column(db.Integer, primary_key=True) 
+    fecha = db.Column(db.DateTime, nullable=False)
+    lugar = db.Column(db.String(100), nullable=False)
+    nave = db.Column(db.String(100), nullable=False)
+
+    detalle_totales = db.Column(db.JSON, nullable=False ) #(total_terrreno,total_procesado,unidad, hortaliza)
+    detalle = db.Column(db.JSON, nullable=False ) #(calibre,cantidad)
+    transporte = db.Column(db.JSON, nullable=False ) #(vehiculo,cantidad)
+
+    extra = db.Column(db.JSON, nullable=False ) #anotaciones
+    periodo_id = db.Column(db.Integer, nullable=False)
+
+    extra2 = [[1,2,3] , ["hola","mundo"] , {"grafico" : 'fecha'}]
+
+    def update_from_dict(self, data):
+        for key, value in data.items():
+            setattr(self, key, value)
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'fecha': self.fecha,
+            'lugar': self.lugar,
+            'nave':self.nave,
+            'detalle': self.detalle,
+            'periodo_id': self.periodo_id
+        }
+
+
 
 
 

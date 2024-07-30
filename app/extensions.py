@@ -47,7 +47,33 @@ def establecer_valores_por_defecto_formulario(formulario, modelo):
             campo.process_data(campo.default)
         else:
             print(f"-> Campo: {campo} NO pertenece a la entidad: * |Defecto: {valor_por_defecto}")
-
+def establecer_choices_en_form(form,parametros):
+    print("(EXTENSIONS): Establecer choices en form")
+    print("|Parametros: ", parametros.keys())
+    print("-"*10 +" Rellenando choices on SelectField START "+ "-"*10)
+    for key,value in parametros.items():
+        print(f"|param| key: {key} - value: {value}")
+        if key in form._fields:
+            print(f"|KEY: {key} in Form SelectField -> Se añaden choices.")
+            form[key].choices = value['valor'] # Se pasa el valor del parametro. Tipo Lista en su mayoria. 
+    print("-"*10 +" Rellenando choices on SelectField END "+ "-"*10)
+    print("-"*10 +" Rellenando choices on HiddenInput JSON START "+ "-"*10)
+    for key,value in form.tablas.items():
+        print(f"|Tabla: {key} | {value['relacion']}")
+        if value['relacion'] == 'muchos':
+            for input in value['inputs']:
+                try:
+                    
+                    #if input['name'] in  empresa.parametros: Si en nombre es el mismo que la lista en parametros.
+                    choices = parametros[input['choice_list_name']] #Se asigna en base al nombre definido en choice_list_name.
+                    print(f"|input|{input['name']} - choices: {input['choice_list_name']} -> {choices['valor']}")
+                    input['choices'] = choices['valor']
+                except KeyError:
+                    #print(f"|input|{input['name']} - (no choice name OR no name input in parametros)")
+                    pass
+            print("|"+ "-"*20)
+    
+    print("-"*10 +" Rellenando choices on HiddenInput JSON END "+ "-"*10)
 def convertir_form_a_dict(request_form,form_tablas):
     new_data = {}
     for key, value in request_form.items():

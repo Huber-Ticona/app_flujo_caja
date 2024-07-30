@@ -16,8 +16,8 @@
             {{ field(class="form-control" , list="list-" + field.name)}}
 
             <datalist id="list-{{field.name}}">
-                {%if dicc['extras'] %}
-                {% for val in dicc['extras']['uno_uno'][field.name] %}
+                {%if dicc['completer'] and dicc['completer']['uno_uno']%}
+                {% for val in dicc['completer']['uno_uno'][field.name] %}
                         <option value="{{val}}">
                 {%endfor%}
                 {%endif%}
@@ -72,8 +72,9 @@
                         {%endfor%}
                     {%elif form.tablas[field.name].relacion == 'muchos'%}
                     <!-- uno-muchos -->
-                    
+                    <br>
                     <div class="text-center border border-sm m-3">
+                        <h6 >{{form.tablas[field.name].titulo}}</h6>
                         <div class="table-responsive">
                             <table id="tabla-{{field.name}}" class="table">
                                 <thead>
@@ -247,8 +248,8 @@ $('#base_form').on('submit',function(){
                 <input list="list-{{input.name}}" type="{{input.type}}" class="form-control" name="" id={{input.name}}-`+ (numeroDeFilas).toString() + `
                 value="{{-input.default-}}">
                 <datalist id="list-{{input.name}}">
-                    {%if dicc['extras'] and dicc['extras']['uno_muchos'][key] and dicc['extras']['uno_muchos'][key][input.name] %}
-                        {% for elemento in dicc['extras']['uno_muchos'][key][input.name] %}
+                    {%if dicc['completer'] and dicc['completer']['uno_muchos'][key] and dicc['completer']['uno_muchos'][key][input.name] %}
+                        {% for elemento in dicc['completer']['uno_muchos'][key][input.name] %}
                         <option value="{{elemento}}">
                         {%endfor%}
                     {%endif%}

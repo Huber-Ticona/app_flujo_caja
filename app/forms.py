@@ -32,12 +32,12 @@ class Crear_Periodo_Form(FlaskForm):
     prov_documento = db.Column(db.String(50), nullable=True)
     prov_folio = db.Column(db.Integer, nullable=True)
 
-    tipo = db.Column(db.String(255), nullable=False) # Tipo de gasto
     detalle = db.Column(db.JSON, nullable=False) # Tipo de gasto (descripcion,cantidad,unidad,precio,etc)
     total = db.Column(db.Integer, nullable=False) # Tipo de gasto
     comentario =  db.Column(db.String(255), nullable=True) # Tipo de gasto
     # Foreaneas
     periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto """
+
 class Gasto_Form(FlaskForm):
 
     fecha = DateTimeField('fecha', validators=[InputRequired()],default=datetime.now())
@@ -46,7 +46,6 @@ class Gasto_Form(FlaskForm):
     prov_empresa = StringField('prov_empresa')
     prov_documento = SelectField('prov_documento', choices=[('factura', 'Factura'), ('boleta', 'Boleta'), ('guia', 'Guia')])
     prov_folio = IntegerField('prov_folio',default=0)
-    tipo = SelectField('tipo', choices=[('HERRAMIENTA', 'HERRAMIENTA'), ('MATERIAL', 'MATERIAL'), ('FERTILIZANTE', 'FERTILIZANTE'), ('CONTROL-PLAGAS', 'CONTROL-PLAGAS'), ('MANTENCION-AUTOMOTRIZ','MANTENCION-AUTOMOTRIZ'), ('ALIMENTACION', 'ALIMENTACION')])
     detalle = HiddenField("detalle")
     total = IntegerField('total',validators=[InputRequired()],default=0)
     comentario = StringField('comentario') 
@@ -72,7 +71,7 @@ class Gasto_Form(FlaskForm):
         ],
         
     }}
-    show_in_table = ["fecha","tipo","total","detalle","prov_empresa","prov_documento","prov_folio","comentario"]
+    show_in_table = ["fecha","total","detalle","prov_empresa","prov_documento","prov_folio","comentario"]
 
 """ Riego form  class Riego(db.Model):
     __tablename__ = 'riego'
@@ -86,10 +85,14 @@ class Gasto_Form(FlaskForm):
     comentario = db.Column(db.String(255), nullable=True)
      # Foreaneas
     periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto """
+
+parcelas = ['Km 17 Parcela', 'Km 17 Olivo','Km 28 Sobraya']
+naves = ['Nave 1','Nave 2','Nave 3','Nave 1 y 2','Nave 2 y 3','Nave 1 y 3','Nave 1, 2 y 3']
+
 class Riego_form(FlaskForm):
-    fecha = DateTimeField('fecha', validators=[InputRequired()])
-    lugar = SelectField('lugar', choices=[('Km 17 Parcela', 'Km 17 Parcela'), ('Km 17 Olivo', 'Km 17 Olivo'), ('Km 28 Sobraya', 'Km 28 Sobraya')])
-    nave = SelectField('nave', choices=[('Nave 1', 'Nave 1'), ('Nave 2', 'Nave 2'), ('Nave 3', 'Nave 3')])
+    fecha = DateTimeField('fecha', validators=[InputRequired()],default=datetime.now())
+    lugar = SelectField('lugar')
+    nave = SelectField('nave')
     minutos = IntegerField('minutos',default=30)
     regador = StringField('regador')
 
@@ -115,12 +118,13 @@ class Riego_form(FlaskForm):
     comentario = db.Column(db.String(255), nullable=False)
      # Foreaneas
     periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto"""
+
+
 class Aplicacion_form(FlaskForm):
 
     fecha = DateTimeField('fecha', validators=[InputRequired()])
-    lugar = SelectField('lugar', choices=[('Km 17 Parcela', 'Km 17 Parcela'), ('Km 17 Olivo', 'Km 17 Olivo'), ('Km 28 Sobraya', 'Km 28 Sobraya')])
-    nave = SelectField('nave', choices=[('Nave 1', 'Nave 1'), ('Nave 2', 'Nave 2'), ('Nave 3', 'Nave 3'), 
-                                        ('Nave 1 y 2', 'Nave 1 y 2'), ('Nave 2 y 3', 'Nave 2 y 3'), ('Nave 1 y 3', 'Nave 1 y 3')])
+    lugar = SelectField('lugar', choices=[(item, item) for item in parcelas])
+    nave = SelectField('nave', choices=[(item, item) for item in naves])
     
     detalle = HiddenField("detalle")
 
@@ -247,7 +251,7 @@ class Embarque_form(FlaskForm):
                 "field": "detalle",
                 "inputs" : [
                     {"name":"parcela", "type":"text",
-                     "choices":["Km 17 Parcela","Km 17 Olivo","Km 28 Sobraya" ]
+                     "choices":parcelas
                      },
                     {"name":"nave", "type":"text",
                      "choices":["1","2","3" ]
@@ -279,3 +283,77 @@ class Embarque_form(FlaskForm):
             } ,
             }
     show_in_table = ["detalle","detalle_totales","extra"]
+
+
+
+unidad_de_comercio = ["GAMELA (18KG)"]
+hortalizas = ["Tomate Bola","Tomate Cherry"]
+class Cosecha_form(FlaskForm):
+
+    fecha = DateTimeField('fecha', validators=[InputRequired()], default=datetime.now())
+    lugar = SelectField('lugar')
+    nave = SelectField('nave')
+
+    detalle_totales = HiddenField("detalle_totales")
+    detalle = HiddenField("detalle")
+    transporte = HiddenField("transporte")
+    extra = HiddenField("extra")
+
+    # Foreaneas
+    periodo_id =HiddenField('periodo_id') # Tipo de gasto
+    endpoint = "/api/cosechas"
+    tablas = {
+        "detalle_totales":{
+            "titulo":"Cosecha total a granel",
+            "relacion":"muchos",
+            "field": "detalle_totales",
+            "inputs":[
+                {"name":"hortaliza", "type":"text" , "choice_list_name":"hortaliza"},
+                {"name":"unidad", "type":"text", "choice_list_name":"unidad_de_comercio"},
+                {"name":"total_terreno", "type":"number"},
+                {"name":"total_procesado", "type":"number"}
+            ]
+        },
+        "detalle": {
+            "titulo": "Proceso/Seleccion",
+            "relacion": "muchos",
+            "field": "detalle",
+            "inputs": [
+                {"name": "hortaliza", "type": "text",
+                 "choice_list_name":"hortaliza"},
+                {"name": "calibre", "type": "text"},
+                {"name": "unidad", "type": "text",
+                 "choice_list_name":"unidad_de_comercio"},
+                {"name": "cantidad", "type": "number"}]
+        },
+        "transporte": {
+            "titulo": "Transporte a packing",
+            "relacion": "muchos",
+            "field": "transporte",
+            "inputs" : [
+                {"name":"vehiculo", "type": "text","choice_list_name":"vehiculo"},
+                {"name":"nro_gamelas", "type": "number"},
+            ]
+        },
+        "extra":{
+            "relacion":"uno",
+            "field":"extra",
+            "inputs":[
+                {"name" : "comentario" , "type":"text"}
+            ]
+        }
+    }
+    show_in_table = ["fecha"]
+
+class Embarque_form2(FlaskForm):
+    x =  0
+    detalle = HiddenField("detalle")
+    tablas = {
+        "detalle": {
+            "relacion": "muchos",
+            "field": "detalle",
+            "inputs": [
+                {"name":"calibre", "type": "text"}
+            ]
+        }
+    }

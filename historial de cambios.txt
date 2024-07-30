@@ -5,3 +5,13 @@ version 1.0.2 27-06-2024
 
 version 1.0.3 30-06-2024
 - fix scrolles en dashboard mediante overflow y table-responsive.
+
+version 1.0.4 23-07-2024
+- Se añadio la entidad Cosecha.
+- Se añadio campo parametros a empresa.
+- Se añadio la funcion establecer_choices_en_form la cual recibe el form y los parametros de empresa.
+  Esta funcion toma los valores (lista) de cada clave en parametros(json) de la empresa y comienza a analisar 
+  los campos Selectfield y los form.tablas(Hiddenfield). Para selectfield se añade automaticamente los valores
+  y para form.tablas se usa el valor choice_list_name para obtener el valor del parametros en empresa. 
+- Se elimino el campo tipo(gasto) de la entidad Gasto y Gasto_form. Ahora el tipo(gasto) se añade en descripcion.
+- Se corrigio el error que impedia ver empleados y registrarlos.

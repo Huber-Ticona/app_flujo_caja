@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block contenido %}
-<div class="container-fluid">
+<div class="d-flex">
     <div class="contenedor-años" style="width:200px">
         <button class="btn btn-secondary">Volver</button>
         <p>Años</p>
@@ -18,16 +18,121 @@
             {% endfor %}
             {%endif%}
         </ul>
+        <a href="/empresa/{{id}}/crear-periodo" class="btn btn-secondary">Añadir Periodo</a>
     </div>
 
 
-<div class="dashboard-contenido" id="dashboard-contenido">
-    <div class="row">
-        <div class="col">
-            <a href="/empresa/{{id}}/crear-periodo" class="btn btn-secondary">Añadir Periodo</a>
+    <div class="dashboard-contenido" id="dashboard-contenido">
+        <div class="row">
+            <div class="col">
+                <h5>Parametros</h5>
+                <div>
+                    <label for="nombre">nombre</label>
+                <input type="text" name="nombre" id="nombre">
+                </div>
+                <div>
+                    <label for="tipo">tipo</label>
+                <select name="tipo" id="tipo">
+                    <option value="lista">lista</option>
+                    <option value="constante">constante</option>
+                    <option value="err">err</option>
+                </select>
+                </div>
+                
+                <button id="add_parametro">Anadir nuevo parametro</button>
+                <hr class="hr">
+                <table class="table">
+                    <thead>
+                        <th>nombre</th>
+                        <th>tipo</th>
+                        <th>valor</th>
+                        <th>edit</th>
+                    </thead>
+                    <tbody>
+                       
+                        {% for key,value in empresa.parametros.items()%}
+                        <tr>
+                            <td>{{key}}</td> 
+                            <td>{{value.tipo}}</td>
+                            <td><div class="m-1" style="border: 1px solid green;">{{value.valor}}</div>
+                                <div class="m-1" id="{{key}}" style="display:none;border: 1px solid red;">
+                                    <label for="">Nuevo valor:</label>
+                                    <input type="text" name="new_value" id="{{key}}_new_value">
+                                    <button class="add_key_value" data-key="{{key}}">add</button>
+                                </div>
+                            </td>
+                            <td><button class="edit_key_value" data-tipo="{{value.tipo}}" data-key="{{key}}">edit {{key}}</button></td>
+                            
+                        </tr>
+                        {%endfor%}
+                        
+                        
+                    </tbody>
+                </table>
+                
+
+            </div>
         </div>
     </div>
 </div>
-</div>
+<script>
+    $(".edit_key_value").click(function(){
+        let key = $(this).data("key")
+        let tipo = $(this).data("tipo")
+        $("#"+key).css("display","block")
+        console.log("editando key "+ key +" tipo: " + tipo + "")
+    })
 
+    $(".add_key_value").click(function(){
+        let key = $(this).data("key")
+        let new_value = $("#"+key+"_new_value").val()
+        
+        $.ajax({
+            type: "POST",
+            url: `/empresa/{{id}}/parametros?key=${key}&new_value=${new_value}`,
+            success: function (res) {
+                if (res.exito) {
+                    console.log(res.msg);
+                    toastr.success(res.msg, res.title, { timeOut: 3000 });
+                } else {
+                    console.log(res.msg);
+                    toastr.error(res.msg, res.title, { timeOut: 3000 });
+                }
+            },
+            
+        });
+        console.log("registrando nuevo valor: " + new_value)
+    })
+
+    $("#add_parametro").click(function(){
+
+        let nombre = $("#nombre").val()
+        let tipo = $("#tipo").val()
+        data = {
+            nombre: nombre,
+            tipo:tipo
+        }
+        data = JSON.stringify(data);
+        console.log("data stringfy", data);
+
+        $.ajax({
+            type: "POST",
+            url: "/empresa/{{id}}/crear-parametros",
+            contentType: "application/json; charset=utf-8",
+            data: data,
+            success: function (res) {
+                if (res.exito) {
+                    console.log(res.msg);
+                    toastr.success(res.msg, res.title, { timeOut: 3000 });
+                } else {
+                    console.log(res.msg);
+                    toastr.error(res.msg, res.title, { timeOut: 3000 });
+                }
+            },
+            
+        });
+        console.log(`Añadiendo...\n Nombre: ${nombre}\nTipo:${tipo}`)
+    })
+    
+</script>
 {% endblock %}
