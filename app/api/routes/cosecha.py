@@ -1,9 +1,9 @@
 from flask import Blueprint,jsonify,request,render_template,session
 from flask_login import login_required
-from .extensions import model_to_dict2,db,convertir_form_a_dict,establecer_valores_por_defecto_formulario,sanitize_json,establecer_choices_en_form
-from .forms import Cosecha_form
-from .models import Cosecha,Empresa
-
+from ...extensions import model_to_dict2,db,convertir_form_a_dict,establecer_valores_por_defecto_formulario,sanitize_json,establecer_choices_en_form
+from ...forms import Cosecha_form
+from ...models import Cosecha,Empresa
+from sqlalchemy import func,text
 cosecha_bp = Blueprint('cosecha_bp', __name__)  # Define a Blueprint for person routes
 
 """ Api cosechas """
@@ -24,8 +24,27 @@ def crear_gasto():
         empresa = Empresa.query.filter_by(empresa_id=session["empresa_id"]).first()
         establecer_choices_en_form(form, empresa.parametros)
         form.process()
+        query = text("""SELECT c.periodo_id,c.id,c.fecha, d.* 
+        FROM cosecha c 
+        CROSS JOIN JSON_TABLE(c.detalle, '$[*]' COLUMNS(
+            hortaliza varchar(255) path '$.hortaliza',
+            calibre varchar(255) path '$.calibre'
+        )) d
+        group by calibre
+        order by c.fecha desc
+        """)
+        # Ejecución de la consulta y obtención de los resultados
+        results = db.session.execute(query).fetchall()
+        lista = []
+        for i in results:
+            lista.append(i[4])
+        print(lista)
+        dicc["completer"] = {
+            "uno_muchos": {
+                "detalle": {"calibre": lista,}
+            }}
         print("-"*20 +f" {request.method} {request.path} END "+ "-"*20)
-        return render_template("components/base_form.html",form=form, prev="/api/cosechas",dicc=dicc)
+        return render_template("components/base_form.html",form=form, prev=dicc["url_api"],dicc=dicc)
     elif request.method == 'POST':
         # Registrar
         try:
@@ -76,7 +95,7 @@ def cosechas(id = None):
         establecer_valores_por_defecto_formulario(form,entidad)
         #print("|empleado detalle: ",empleado.detalle)
         # Obtener lista de riego o aplicar filtros según sea necesario
-        return render_template('components/base_form.html',form=form,entidad=entidad,dicc=dicc)
+        return render_template('components/base_form.html',form=form,entidad=entidad,dicc=dicc,prev=dicc["url_api"])
     
     if request.method == 'PUT':
         try:

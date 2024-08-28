@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, jsonify, session, json
 from flask_login import login_required, current_user
-from .extensions import convertir_fecha, db
+from .extensions import convertir_fecha, db ,cache
 from flask_minify import decorators as minify_decorators
 from html import escape
 
@@ -27,7 +27,8 @@ def empresa(id=None):
     session['empresa_id'] = id
     empresa = Empresa.query.filter_by(empresa_id=id).first()
     periodos = Periodo.query.filter_by(empresa_id=id).all()
-
+    
+    session["empresa_parametros"] = empresa.parametros
     print(f"******** EMPRESA: {id} *********")
     print(f'Empresa: {empresa} | nombre: {empresa.nombre_empresa} | rubro: {empresa.rubro_empresa}')
     print('Periodos: ', periodos)
@@ -37,14 +38,17 @@ def empresa(id=None):
 
 @main_bp.route('/empresa/<int:id>/<int:periodo_id>', methods=['GET'])
 @minify_decorators.minify(html=True, js=True, cssless=True)
+@cache.cached(timeout=10)
 @login_required
 def empresa_dashboard(id=None, periodo_id=None):
     session['periodo_id'] = periodo_id
+    parametros = session["empresa_parametros"]
     empresa = Empresa.query.filter_by(empresa_id=id).first()
-    
     periodo = Periodo.query.filter_by(periodo_id=periodo_id).first()
-
     print(f"******** EMPRESA: {id} | Periodo: {str(periodo)} *********")
+    print(" parametros type: ", type(parametros))
+    #print("cache empresa: ", empresa)
+    print(" parametros: ", parametros)
     print("DASHBOARD")
     print(f"*****************")
     return render_template('dashboard.html', id=id, periodo=periodo,empresa=empresa,periodo_id=periodo_id)
@@ -139,10 +143,12 @@ def crear_empresa():
         print('POST: CREANDO EMPRESA')
         nombre_empresa = escape(request.form.get('nombre_empresa'))
         rubro_empresa = escape(request.form.get('rubro_empresa'))
+        parametros = {}
         print('nombre:', nombre_empresa)
         print('rubro: ', rubro_empresa)
         # crear una nueva empresa y asociarla al usuario
         new_empresa = Empresa(nombre_empresa=nombre_empresa, rubro_empresa=rubro_empresa,
+                              parametros=parametros,
                               usuario_id=current_user.get_id())
         db.session.add(new_empresa)
         db.session.commit()
@@ -251,6 +257,7 @@ def parametros(id=None):
         db.session.commit()
         print("|Final empresa.parametros: ", empresa.parametros)
         empresa.parametros = new_parametros
+        session["empresa_parametros"] = empresa.parametros
         db.session.commit()
         return jsonify(exito=True , msg=True)
         

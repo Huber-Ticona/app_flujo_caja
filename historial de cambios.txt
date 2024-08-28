@@ -15,3 +15,9 @@ version 1.0.4 23-07-2024
   y para form.tablas se usa el valor choice_list_name para obtener el valor del parametros en empresa. 
 - Se elimino el campo tipo(gasto) de la entidad Gasto y Gasto_form. Ahora el tipo(gasto) se añade en descripcion.
 - Se corrigio el error que impedia ver empleados y registrarlos.
+
+version 1.0.5 28-08-2024
+- Se mejoro estructura -> api-rest 
+- Se agrego columna lugar , nave a visualizar en Cosecha.
+- Se agrego Qcmpleter a calibre de cosecha.
+- Se ALMACENo empresa.parametros en session.

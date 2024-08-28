@@ -15,6 +15,7 @@ class Crear_Empresa_Form(FlaskForm):
     nombre_empresa = StringField('nombre_empresa', validators=[
                                  InputRequired(), Length(min=4)])
     rubro_empresa = StringField('rubro_empresa')
+    parametros = HiddenField('parametros' , default= {})
 
 
 class Crear_Periodo_Form(FlaskForm):
@@ -122,9 +123,9 @@ class Riego_form(FlaskForm):
 
 class Aplicacion_form(FlaskForm):
 
-    fecha = DateTimeField('fecha', validators=[InputRequired()])
+    fecha = DateTimeField('fecha', validators=[InputRequired()],default=datetime.now())
     lugar = SelectField('lugar', choices=[(item, item) for item in parcelas])
-    nave = SelectField('nave', choices=[(item, item) for item in naves])
+    nave = SelectField('nave')
     
     detalle = HiddenField("detalle")
 
@@ -343,7 +344,7 @@ class Cosecha_form(FlaskForm):
             ]
         }
     }
-    show_in_table = ["fecha"]
+    show_in_table = ["fecha","lugar","nave"]
 
 class Embarque_form2(FlaskForm):
     x =  0

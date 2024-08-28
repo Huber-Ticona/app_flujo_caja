@@ -8,11 +8,12 @@ import bleach
 import datetime
 from sqlalchemy import inspect
 from html import escape
-
+from flask_caching import Cache
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 minify = Minify( passive=True)
+cache = Cache()
 csrf = CSRFProtect()
 
 

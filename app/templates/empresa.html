@@ -49,7 +49,7 @@
                         <th>edit</th>
                     </thead>
                     <tbody>
-                       
+                        {%if empresa.parametros %}
                         {% for key,value in empresa.parametros.items()%}
                         <tr>
                             <td>{{key}}</td> 
@@ -65,8 +65,7 @@
                             
                         </tr>
                         {%endfor%}
-                        
-                        
+                        {%endif%}
                     </tbody>
                 </table>
                 

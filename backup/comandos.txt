@@ -1,6 +1,6 @@
-mysql -u root -h localhost -p test_app_flujo < app_flujo_caja_2024-04-30.sql
+mysql -u root -h localhost -p test_app_flujo < app_flujo_caja_09-08-24.sql
 
-mysqldump -u root -p -h localhost app_flujo_caja > app_flujo_caja_2024-04-30.sql
+mysqldump -u root -p -h localhost app_flujo_caja > app_flujo_caja_09-08-24.sql
 
 journalctl -u admin_website.service -b
 journalctl -u new_website.service --since "2023-07-28" --until "2023-07-29"

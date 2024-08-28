@@ -282,5 +282,15 @@ class Cosecha(db.Model):
 
 
 
+class Movimiento(db.Model):
+    __tablename__ = 'movimiento'
+    id = db.Column(db.Integer, primary_key=True) 
+    fecha = db.Column(db.Date, nullable=False)
+    descripcion = db.Column(db.String(255))
+    canal_sucursal = db.Column(db.String(255))
+    cargo = db.Column(db.Integer)
+    abono = db.Column(db.Integer)
+    saldo = db.Column(db.Integer)
 
+    gasto_id = db.Column(db.Integer, nullable=True,default=0)
 
