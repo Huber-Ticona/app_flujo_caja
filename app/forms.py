@@ -287,8 +287,6 @@ class Embarque_form(FlaskForm):
 
 
 
-unidad_de_comercio = ["GAMELA (18KG)"]
-hortalizas = ["Tomate Bola","Tomate Cherry"]
 class Cosecha_form(FlaskForm):
 
     fecha = DateTimeField('fecha', validators=[InputRequired()], default=datetime.now())
@@ -344,7 +342,7 @@ class Cosecha_form(FlaskForm):
             ]
         }
     }
-    show_in_table = ["fecha","lugar","nave"]
+    show_in_table = ["fecha","lugar","nave","detalle_totales"]
 
 class Embarque_form2(FlaskForm):
     x =  0

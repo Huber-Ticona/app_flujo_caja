@@ -96,6 +96,8 @@ def aplicaciones(id = None):
     
         print(f"|Idea: Mostrar {dicc['entidad']} con datos.")
         entidad = Aplicacion.query.filter_by(id=id).first()
+        empresa_parametros = session["empresa_parametros"]
+        establecer_choices_en_form(form, empresa_parametros)
         print(f'|{dicc["entidad"]}: {entidad}')
 
         establecer_valores_por_defecto_formulario(form,entidad)

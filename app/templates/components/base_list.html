@@ -11,7 +11,9 @@
         <tr>
             <th>ID</th>
             {% for field in form if field.type != 'CSRFTokenField' %}
-            {%if field.name in form.show_in_table %}<th class="text-capitalize">{{field.id}}</th>{%endif%}
+                {%if field.name in form.show_in_table %}
+                <th class="text-capitalize">{{field.id}}</th>
+                {%endif%}
             {% endfor %}
             <th>Accion</th>
         </tr>
@@ -22,7 +24,12 @@
                     <td>{{entidad.id}}</td>
 
                     {%for key,value in entidad.items() if key in form.show_in_table %}
-                    <td>{{value}}</td>
+                    <td>{%if key == 'fecha' %} <!-- Format fecha -->
+                        {{value.strftime('%d-%m-%Y %H:%M:%S')}}
+                        {%else%}
+                        {{value}}
+                        {%endif%}
+                    </td>
                     {%endfor%}
                     <td>
                         <button class="btn bg-none rounded-circle border border-2"

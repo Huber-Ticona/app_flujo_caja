@@ -276,6 +276,9 @@ class Cosecha(db.Model):
             'lugar': self.lugar,
             'nave':self.nave,
             'detalle': self.detalle,
+            'detalle_totales': self.detalle_totales,
+            'transporte': self.transporte,
+            'extra': self.extra,
             'periodo_id': self.periodo_id
         }
 

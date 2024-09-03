@@ -21,3 +21,7 @@ version 1.0.5 28-08-2024
 - Se agrego columna lugar , nave a visualizar en Cosecha.
 - Se agrego Qcmpleter a calibre de cosecha.
 - Se ALMACENo empresa.parametros en session.
+
+version 1.0.6 02-09-2024
+- se formateo la fecha a d-m-y H-M-S
+- Se agrego los parametros de empresa al actualizar entidad(aplicacion).
