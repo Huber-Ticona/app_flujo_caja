@@ -57,15 +57,15 @@ class Gasto_Form(FlaskForm):
         "relacion":"muchos",
         "field":"detalle",
         "inputs":[
-            {"name":"cantidad" ,"type": "number","default":1 },
+            {"name":"cantidad" ,"type": "number", "step":0.001, "default":1 },
             {"name":"unidad", "type":"text" ,
              "choices":["UND","SACO","CAJA","PACK (Bolsa)","kilogramo (KG)","Litro (LT)" ,"Mili-gramo (MG)","Mili-litro (ML)"]
             },
             {"name":"descripcion", "type":"text"},
-            {"name":"precio_unitario", "type":"number","default":0 ,
+            {"name":"precio_unitario", "type":"number", "step":0.001, "default":0 ,
              "onchange":{"target":"precio_total",
                           "result":["cantidad","*","precio_unitario"]}},
-            {"name":"precio_total", "type":"number","default":0},
+            {"name":"precio_total", "type":"number", "step":0.001, "default":0},
             {"name":"tipo", "type":"text" ,
              "choices":["HERRAMIENTA","MATERIAL","FERTILIZANTE","CONTROL-PLAGAS","MANTENCION-AUTOMOTRIZ","ALIMENTACION"]
             }
@@ -140,11 +140,11 @@ class Aplicacion_form(FlaskForm):
                 "field": "detalle",
                 "inputs" : [
                     {"name":"insumo", "type":"text"},
-                    {"name":"cantidad_x_riego", "type":"number"},
+                    {"name":"cantidad_x_riego", "type":"number", "step":0.001 },
                     {"name":"unidad_de_cantidad", "type":"text",
                      "choices":["Mili-litro (ML)","kilogramo (KG)","Litro (LTS)" ,"Mili-gramo (MG)"]
                      },
-                    {"name":"total_aplicado", "type":"number"},
+                    {"name":"total_aplicado", "type":"number", "step":0.001},
                     {"name":"unidad_de_total", "type":"text",
                      "choices":["Mili-litro (ML)","kilogramo (KG)","Litro (LTS)" ,"Mili-gramo (MG)"]
                      },
@@ -342,7 +342,7 @@ class Cosecha_form(FlaskForm):
             ]
         }
     }
-    show_in_table = ["fecha","lugar","nave","detalle_totales"]
+    show_in_table = ["fecha","lugar","nave","detalle_totales","extra"]
 
 class Embarque_form2(FlaskForm):
     x =  0

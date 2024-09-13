@@ -25,3 +25,10 @@ version 1.0.5 28-08-2024
 version 1.0.6 02-09-2024
 - se formateo la fecha a d-m-y H-M-S
 - Se agrego los parametros de empresa al actualizar entidad(aplicacion).
+
+version 1.0.7 13-09-2024
+- se anulo el formateo de fecha. Causaba error al ordenar en datatable.
+- Se agrego "extra" a show_in_table del form_cosecha para visualizar campo comentario del JSON.
+- Se agrego input.step a los inputs en modo modificar y en modo crear.
+- Se agrega STEP 0,001 a form_gasto para permitir cantidad, precio_unitario y precio_total como flotantes.
+- Se agrega STEP 0,001 a form_aplicacion para permitir cantidad_x_riego y total_aplicado como flotantes.

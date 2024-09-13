@@ -204,7 +204,7 @@ $('#base_form').on('submit',function(){
                     var fila = $("<tr>");
                     {% for input in form.tablas[key].inputs %}
                             var {{input.name}} = `{% if not input.choices %}
-                                <input type="{{input.type}}" class="form-control" name="" id="{{input.name}}-{{outer_loop}}"
+                                <input type="{{input.type}}" {%if input.step %}step={{input.step}}{%endif%} class="form-control" name="" id="{{input.name}}-{{outer_loop}}"
                                 value="{{ item[input.name] }}">
                                 {%else%}
                                 <select class="form-select" id="{{input.name}}">
@@ -245,7 +245,7 @@ $('#base_form').on('submit',function(){
         {% for input in form.tablas[key].inputs %}
             
             var {{input.name}} = `{% if not input.choices %}
-                <input list="list-{{input.name}}" type="{{input.type}}" class="form-control" name="" id={{input.name}}-`+ (numeroDeFilas).toString() + `
+                <input list="list-{{input.name}}" type="{{input.type}}" {%if input.step %}step={{input.step}}{%endif%} class="form-control" name="" id={{input.name}}-`+ (numeroDeFilas).toString() + `
                 value="{{-input.default-}}">
                 <datalist id="list-{{input.name}}">
                     {%if dicc['completer'] and dicc['completer']['uno_muchos'][key] and dicc['completer']['uno_muchos'][key][input.name] %}

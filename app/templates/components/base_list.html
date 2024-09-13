@@ -24,12 +24,7 @@
                     <td>{{entidad.id}}</td>
 
                     {%for key,value in entidad.items() if key in form.show_in_table %}
-                    <td>{%if key == 'fecha' %} <!-- Format fecha -->
-                        {{value.strftime('%d-%m-%Y %H:%M:%S')}}
-                        {%else%}
-                        {{value}}
-                        {%endif%}
-                    </td>
+                    <td>{{value}}</td>
                     {%endfor%}
                     <td>
                         <button class="btn bg-none rounded-circle border border-2"
