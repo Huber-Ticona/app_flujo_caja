@@ -15,8 +15,8 @@ def create_app():
         app.config.from_object(ConfigDevelop)
     else:
         app.config.from_object(ConfigProduction)
-
-    print(f"|-- ENV CONFIG: {app.config['DEBUG']}")
+        
+    print(f"|-- ENV CONFIG[DEBUG]: {app.config['DEBUG']} | DB: {app.config['DB']}")
     # Inicializamos Extensiones
     db.init_app(app)
     migrate.init_app(app, db)

@@ -368,18 +368,22 @@ def subir_csv():
             csv_file = request.files['csv-file']
             csv_data = csv_file.read().decode('utf-8')
             csv_rows = csv_data.split('\n')
-            clave_valor = {}
+            #clave_valor = {}
             datos = []
             tabla_datos = []
             array_json_liquidacion = []
-
-            for row in csv_rows:
+            print("Range: ", range(len(csv_rows)))
+            for index in range(len(csv_rows)):
+                row = csv_rows[index]
                 cols = row.split(';')
-                if len(cols) == 2:  # clave - valor
-                    clave_valor[cols[0]] = cols[1].replace('\r', '')
+                print(f"Row {index} : {row}")
+                print(f"Cols {index} : {cols}")
+                
+                if index < 9:  # clave - valor => primeras 9 filas [0..8]
+                    #clave_valor[cols[0]] = cols[1].replace('\r', '')
                     datos.append(cols[1].replace('\r', ''))
 
-                elif len(cols) > 2:  # tabla
+                elif index >= 9 and len(cols)>6:  # tabla => Resto de las filas
                     item_json = {
                         "producto": cols[0],
                         "cantidad": cols[1],

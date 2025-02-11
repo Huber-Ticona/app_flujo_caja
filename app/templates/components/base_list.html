@@ -10,11 +10,14 @@
         <thead>
         <tr>
             <th>ID</th>
-            {% for field in form if field.type != 'CSRFTokenField' %}
+            <!-- {% for field in form if field.type != 'CSRFTokenField' %}
                 {%if field.name in form.show_in_table %}
                 <th class="text-capitalize">{{field.id}}</th>
                 {%endif%}
-            {% endfor %}
+            {% endfor %} -->
+            {% for column_name in form.show_in_table%}
+            <th class="text-capitalize">{{column_name}}</th>
+            {%endfor%}
             <th>Accion</th>
         </tr>
         </thead>
@@ -23,9 +26,15 @@
                 <tr id="{{entidad.id}}">
                     <td>{{entidad.id}}</td>
 
-                    {%for key,value in entidad.items() if key in form.show_in_table %}
+                    <!-- {%for key,value in entidad.items() if key in form.show_in_table %}
                     <td>{{value}}</td>
+                    {%endfor%} -->
+
+                    <!-- Solucion al problema Atributo no existe (error) -->
+                    {%for column_name in form.show_in_table if column_name in entidad.keys()%} 
+                    <td>{{entidad[column_name]}}</td>
                     {%endfor%}
+
                     <td>
                         <button class="btn bg-none rounded-circle border border-2"
                         hx-get="{{dicc['url_api']}}/{{entidad.id}}"
@@ -78,6 +87,7 @@
 <script>
     $(document).ready(function() {
       let datatable = new DataTable('#datatable')
+      //console.log('{{entidades|safe}}')
       // Antes de cargar el nuevo componente, desvincula el evento anterior
     $(".contenido-principal-body").off("click", ".remover-fila");
     /* FUNCION AGREGAR FILA */

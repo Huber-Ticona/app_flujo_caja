@@ -170,7 +170,7 @@ class Riego(db.Model):
 
     comentario = db.Column(db.String(255), nullable=True)
      # Foreaneas
-    periodo_id = db.Column(db.Integer, nullable=False) # Tipo de gasto
+    periodo_id = db.Column(db.Integer, nullable=False) 
     def update_from_dict(self, data):
         for key, value in data.items():
             setattr(self, key, value)
@@ -262,7 +262,9 @@ class Cosecha(db.Model):
 
     extra = db.Column(db.JSON, nullable=False ) #anotaciones
     periodo_id = db.Column(db.Integer, nullable=False)
-
+    packing_id = db.Column(db.Integer, nullable=False) #v.1.0.9
+    liquidacion_id = db.Column(db.Integer, nullable=True) #v.1.0.9
+    
     extra2 = [[1,2,3] , ["hola","mundo"] , {"grafico" : 'fecha'}]
 
     def update_from_dict(self, data):
@@ -272,14 +274,16 @@ class Cosecha(db.Model):
     def to_json(self):
         return {
             'id': self.id,
-            'fecha': self.fecha,
+            'fecha': self.fecha,#.isoformat()
             'lugar': self.lugar,
             'nave':self.nave,
             'detalle': self.detalle,
             'detalle_totales': self.detalle_totales,
             'transporte': self.transporte,
             'extra': self.extra,
-            'periodo_id': self.periodo_id
+            'periodo_id': self.periodo_id,
+            'packing_id': self.packing_id,
+            'liquidacion_id': self.liquidacion_id  #v.1.0.9
         }
 
 
@@ -297,3 +301,64 @@ class Movimiento(db.Model):
 
     gasto_id = db.Column(db.Integer, nullable=True,default=0)
 
+# MODELOS DE AUDITORIA
+class RegistroInicioSesion(db.Model):
+    __tablename__ = 'registro_inicio_sesion'
+
+    id = db.Column(db.Integer, primary_key=True)
+    fecha_hora = db.Column(db.DateTime, nullable=False)
+    usuario = db.Column(db.String(255))
+    contrasena = db.Column(db.String(255))
+    direccion_ip = db.Column(db.String(255), nullable=False)
+    ubicacion_geografica = db.Column(db.String(255))
+    navegador = db.Column(db.String(255))
+    sistema_operativo = db.Column(db.String(255))
+    estado_inicio_sesion = db.Column(db.Boolean, nullable=False)
+    duracion_sesion = db.Column(db.Integer)
+    detalle = db.Column(db.JSON)
+
+# Modelo Packing
+class Packing(db.Model):
+    __tablename__ = 'packing'
+
+    id = db.Column(db.Integer, primary_key=True)
+    fecha = db.Column(db.DateTime, nullable=False)
+    detalle = db.Column(db.JSON) #CALIBRE-NAVE-CANTIDAD
+    comentario = db.Column(db.String(255), nullable=True)
+    # Foreaneas
+    cosechas = db.Column(db.JSON)
+    periodo_id = db.Column(db.Integer, nullable=False)
+    def to_json(self):
+        return {
+            'id': self.id,
+            'fecha': self.fecha,
+            'cosechas':self.cosechas,
+            'detalle':self.detalle,
+            'comentario':self.comentario,
+            'periodo_id':self.periodo_id
+        }
+    
+# Modelo Doc_Venta
+""" class Doc_Venta(db.Model):
+    __tablename__ = 'doc_venta'
+
+    id = db.Column(db.Integer, primary_key=True)
+    fecha = db.Column(db.DateTime, nullable=False)
+    tipo = db.Column(db.String(255), nullable=False)
+    folio = db.Column(db.Integer, nullable=False)
+    detalle = db.Column(db.JSON) #CALIBRE-NAVE-CANTIDAD
+
+    comentario = db.Column(db.String(255), nullable=True)
+    # Foreaneas
+    packings = db.Column(db.JSON) # [Packings]
+    periodo_id = db.Column(db.Integer, nullable=False)
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'fecha': self.fecha,
+            'cosechas':self.cosechas,
+            'detalle':self.detalle,
+            'comentario':self.comentario,
+            'periodo_id':self.periodo_id
+        } """

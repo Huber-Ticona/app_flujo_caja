@@ -4,8 +4,10 @@ from werkzeug.security import check_password_hash
 from datetime import datetime,timezone,timedelta
 from ..forms import Login_Form
 from html import escape
-
-from ..models import Usuario
+import requests
+from ..models import Usuario,RegistroInicioSesion
+from ..extensions import db
+from user_agents import parse
 
 auth_bp = Blueprint('auth_bp', __name__,
                     static_folder='static', template_folder='templates')
@@ -21,16 +23,36 @@ def cuenta():
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     formulario = Login_Form()
-
     # Verifica peticion POST y valida el formulario
     if formulario.validate_on_submit():
+        print('*'*15 + " [POST] LOGIN " + "*"*15)
+        raw_usuario = request.form.get('usuario')
+        raw_contrasena = request.form.get('contrasena')
 
-        usuario = escape(request.form.get('usuario'))
-        contrasena = escape(request.form.get('contrasena'))
+        usuario = escape(raw_usuario)
+        contrasena = escape(raw_contrasena)
+        detalle = {
+                "raw_usuario": raw_usuario,
+                "raw_contrasena": raw_contrasena
+            }
+        # Obtener la dirección IP del cliente
+        ip = request.remote_addr
+        # Hacer una solicitud a la API de ipapi para obtener la información de geolocalización
+        response = requests.get(f'https://ipapi.co/{ip}/json/')
+        if response.status_code == 200:
+            data = response.json()
+            country = data.get('country_name', 'Desconocido')
+        else:
+            country = 'Desconocido'
+        # Obtener el tipo de navegador y sistema operativo del encabezado User-Agent
+        user_agent = parse(request.headers.get('User-Agent'))
+        browser = user_agent.browser.family
+        os = user_agent.os.family
+
+        print(f'ip: {ip} | os: {os} | browser: {browser} | contry: {country}')
 
         # Intentos de inicio de sesión fallidos permitidos antes de bloqueo
         max_intentos_fallidos = 3
-
         # Duración del bloqueo después de 3 intentos fallidos (en minutos)
         tiempo_bloqueo = 3  # minutos
 
@@ -60,12 +82,29 @@ def login():
         # print(f'POST | usuario: {usuario} | contraseña: {contrasena}')
         user = Usuario.query.filter_by(usuario=usuario).first()
 
-        # Si existe usaurio y la contraseña coincide
+        # Si existe usuario y la contraseña coincide
         if user and user.contrasena == contrasena:
             # Restablecer el contador de intentos fallidos al iniciar sesión exitosamente
             session.pop('intentos_fallidos', None)
             session.pop('ultimo_fallido', None)
+
+            # Registro en la tabla "registro-inicio-sesion"
+            nuevo_registro = RegistroInicioSesion(
+                fecha_hora=datetime.now(),
+                navegador=browser,
+                sistema_operativo = os,
+                ubicacion_geografica=country,
+                direccion_ip=request.remote_addr,
+                usuario=usuario,
+                contrasena=contrasena,
+                estado_inicio_sesion=True,
+                detalle = detalle
+            )
+            db.session.add(nuevo_registro)
+            db.session.commit()
+
             login_user(user)  # remember=form.remember_me.data)
+
             return redirect(url_for('main_bp.home'))
         else:
             # Incrementar el contador de intentos fallidos
@@ -74,10 +113,25 @@ def login():
             else:
                 session['intentos_fallidos'] = 1
             session['ultimo_fallido'] = datetime.now(timezone.utc)
+
+            # Registro en la tabla "registro-inicio-sesion"
+            nuevo_registro = RegistroInicioSesion(
+                fecha_hora=datetime.now(),
+                navegador=browser,
+                sistema_operativo = os,
+                ubicacion_geografica=country,
+                direccion_ip=request.remote_addr,
+                usuario=usuario,
+                contrasena=contrasena,
+                estado_inicio_sesion=False,
+                detalle = detalle
+            )
+            db.session.add(nuevo_registro)
+            db.session.commit()
             flash(f'Credenciales invalidas. Intente nuevamente. (Intentos restantes: { max_intentos_fallidos - session["intentos_fallidos"]})',
                   'warning')
 
-    print('get login')
+    print('*'*15 + " [GET] LOGIN " + "*"*15)
     return render_template('auth/login.html', form=formulario)
 
 

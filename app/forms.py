@@ -300,6 +300,9 @@ class Cosecha_form(FlaskForm):
 
     # Foreaneas
     periodo_id =HiddenField('periodo_id') # Tipo de gasto
+    packing_id =HiddenField('packing_id',default=0)
+    liquidacion_id = IntegerField('liquidacion_id',default=0)
+
     endpoint = "/api/cosechas"
     tablas = {
         "detalle_totales":{
@@ -342,7 +345,7 @@ class Cosecha_form(FlaskForm):
             ]
         }
     }
-    show_in_table = ["fecha","lugar","nave","detalle_totales","extra"]
+    show_in_table = ["fecha","lugar","nave","detalle_totales","extra","packing_id","liquidacion_id"]
 
 class Embarque_form2(FlaskForm):
     x =  0
@@ -356,3 +359,34 @@ class Embarque_form2(FlaskForm):
             ]
         }
     }
+class Packing_form(FlaskForm):
+    fecha = DateTimeField('fecha', validators=[InputRequired()], default=datetime.now())
+    cosechas = HiddenField("cosechas")
+    detalle = HiddenField("detalle")
+    comentario =  StringField('comentario')
+
+    # Foreaneas
+    periodo_id =HiddenField('periodo_id') # Tipo de gasto
+    
+    endpoint = "/api/packings"
+    tablas = {
+        "cosechas":{
+            "titulo":"Cosecha total a granel",
+            "relacion":"muchos",
+            "field": "detalle_totales",
+            "inputs":[
+                {"name":"cosecha_id", "type":"text"},
+                
+            ]
+        },
+        "detalle": {
+            "titulo": "Proceso/Seleccion",
+            "relacion": "muchos",
+            "field": "detalle",
+            "inputs": [
+                
+                {"name": "calibre", "type": "text"},
+                ]
+        }
+    }
+    show_in_table = ["fecha","cosechas","detalle","comentario","periodo_id"]

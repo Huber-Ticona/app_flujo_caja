@@ -204,8 +204,17 @@ $('#base_form').on('submit',function(){
                     var fila = $("<tr>");
                     {% for input in form.tablas[key].inputs %}
                             var {{input.name}} = `{% if not input.choices %}
-                                <input type="{{input.type}}" {%if input.step %}step={{input.step}}{%endif%} class="form-control" name="" id="{{input.name}}-{{outer_loop}}"
+                                <input list="list-{{input.name}}" type="{{input.type}}" {%if input.step %}step={{input.step}}{%endif%} class="form-control" name="" id="{{input.name}}-{{outer_loop}}"
                                 value="{{ item[input.name] }}">
+
+                                {%if dicc['completer'] and dicc['completer']['uno_muchos'][key] and dicc['completer']['uno_muchos'][key][input.name] %}
+                                <datalist id="list-{{input.name}}">
+                                    {% for elemento in dicc['completer']['uno_muchos'][key][input.name] %}
+                                    <option value="{{elemento}}">
+                                    {%endfor%}
+                                </datalist>
+                                {%endif%}
+
                                 {%else%}
                                 <select class="form-select" id="{{input.name}}">
                                     {% for choice in input.choices %}
@@ -247,13 +256,15 @@ $('#base_form').on('submit',function(){
             var {{input.name}} = `{% if not input.choices %}
                 <input list="list-{{input.name}}" type="{{input.type}}" {%if input.step %}step={{input.step}}{%endif%} class="form-control" name="" id={{input.name}}-`+ (numeroDeFilas).toString() + `
                 value="{{-input.default-}}">
-                <datalist id="list-{{input.name}}">
+                
                     {%if dicc['completer'] and dicc['completer']['uno_muchos'][key] and dicc['completer']['uno_muchos'][key][input.name] %}
+                    <datalist id="list-{{input.name}}">
                         {% for elemento in dicc['completer']['uno_muchos'][key][input.name] %}
                         <option value="{{elemento}}">
                         {%endfor%}
+                    </datalist>
                     {%endif%}
-                </datalist>
+                
                 {%else%}
                 <select class="form-select" id="{{input.name}}">
                     {% for choice in input.choices %}

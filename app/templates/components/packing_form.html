@@ -1,0 +1,262 @@
+<div>
+    {% if prev %}
+    <button class="btn bg-none border border-lg rounded-pill" hx-get="{{prev}}" hx-target="#dashboard-contenido"><i class="fas fa-arrow-left"></i> Volver a {{prev}} </button>
+    {%else%}{%endif%} 
+    <!-- FIX EMBARQUE ID -->
+    <h3>{%if entidad %}{{dicc['api']}} :{% if entidad.id%}{{entidad.id}} {%else%}{{entidad.embarque_id}}{%endif%} {%else%}Formulario{%endif%}</h3>
+
+    <form id="base_form" action="{{form.endpoint}}{%if entidad %}/{% if entidad.id%}{{entidad.id}}{%else%}{{entidad.embarque_id}}{%endif%}{%else%}/registrar{%endif%}" method="{%if entidad %}PUT{%else%}POST{%endif%}" >
+
+        {% for field in form %}
+        
+            {% if field.type != 'CSRFTokenField' and field.type != 'DateTimeField' and field.type != 'SelectField' and field.type != 'HiddenField' %}
+            <!-- INPUTFIELD -->
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1"> {{ field.label() }}</span>
+                {{ field(class="form-control" , list="list-" + field.name)}}
+
+                <datalist id="list-{{field.name}}">
+                    {%if dicc['completer'] and dicc['completer']['uno_uno']%}
+                    {% for val in dicc['completer']['uno_uno'][field.name] %}
+                            <option value="{{val}}">
+                    {%endfor%}
+                    {%endif%}
+                </datalist>
+                
+            </div>
+            {% endif %}
+
+            {% if field.type == 'DateTimeField' %}
+            <!-- DateTimeField -->
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1"> {{ field.label() }}</span>
+                {{ field(class="form-control",type="datetime-local",step="1") }}
+            </div>
+            {% endif %}
+
+            {% if field.type == 'SelectField' %}
+            <!-- Selectfield -->
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="basic-addon1"> {{ field.label() }}</span>
+                {{ field(class="form-control") }}
+            </div>
+            {% endif %}
+            {% if field.type == 'HiddenField' %}
+            <!-- HIDDENFIELD -->
+            <div class="input-group mb-3 d-none">
+                <span class="input-group-text" id="basic-addon1"> {{ field.label() }}</span>
+                {{ field(class="form-control") }}
+            </div>
+            {% endif %}
+            
+        {% endfor %}
+
+         <br>
+         
+    <!-- SELECT COSECHAS -->
+     <div>
+        <select id="cosechas_select" class="">
+            {%for cosecha in cosechas%}
+            <option value="{{cosecha.id}}">[{{cosecha.id}}] | {{cosecha.fecha}} | {{cosecha.lugar}} | {{cosecha.nave}}</option>
+            {%endfor%}
+        </select>
+    
+        <button id="agregar_cosecha" class="btn btn-secondary">Añadir Cosecha</button>
+     </div>
+
+    
+    <div class="text-center border border-sm m-3">
+        <h6 >cosechas</h6>
+        <div class="table-responsive">
+            <table id="tabla_cosechas" class="table">
+                <thead>
+                <th>cosechas</th>
+                <th>Accion</th>
+                </thead>
+                <tbody>
+                  
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <br>
+    <!-- CALIBRE-COSECHA-CANTIDAD -->
+    <div class="text-center border border-sm m-3">
+        <h6 >proceso-seleccion</h6>
+        <div class="table-responsive">
+            <table id="tabla_packing" class="table">
+                <thead>
+                    <tr>
+                        <th>calibres</th>
+                    </tr>
+                </thead>
+                <tbody>
+                
+                </tbody>
+            </table>
+        </div>
+        <div class="btn btn-secondary add-fila-packing">Añadir Fila</div>
+    </div>
+
+        
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm">
+                <input type="submit" value="{%if entidad %}ActualizaRR{%else%}RegistraRR{%endif%}" class="btn btn-primary">
+            </div>
+            <!-- Testing break Layout base_form -->
+            <!-- <button type="reset" style="width: 1200px;height:30px;border:1 px solid green;">no tocar</button> -->
+        </div>
+     </form>
+</div>
+<script>
+    //$(document).load hace que solo se ejecute una vez el script. 
+    //Causa error al usar jquery para vistas dinamicas y variables cada ves que se carga html en dom.
+        $('#base_form').on('submit',function(){
+            // Prevenir el envío del formulario para manejarlo manualmente
+            event.preventDefault();
+            
+            $('#cosechas').val(JSON.stringify(cosechas_seleccionadas))
+            $('#detalle').val(JSON.stringify(cosechas_seleccionadas))
+            console.log("enviando")
+             // Obtener los datos del formulario
+            var formData = $(this).serialize();
+
+            // Enviar la solicitud AJAX al servidor
+            $.ajax({
+                url: $(this).attr('action'),
+                type: $(this).attr('method'),
+                data: formData,
+                success: function (res) {
+                    // Manejar la respuesta del servidor
+                    console.log(res);
+                    if (res.status){
+                        $(".dashboard-contenido").empty();
+                        //$(".dashboard-contenido").append(aux_dashboard);
+                        toastr.success(res.msg, res.title, { timeOut: 3000 });
+                    } else {
+                        console.log(res.msg);
+                        toastr.error(res.msg, res.title, { timeOut: 3000 });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    // Manejar errores de la solicitud
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+
+        // Datos de las cosechas
+        
+        var cosechas_seleccionadas = []
+        // Crear las opciones del select
+        /*$.each(cosechas_id, function(index, value) {
+            $('#cosechas_select').append($('<option>', {
+                value: value,
+                text: 'Cosecha ' + value
+            }));
+        });*/
+
+
+
+        // PACKING 
+        //var lista_cosechas = {{cosechas|safe}}
+        //console.log(lista_cosechas)
+        // Manejar el evento de clic en el botón "Añadir Cosecha"
+        $(".contenido-principal-body").on("click","#agregar_cosecha",function (event) {
+            console.log("agregando...")
+            event.preventDefault();  // Previene el comportamiento del boton
+            event.stopPropagation(); // SE DETIENE LA PROPAGACION DEL EVENTO SUBMIT HACIA EL FORM.
+            // Obtener las cosechas seleccionadas
+            var cosecha_id = $('#cosechas_select').val();
+            console.log("cosecha seleccionada: ",cosecha_id)
+            if( cosecha_id !== null){
+                var fila = $("<tr>");
+                // Agregar las cosechas seleccionadas a la tabla
+                    var boton = $("<button>")
+                    .addClass("btn-remover-cosecha btn bg-none rounded-circle border border-2")
+                    .attr("data-cosecha-id", cosecha_id)
+                    .append('<i class="fas fa-trash"></i>')
+                let accion = $("<td>").append(boton)
+                //$('#tabla_cosechas tbody').append('<tr><td>Cosecha ' + cosecha_id + '</td><td></td></tr>');
+                fila.append('<td>Cosecha' + cosecha_id + '</td>');
+                fila.append(accion)
+                $('#tabla_cosechas tbody').append(fila);
+                $('#tabla_packing thead tr').append("<th>Nave "+cosecha_id+"</th>");
+                // Recorrer todas las filas y agregar una nueva celda a cada una
+                $("#tabla_packing tbody").find('tr').each(function() {
+                    var nuevaCeldaFila = $('<td>').append('<input type=number value=0></input>') // Reemplaza 'Contenido por defecto' con el valor deseado
+                    $(this).append(nuevaCeldaFila);
+                });
+                cosechas_seleccionadas.push(parseInt(cosecha_id))
+                console.log("| COSECHAS SELECIONADAS -> ",cosechas_seleccionadas)
+            
+                // Deshabilitar la opción seleccionada en el select
+                $('#cosechas_select option[value="' + cosecha_id + '"]').prop('disabled', true);
+            }
+            console.log("cosecha existe en seleccion")
+        });
+        /* FIN AGREGAR COSECHA */
+
+        /* FUNCION ELIMINAR FILA COSECHA */
+        $(".contenido-principal-body").on("click",".btn-remover-cosecha",function () {
+                // Encuentra el elemento padre <tr> de este botón y elimínalo
+                console.log("eliminando fila cosecha.");
+                let cosecha_id = ($(this).data("cosecha-id"))
+                console.log("eliminando " , cosecha_id)
+                $(this).closest("tr").remove();
+                // Habilitar la opción seleccionada en el select
+                $('#cosechas_select option[value="' + cosecha_id + '"]').prop('disabled', false);
+                let index = cosechas_seleccionadas.indexOf(cosecha_id);
+                console.log("index a eliminar: ", index)
+                if (index !== -1) {
+                cosechas_seleccionadas.splice(index, 1);
+                }
+                
+                console.log("Actual cosechas: [] -> " , cosechas_seleccionadas)
+            }
+        );
+        /* FIN REMOVER COSECHA */
+        var count = 1
+
+        // Antes de cargar el nuevo componente, desvincula el evento anterior
+        $(".contenido-principal-body").off("click", ".add-fila-packing");
+
+        // AGREGAR CALIBRE
+        $(".contenido-principal-body").on("click",".add-fila-packing",function () {
+            console.log("agregando... fila calibre packing")
+            //event.preventDefault();  // Previene el comportamiento del boton
+            //event.stopPropagation(); // SE DETIENE LA PROPAGACION DEL EVENTO SUBMIT HACIA EL FORM.
+            
+            var fila = $('<tr>')
+            var calibre = $("<td>").append('cal ' + count)
+            count = count + 1
+            // fila.append(calibre)
+            //$("#tabla_packing tbody").append(fila)
+
+            // Obtener la tabla
+            const $tabla = $('#tabla_packing');
+            // Obtener el número de columnas
+            const numColumnas = $tabla.find('thead tr:first-child th').length;
+
+            // Crear una nueva fila
+            const $nuevaFila = $('<tr>');
+
+            // Agregar la celda "calibre"
+            $nuevaFila.append('<td>Calibre '+count+'</td>');
+
+            // Agregar botones a las demás celdas
+            for (let i = 1; i < numColumnas; i++) {
+                $nuevaFila.append('<td><input type=number value=0></input></td>');
+            }
+
+            // Agregar la nueva fila a la tabla
+            $tabla.find('tbody').append($nuevaFila);
+
+        });
+    /* FIN AGREGAR CALIBRE */
+   
+
+
+</script>

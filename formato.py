@@ -44,7 +44,7 @@ para que lea la cantidad exacta de 14 lineas*
             j = 0
             incr = 0
             text = ''
-
+    print(text_list)
     return text_list
 
 
@@ -142,8 +142,8 @@ def swapPositions(list, pos1, pos2):
 
 
 if __name__ == '__main__':
-    texto_tabla = "libro1.txt"
-    montos = 'libro2.txt'
+    texto_tabla = "liquidaciones/libro1.txt"
+    montos = 'liquidaciones/libro2.txt'
     #a = formato_combinado(texto_tabla)
     j = formato2(montos)
     x = swapPositions(j, 0, 1)

@@ -11,13 +11,14 @@ from sqlalchemy.orm import aliased
 
 from .routes.cosecha import cosecha_bp
 from .routes.aplicacion import aplicacion_bp
+from .routes.packing import packing_bp
 
 
 api_bp = Blueprint('api_bp' , __name__,template_folder='templates',static_folder='static')
 
 api_bp.register_blueprint(cosecha_bp)
 api_bp.register_blueprint(aplicacion_bp)
-
+api_bp.register_blueprint(packing_bp)
 
 @api_bp.route('/')
 def new_api():
@@ -63,12 +64,9 @@ def crear_gasto():
             print("empresa: ",i.prov_empresa)
 
         dicc["completer"] = {
-            "uno_uno": {"prov_empresa": lista_empresa,
-                        "prov_folio": [500, 2000, 7500]
-                        },
+            "uno_uno": {"prov_empresa": lista_empresa},
             "uno_muchos": {
-                "detalle": {"descripcion": lista,
-                            "cantidad": [9, 99, 999]}
+                "detalle": {"descripcion": lista}
             }}
         return render_template("components/base_form.html",form=form, prev="/api/gastos",dicc=dicc)
     elif request.method == 'POST':
@@ -122,6 +120,39 @@ def gastos(id = None):
         print(f'|{dicc["api"]}: {entidad}')
 
         establecer_valores_por_defecto_formulario(form,entidad)
+        query = text("""
+            SELECT g.fecha,g.prov_empresa, d.* 
+            FROM gasto g 
+            CROSS JOIN JSON_TABLE(g.detalle, '$[*]' COLUMNS(
+                descripcion VARCHAR(255) PATH '$.descripcion'
+            )) d
+            group by d.descripcion
+            order by g.fecha desc
+            """)
+
+        # Ejecución de la consulta y obtención de los resultados
+        results = db.session.execute(query).fetchall()
+        print("Results: ",results)
+        lista = []
+        for i in results:
+            lista.append(i[2])
+        print(lista)
+
+        # Consulta para obtener descripciones únicas
+        descripciones_unicas = Gasto.query \
+            .filter_by(periodo_id=session["periodo_id"]) \
+            .group_by(Gasto.prov_empresa) \
+            .all()
+        lista_empresa = []
+        for i in descripciones_unicas:
+            lista_empresa.append(i.prov_empresa)
+            print("empresa: ",i.prov_empresa)
+
+        dicc["completer"] = {
+            "uno_uno": {"prov_empresa": lista_empresa},
+            "uno_muchos": {
+                "detalle": {"descripcion": lista}
+            }}
         #print("|empleado detalle: ",empleado.detalle)
         # Obtener lista de riego o aplicar filtros según sea necesario
         return render_template('components/base_form.html',form=form,entidad=entidad,dicc=dicc)

@@ -35,3 +35,15 @@ version 1.0.7 13-09-2024
 
 version 1.0.7.1 13-09-24
 - remove ru74as b4kup5
+
+v 1.0.8
+- agrego completer al modificar gasto.descripcion .
+
+v1.0.9 (Proceso...)
+- Se agrego Registro_Inicio_Session al login
+- cosecha: se agrego packing_id, liquidacion_id
+- Se corrigio asignar a packing solo cosechas del mismo periodo(año).
+
+
+
+
