@@ -25,7 +25,7 @@
                     <td>{{item.total_venta}}</td>
                     <td>
                         <button class="btn bg-none rounded-circle border border-2 btn-mod-lq" data-id="{{item.liquidacion_id}}"><i class="fas fa-pen"></i></button>
-                        <button class="btn bg-none rounded-circle border border-2"><i class="fas fa-trash"></i></button>
+                        <button class="btn bg-none rounded-circle border border-2" hx-delete="/liquidacion/{{item.liquidacion_id}}" hx-confirm="¿Seguro que desea eliminar el liquidacion {{item.liquidacion_id}}?"><i class="fas fa-trash"></i></button>
                     </td>
                 </tr>
                 {% endfor %}

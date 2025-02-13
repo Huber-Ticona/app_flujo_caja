@@ -39,11 +39,16 @@ version 1.0.7.1 13-09-24
 v 1.0.8
 - agrego completer al modificar gasto.descripcion .
 
-v1.0.9 (Proceso...)
-- Se agrego Registro_Inicio_Session al login
+v1.0.9 
+- Se agrego Registro_Inicio_Session al login -> se agrego libreria USER-AGENTS.
 - cosecha: se agrego packing_id, liquidacion_id
 - Se corrigio asignar a packing solo cosechas del mismo periodo(año).
 
-
+v1.1.0 ()
+- se agrego libreria USER-AGENTS al requirements.txt.
+- habilitar eliminar liquidacion (por mejorar)
+- agregar comentario a liquidacion
+- agregar lista cliente(danilo,pablo,etc) a registrar,modificar liquidacion
+- confirm agregado al eliminar una entidad de base_list.
 
 

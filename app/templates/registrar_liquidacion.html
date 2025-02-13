@@ -86,19 +86,22 @@
         <span class="input-group-text" id="basic-addon1">TOTAL A PAGAR</span>
         <input type="number" class="form-control" id="total_pago" value="{{liquidacion.total_pago}}">
     </div>
-    <!-- Vendedor -->
-    <div class="input-group mb-3">
+    <!-- Vendedor ok --> 
+    <div class="input-group mb-2">
         <span class="input-group-text" id="basic-addon1">Vendedor</span>
 
         <select class="form-select" id="input-vendedor">
             <option value="NO ASIGNADO" {% if 'vendedor' in liquidacion.detalles_extras and liquidacion.detalles_extras['vendedor'] == 'NO ASIGNADO' %} selected {% endif %}>NO ASIGNADO</option>
-            <option value="STEFANO" {% if 'vendedor' in liquidacion.detalles_extras and liquidacion.detalles_extras['vendedor'] == 'STEFANO' %} selected {% endif %}>STEFANO</option>
-            <option value="DANILO" {% if 'vendedor' in liquidacion.detalles_extras and liquidacion.detalles_extras['vendedor'] == 'DANILO' %} selected {% endif %}>DANILO</option>
-            <option value="AGRICOLA DEL NORTE" {% if 'vendedor' in liquidacion.detalles_extras and liquidacion.detalles_extras['vendedor'] == 'AGRICOLA DEL NORTE' %} selected {% endif %}>AGRICOLA DEL NORTE</option>
-            <option value="PABLO LAGOS" {% if 'vendedor' in liquidacion.detalles_extras and liquidacion.detalles_extras['vendedor'] == 'PABLO LAGOS' %} selected {% endif %}>PABLO LAGOS</option>
-        
+            {%for cliente in clientes%}
+            <option value="{{cliente}}" {% if 'vendedor' in liquidacion.detalles_extras and liquidacion.detalles_extras['vendedor'] == cliente %} selected {% endif %}>{{cliente}}</option>
+            {%endfor%}
         </select>
 
+    </div>
+    <!-- COMENTARIO OK -->
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">COMENTARIO</span>
+        <input type="text" class="form-control" id="input-comentario" value="{% if liquidacion.detalles_extras and liquidacion.detalles_extras['comentario']%}{{liquidacion.detalles_extras['comentario']}}{%endif%}">
     </div>
     <div class="text-center">
         <button class="btn btn-secondary" id="registrar_liquidacion" data-liquidacion_id="{{liquidacion.liquidacion_id}}">Actualizar</button>
@@ -152,43 +155,48 @@
     <hr class="hr">
     <div class="input-group input-group-sm mb-2">
         <span class="input-group-text" id="basic-addon1">Total</span>
-        <input type="number" class="form-control" id="total_venta">
+        <input type="number" class="form-control" id="total_venta" value="0">
     </div>
     <div class="input-group input-group-sm mb-2">
         <span class="input-group-text" id="basic-addon1">TOTAL NETO(guia)</span>
-        <input type="number" class="form-control" id="total_neto_guia">
+        <input type="number" class="form-control" id="total_neto_guia" value="0">
     </div>
     <div class="input-group input-group-sm mb-2">
         <span class="input-group-text" id="basic-addon1">10% COMISION</span>
-        <input type="number" class="form-control" id="comision">
+        <input type="number" class="form-control" id="comision" value="0">
     </div>
     <div class="input-group input-group-sm mb-2">
         <span class="input-group-text" id="basic-addon1">FLETE ARI-STGO</span>
-        <input type="number" class="form-control" id="flete_ari_stgo">
+        <input type="number" class="form-control" id="flete_ari_stgo" value="0">
     </div>
     <div class="input-group input-group-sm mb-2">
         <span class="input-group-text" id="basic-addon1">FLETE STGO-ARI</span>
-        <input type="number" class="form-control" id="flete_stgo_ari">
+        <input type="number" class="form-control" id="flete_stgo_ari" value="0">
     </div>
     <div class="input-group input-group-sm mb-2">
         <span class="input-group-text" id="basic-addon1">TOTAL DESCUENTOS</span>
-        <input type="number" class="form-control" id="total_descuento">
+        <input type="number" class="form-control" id="total_descuento" value="0">
     </div>
     <div class="input-group input-group-sm mb-2">
         <span class="input-group-text" id="basic-addon1">TOTAL A PAGAR</span>
-        <input type="number" class="form-control" id="total_pago">
+        <input type="number" class="form-control" id="total_pago" value="0">
     </div>
     <!-- Vendedor -->
-    <div class="input-group mb-3">
+    <div class="input-group mb-2">
         <span class="input-group-text" id="basic-addon1">Vendedor</span>
 
         <select class="form-select" id="input-vendedor">
             <option value="NO ASIGNADO" selected>NO ASIGNADO</option>
-            <option value="STEFANO">STEFANO</option>
-            <option value="DANILO">DANILO</option>
-            <option value="PABLO-LAGOS">PABLO-LAGOS</option>
+            {%for cliente in clientes%}
+            <option value="{{cliente}}">{{cliente}}</option>
+            {%endfor%}
+            
             
         </select>
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">COMENTARIO</span>
+        <input type="text" class="form-control" id="input-comentario">
     </div>
     <div class="text-center">
         <button class="btn btn-secondary" id="registrar_liquidacion" >Registrar</button>

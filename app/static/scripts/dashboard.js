@@ -363,6 +363,7 @@ $(".dashboard-contenido").on("click", "#registrar_liquidacion", function () {
         flete_stgo_ari: parseInt($("#flete_stgo_ari").val()),
         nro_guia: $("#nro_guia").val(),
         vendedor: $("#input-vendedor").val(),
+        comentario: $("#input-comentario").val(),
     };
 
     console.log("detalles extras", detalles_extras);

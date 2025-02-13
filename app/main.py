@@ -272,7 +272,11 @@ def parametros(id=None):
 def liquidacion():
     if request.method == 'POST':
         print('OBTENIENDO COMPONENTE REGISTRAR LIQUIDACION ...')
-        return render_template('registrar_liquidacion.html')
+        empresa_parametros = session["empresa_parametros"]
+        print(empresa_parametros)
+        clientes = empresa_parametros['cliente']['valor']
+        print(clientes)
+        return render_template('registrar_liquidacion.html',clientes=clientes)
     return render_template('registrar_liquidacion.html')
 
 
@@ -285,6 +289,8 @@ def lista_liquidacion():
             periodo_id=periodo_id).all()
         print('nro liquidaciones: ', str(len(lista_liquidacion)))
         page = 'liquidacion'
+       
+      
         return render_template('lista_liquidacion.html', lista_liquidacion=lista_liquidacion, page=page)
 
 
@@ -293,7 +299,7 @@ def lista_liquidacion():
 def registrar_liquidacion():
     if request.method == 'POST':
         dato = request.get_json()
-        print(dato)
+        print("DATO: ", dato)
         periodo_id = session["periodo_id"]
         # ? FALTA SANITIZAR VALORES !!
         new_liquidacion = Liquidacion(
@@ -357,8 +363,31 @@ def actualizar_liquidacion(id = None):
     print("Obteniendo liquidacion: ", id)
     liquidacion = Liquidacion.query.filter_by(liquidacion_id = id).first()
     print("liquidacion: ", liquidacion)
-    return render_template("registrar_liquidacion.html", liquidacion = liquidacion)
+    empresa_parametros = session["empresa_parametros"]
+    print(empresa_parametros)
+    clientes = empresa_parametros['cliente']['valor']
+    print(clientes)
+    return render_template("registrar_liquidacion.html", liquidacion = liquidacion,clientes=clientes)
 
+@main_bp.route('/liquidacion/<int:id>', methods=['DELETE'])
+@login_required
+def eliminar_liquidacion(id=None):
+    if request.method == 'DELETE':
+         try:
+            print(f'|Idea: Eliminar LIQUIDACION -> ',id)
+            entidad = Liquidacion.query.filter_by(liquidacion_id=id).first()
+            print(f'|LIQUIDACION a eliminar: ',entidad)
+            db.session.delete(entidad)
+            db.session.commit()
+            data = {
+                "class":"danger",
+                "msg": f"Error al eliminar LIQUIDACION {id}.",
+                "id": id 
+            }
+            return jsonify(status=True,title='Exito', msg=f'LIQUIDACION : {id} eliminado exitosamente.')
+         except:
+            return jsonify(status=False,title='Error', msg=f'Ocurrio un error al eliminar LIQUIDACION : {id}.')
+         
 @main_bp.route('/subir_csv', methods=['POST'])
 @login_required
 def subir_csv():
