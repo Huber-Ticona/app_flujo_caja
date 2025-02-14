@@ -12,6 +12,7 @@
                     <th scope="col">Liquidacion</th>
                     <th scope="col">Fecha</th>
                     <th scope="col">Total venta</th>
+                    <th scope="col">extras</th>
                     <th scope="col">Acción</th>
                 </tr>
             </thead>
@@ -23,6 +24,7 @@
                     <td>Liquidacion {{loop.index}} | guia: {{item.detalles_extras['nro_guia']}} | Id: {{item.liquidacion_id}}</td>
                     <td>{{item.fecha}}</td>
                     <td>{{item.total_venta}}</td>
+                    <td>{{item.detalles_extras}}</td>
                     <td>
                         <button class="btn bg-none rounded-circle border border-2 btn-mod-lq" data-id="{{item.liquidacion_id}}"><i class="fas fa-pen"></i></button>
                         <button class="btn bg-none rounded-circle border border-2" hx-delete="/liquidacion/{{item.liquidacion_id}}" hx-confirm="¿Seguro que desea eliminar el liquidacion {{item.liquidacion_id}}?"><i class="fas fa-trash"></i></button>
