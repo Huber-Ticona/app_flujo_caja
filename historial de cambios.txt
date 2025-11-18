@@ -54,4 +54,14 @@ v1.1.0 ()
 v.1.1.1
 - se muestra detalles_extras en lista_liquidacion.
 
-
+v.1.1.2 
+- main_sidebar: Se agrego overflow-y a las opciones de cada periodo.
+- base_form :  
+  - agregar check para elegir que item de la lista de insumos se va a registrar. ok
+  - mover btn registrar al lado de label Formulario. OK
+- registrar gasto: rellenar qcompleter con todos las empresas registradas. OK
+  No solamente las del periodo actual.
+- registrar aplicacion:
+  - reordenar las unidades de medida: litro, kilogramo, mililitro, miligramo. OK
+  - Default en 0 las cantidad_x_riego y total_aplicado al agregar fila.
+  Observacion: Error al definir miligramo -> debiese ser gramo. 

@@ -1,12 +1,12 @@
 from flask import Blueprint,render_template,request,redirect,url_for,jsonify,session,Response,abort,flash
 from flask_login import login_required
 from ..forms import Empleado_form,Aplicacion_form,Riego_form,Gasto_Form,PagoPersonal_form,RegistroLaboral_form,Embarque_form
-from ..models import Gasto,Riego,Empleado,Aplicacion,PagoPersonal,RegistroLaboral,Embarque,Empresa
+from ..models import Gasto,Riego,Empleado,Aplicacion,PagoPersonal,RegistroLaboral,Embarque,Empresa,Periodo
 from ..extensions import model_to_dict2,db,convertir_form_a_dict,establecer_valores_por_defecto_formulario,sanitize_json,cache,establecer_choices_en_form
 from datetime import datetime
 import json
 import requests
-from sqlalchemy import func,text, column,select, literal_column,JSON,cast,String,Integer
+from sqlalchemy import func,text, column,select, literal_column,JSON,cast,String,Integer,distinct
 from sqlalchemy.orm import aliased
 
 from .routes.cosecha import cosecha_bp
@@ -36,37 +36,42 @@ def crear_gasto():
         form.periodo_id.default = session['periodo_id']
         form.process()
         query = text("""
-            SELECT g.fecha,g.prov_empresa, d.* 
+            SELECT DISTINCT d.descripcion 
             FROM gasto g 
             CROSS JOIN JSON_TABLE(g.detalle, '$[*]' COLUMNS(
                 descripcion VARCHAR(255) PATH '$.descripcion'
             )) d
-            group by d.descripcion
-            order by g.fecha desc
-            """)
-
-        # Ejecución de la consulta y obtención de los resultados
+        """)
+        # Ejecución de la consulta y obtención de las descripciones de gastos
         results = db.session.execute(query).fetchall()
-        print("Results: ",results)
-        lista = []
-        for i in results:
-            lista.append(i[2])
-        print(lista)
-
-        # Consulta para obtener descripciones únicas
-        descripciones_unicas = Gasto.query \
+        lista_descripciones = [i[0] for i in results]
+        print(lista_descripciones)
+        
+        comentarios_unicos_tuplas = db.session.query(distinct(Gasto.comentario)) \
             .filter_by(periodo_id=session["periodo_id"]) \
-            .group_by(Gasto.prov_empresa) \
             .all()
-        lista_empresa = []
-        for i in descripciones_unicas:
-            lista_empresa.append(i.prov_empresa)
-            print("empresa: ",i.prov_empresa)
+
+        # 2. Aplanar la lista de tuplas a una lista simple de strings
+        lista_comentarios = [comentario[0] for comentario in comentarios_unicos_tuplas]
+        print("listaxd: ",lista_comentarios)
+
+        # 1. Definir la consulta que incluye la selección de valores únicos.
+        lista_proveedores_consulta = db.session.query(distinct(Gasto.prov_empresa)) \
+            .join(Periodo, Gasto.periodo_id == Periodo.periodo_id) \
+            .filter(Periodo.empresa_id == session["empresa_id"]) \
+            .all()
+
+        # 2. Procesar el resultado (aplanar la lista de tuplas)
+        lista_proveedores = [proveedor[0] for proveedor in lista_proveedores_consulta]
+        for i in lista_proveedores:
+            #lista_proveedores.append(i.prov_empresa)
+            print("Empresa: ",i)
 
         dicc["completer"] = {
-            "uno_uno": {"prov_empresa": lista_empresa},
+            "uno_uno": {"prov_empresa": lista_proveedores,
+                        "comentario": lista_comentarios},
             "uno_muchos": {
-                "detalle": {"descripcion": lista}
+                "detalle": {"descripcion": lista_descripciones}
             }}
         return render_template("components/base_form.html",form=form, prev="/api/gastos",dicc=dicc)
     elif request.method == 'POST':
@@ -742,6 +747,7 @@ def odepa():
         print("|- Mostrando datos token ...")
         # La solicitud fue exitosa, puedes procesar los datos de la respuesta
         data = response.json()
+        print("Data: ",data)
         print(f"|Exito - Token valido hasta: {data['expires_in']} segundos.")
         print('*'*15 + f' Obteniendo datos api REPORTES '+ '*'*15 )
         # URL de la API

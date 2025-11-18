@@ -124,7 +124,7 @@ class Riego_form(FlaskForm):
 class Aplicacion_form(FlaskForm):
 
     fecha = DateTimeField('fecha', validators=[InputRequired()],default=datetime.now())
-    lugar = SelectField('lugar', choices=[(item, item) for item in parcelas])
+    lugar = SelectField('lugar')
     nave = SelectField('nave')
     
     detalle = HiddenField("detalle")
@@ -140,13 +140,13 @@ class Aplicacion_form(FlaskForm):
                 "field": "detalle",
                 "inputs" : [
                     {"name":"insumo", "type":"text"},
-                    {"name":"cantidad_x_riego", "type":"number", "step":0.001 },
+                    {"name":"cantidad_x_riego", "type":"number", "step":0.001, "default":0 },
                     {"name":"unidad_de_cantidad", "type":"text",
-                     "choices":["Mili-litro (ML)","kilogramo (KG)","Litro (LTS)" ,"Mili-gramo (MG)"]
+                     "choices":["Litro (LTS)","kilogramo (KG)","Mili-litro (ML)","Mili-gramo (MG)"]
                      },
-                    {"name":"total_aplicado", "type":"number", "step":0.001},
+                    {"name":"total_aplicado", "type":"number", "step":0.001 ,"default":0},
                     {"name":"unidad_de_total", "type":"text",
-                     "choices":["Mili-litro (ML)","kilogramo (KG)","Litro (LTS)" ,"Mili-gramo (MG)"]
+                     "choices":["Litro (LTS)","kilogramo (KG)","Mili-litro (ML)","Mili-gramo (MG)"]
                      },
                     ]
             } ,

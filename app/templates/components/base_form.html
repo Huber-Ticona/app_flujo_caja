@@ -3,10 +3,21 @@
     <button class="btn bg-none border border-lg rounded-pill" hx-get="{{prev}}" hx-target="#dashboard-contenido"><i class="fas fa-arrow-left"></i> Volver a {{prev}} </button>
     {%else%}{%endif%} 
     <!-- FIX EMBARQUE ID -->
-    <h3>{%if entidad %}{{dicc['api']}} :{% if entidad.id%}{{entidad.id}} {%else%}{{entidad.embarque_id}}{%endif%} {%else%}Formulario{%endif%}</h3>
-
+    
     <form id="base_form" action="{{form.endpoint}}{%if entidad %}/{% if entidad.id%}{{entidad.id}}{%else%}{{entidad.embarque_id}}{%endif%}{%else%}/registrar{%endif%}" method="{%if entidad %}PUT{%else%}POST{%endif%}" >
-
+        
+        <div class="d-flex justify-content-evenly align-items-center mb-3">
+            <h3>{%if entidad %}{{dicc['api']}} :{% if entidad.id%}{{entidad.id}} {%else%}{{entidad.embarque_id}}{%endif%}
+                {%else%}Formulario{%endif%}</h3>
+           
+                <div class="">
+                    <input type="submit" value="{%if entidad %}Actualizar{%else%}Registrar{%endif%}" class="btn btn-primary">
+                </div>
+                <!-- Testing break Layout base_form -->
+                <!-- <button type="reset" style="width: 1200px;height:30px;border:1 px solid green;">no tocar</button> -->
+            
+        </div>
+        
         {% for field in form %}
         
         {% if field.type != 'CSRFTokenField' and field.type != 'DateTimeField' and field.type != 'SelectField' and field.type != 'HiddenField' %}
@@ -44,7 +55,7 @@
         
         {% if field.type == 'HiddenField' %}
             <!-- HIDDENFIELD -->
-            <div class="input-group mb-3">
+            <div class="input-group mb-0">
                 {{ field(class="form-control") }}
             </div>
             
@@ -72,15 +83,16 @@
                         {%endfor%}
                     {%elif form.tablas[field.name].relacion == 'muchos'%}
                     <!-- uno-muchos -->
-                    <br>
                     <div class="text-center border border-sm m-3">
                         <h6 >{{form.tablas[field.name].titulo}}</h6>
                         <div class="table-responsive">
                             <table id="tabla-{{field.name}}" class="table">
                                 <thead>
+                                <th>Flag</th> <!-- Encabezado para la columna de selección -->
                                 {%for input in form.tablas[field.name].inputs %}
                                 <th>{{input.name}}</th>
                                 {%endfor%}
+                                <th>Accion</th> <!-- Encabezado para acciones -->
                                 </thead>
                                 <tbody id="body-tabla-{{field.name}}">
                                 
@@ -96,15 +108,7 @@
         
         {% endfor %}
 
-
         
-        <div class="form-group">
-            <div class="col-sm-offset-2 col-sm">
-                <input type="submit" value="{%if entidad %}Actualizar{%else%}Registrar{%endif%}" class="btn btn-primary">
-            </div>
-            <!-- Testing break Layout base_form -->
-            <!-- <button type="reset" style="width: 1200px;height:30px;border:1 px solid green;">no tocar</button> -->
-        </div>
      </form>
 </div>
 <script type="module">
@@ -136,6 +140,14 @@ $('#base_form').on('submit',function(){
                 $('#body-tabla-{{key}} tr').each(function() {
                     var fila = {};
                     var celdas = $(this).find('td');
+                    // Buscar el checkbox dentro de la primera celda (o donde esté tu columna de selección)
+                    var checkbox = celdas.eq(0).find('input[type="checkbox"]');
+                    
+                    // Si la fila tiene un checkbox y NO está marcado, OMITIMOS esta fila.
+                    if (checkbox.length && !checkbox.is(':checked')) {
+                        return; // 'return' dentro de $.each() salta a la siguiente iteración (siguiente fila).
+                    }
+
                     // Obtener el texto de cada celda y asignarlo a la clave correspondiente
                     // Iterar sobre cada celda en la fila
                     celdas.each(function(index) {
@@ -143,10 +155,9 @@ $('#base_form').on('submit',function(){
                         if (input.length > 0) {
                             var nombreColumna = input.attr('id').split('-');
                             console.log("Nombre columna after: ", nombreColumna)
-                            nombreColumna = nombreColumna[0]
-                            var valor = input.val();
-                            // Asignar el valor al objeto de la fila
-                            fila[nombreColumna] = valor;
+                            if(nombreColumna[0] === 'check') return; 
+                            fila[nombreColumna[0]] = input.val();
+                            
                         }
                     });
                     console.log("Fila: ",fila)
@@ -201,7 +212,11 @@ $('#base_form').on('submit',function(){
             {% for item in entidad[key] %}
                     {% set outer_loop = loop.index %}
                     console.log("|Item encontrado -> se añade a Tabla {{key}}: ")
-                    var fila = $("<tr>");
+                    // Crear una nueva fila
+                    var fila = $("<tr>"); 
+                    // Columna de selección
+                    fila.append($("<td>").html(`<input class="form-check-input" type="checkbox" value="" id="check-{{outer_loop}}" ` + ` checked>`)) 
+                    
                     {% for input in form.tablas[key].inputs %}
                             var {{input.name}} = `{% if not input.choices %}
                                 <input list="list-{{input.name}}" type="{{input.type}}" {%if input.step %}step={{input.step}}{%endif%} class="form-control" name="" id="{{input.name}}-{{outer_loop}}"
@@ -250,7 +265,11 @@ $('#base_form').on('submit',function(){
         console.log("Número de filas en la tabla: " + numeroDeFilas);
         console.log('filas_tabla: ',filas_tabla)
         var i = numeroDeFilas;
-        var fila = $("<tr>");
+        // Crear una nueva fila
+        var fila = $("<tr>"); 
+        // Columna de selección
+        fila.append($("<td>").html(`<input class="form-check-input" type="checkbox" value="" id=check-`+ (numeroDeFilas).toString()  + ` checked>`)) 
+        
         {% for input in form.tablas[key].inputs %}
             
             var {{input.name}} = `{% if not input.choices %}
@@ -280,6 +299,7 @@ $('#base_form').on('submit',function(){
                 {%endif%}
                 //$('#precio_total-'+(numeroDeFilas).toString()).val( $('#{{input.name}}-'+(numeroDeFilas).toString()).val() * 2 )
             })
+            // Agregar celda a la fila
             fila.append($("<td>").append({{input.name}}))
         {% endfor%}
 
@@ -288,6 +308,7 @@ $('#base_form').on('submit',function(){
             .append('<i class="fas fa-trash"></i>')
 
         fila.append($("<td>").append(boton))
+        // Agregar la fila a la tabla
         tabla.append(fila);
     })
     /* FUNCION ELIMINAR FILA */

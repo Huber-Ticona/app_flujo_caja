@@ -58,7 +58,7 @@
             <i class="fas fa-building"></i> Periodo: {{periodo.periodo_fiscal}}
         </div>
         <hr class="hr-horizontal-light">
-        <div class="">
+        <div class="flex-row" style="overflow-y: auto;max-height: 300px;">
             <div class="list-group-item custom-item" hx-post="/lista/embarque" hx-target="#dashboard-contenido">Embarque</div>
             <div class="list-group-item custom-item" hx-get="/api/embarques" hx-target="#dashboard-contenido">Embarque v2</div>
             <div class="list-group-item custom-item" hx-post="/lista/liquidacion" hx-target="#dashboard-contenido">Liquidacion</div>

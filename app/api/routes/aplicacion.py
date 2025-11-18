@@ -45,7 +45,7 @@ def crear_aplicaciones():
             }}
         return render_template("components/base_form.html",form=form,prev=dicc["url_api"],dicc=dicc)
     elif request.method == 'POST':
-        # Registrar Trabajador
+        # Registrar Aplicacion 
         try:
             data = request.form
             print("form data: ",data)
@@ -60,7 +60,7 @@ def crear_aplicaciones():
             print("new aplicacion: ",new_aplicacion)
             db.session.add(new_aplicacion)
             db.session.commit() 
-            return jsonify(status=True,title='Exito', msg='Aplicacion registrado exitosamente.')
+            return jsonify(status=True,title='Exito', msg=f'Aplicacion {new_aplicacion.id} registrado exitosamente.')
         except Exception as e:
             return jsonify(status=False,title='Error', msg=f'Ocurrio un error al registrar Aplicacaion. Error: {str(e)}')
 
