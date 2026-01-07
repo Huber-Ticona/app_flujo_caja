@@ -32,6 +32,9 @@
                     <th>Iva.guia</th>
                     <th>precio</th>
                     <th>total</th>
+                    <th>p.guia</th>
+                    <th>total_neto</th>
+                    <th>desc.aplicado</th>
                     <th>action</th>
                 </tr>
             </thead>
@@ -46,6 +49,10 @@
                     <td><input type="number" name="" id="" class="input-table-liquidacion ivaguia-lq" value="{{item.iva_guia}}"></td>
                     <td><input type="number" name="" id="" class="input-table-liquidacion precio-lq" value="{{item.precio}}"></td>
                     <td><input type="number" name="" id="" class="input-table-liquidacion total-lq" value="{{item.total}}"></td>
+                    <td><input type="number" name="" id="" class="input-table-liquidacion p_guia-lq" value="{{item.p_guia}}"></td>
+                    <td><input type="number" name="" id="" class="input-table-liquidacion total_neto-lq" value="{{item.total_neto}}"></td>
+                    <td><input type="number" name="" id="" class="input-table-liquidacion desc_aplicado-lq" value="{{item.desc_aplicado}}"></td>
+                    
                     <td><button class="btn-remover-fila-liquidacion">Eliminar</button></td>
                 </tr>
                 {%endfor%}
@@ -85,6 +92,14 @@
     <div class="input-group input-group-sm mb-2">
         <span class="input-group-text" id="basic-addon1">TOTAL A PAGAR</span>
         <input type="number" class="form-control" id="total_pago" value="{{liquidacion.total_pago}}">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">TOTAL BULTOS</span>
+        <input type="number" class="form-control" id="total_bulto" value="{{liquidacion.detalles_extras['total_bulto']}}">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">DESC_X_BULTO</span>
+        <input type="number" class="form-control" id="desc_x_bulto" value="{{liquidacion.detalles_extras['desc_x_bulto']}}">
     </div>
     <!-- Vendedor ok --> 
     <div class="input-group mb-2">
@@ -138,6 +153,9 @@
                     <th>Iva.guia</th>
                     <th>precio</th>
                     <th>total</th>
+                    <th>p.guia</th>
+                    <th>total_neto</th>
+                    <th>desc.aplicado</th>
                     <th>action</th>
                 </tr>
             </thead>
@@ -180,6 +198,14 @@
     <div class="input-group input-group-sm mb-2">
         <span class="input-group-text" id="basic-addon1">TOTAL A PAGAR</span>
         <input type="number" class="form-control" id="total_pago" value="0">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">TOTAL BULTOSx</span>
+        <input type="number" class="form-control" id="total_bulto" value="0">
+    </div>
+    <div class="input-group input-group-sm mb-2">
+        <span class="input-group-text" id="basic-addon1">DESC_X_BULTOx</span>
+        <input type="number" class="form-control" id="desc_x_bulto" value="0">
     </div>
     <!-- Vendedor -->
     <div class="input-group mb-2">

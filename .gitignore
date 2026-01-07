@@ -7,3 +7,4 @@ migrations
 app/__pycache__
 app/auth/__pycache__
 backup
+analisis_app_flujo_caja.sql

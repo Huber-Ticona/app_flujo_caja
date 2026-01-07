@@ -23,7 +23,6 @@ def crear_packing():
         form.periodo_id.default = session['periodo_id']
         form.process()
         cosechas = Cosecha.query.filter_by(packing_id=0,periodo_id=session['periodo_id']).all() #v1.0.9
-        
         cosechas = [ item.to_json() for item in cosechas ]
         print(f"Cosechas: {cosechas}")
         print("-"*20 +f" {request.method} {request.path} END "+ "-"*20)

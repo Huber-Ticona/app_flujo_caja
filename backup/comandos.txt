@@ -1,7 +1,7 @@
-mysql -u root -h localhost -p test_app_flujo < app_flujo_caja_21-02-25.sql
+mysql -u root -h localhost -p test_app_flujo < app_flujo_caja_04-12-25.sql
 * al realizar lo anterior en servidor, tarda 2 a 5 minutos. Paciencia. *
 
-mysqldump -u root -p -h localhost app_flujo_caja > app_flujo_caja_21-02-25.sql
+mysqldump -u root -p -h localhost app_flujo_caja > app_flujo_caja_04-12-25.sql
 
 journalctl -u app_flujo_caja.service -b
 journalctl -u new_website.service --since "2023-07-28" --until "2023-07-29"

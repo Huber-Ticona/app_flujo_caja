@@ -408,11 +408,11 @@ def subir_csv():
                 print(f"Row {index} : {row}")
                 print(f"Cols {index} : {cols}")
                 
-                if index < 9:  # clave - valor => primeras 9 filas [0..8]
+                if index < 11:  # clave - valor => primeras 9 filas [0..8]
                     #clave_valor[cols[0]] = cols[1].replace('\r', '')
                     datos.append(cols[1].replace('\r', ''))
 
-                elif index >= 9 and len(cols)>6:  # tabla => Resto de las filas
+                elif index >= 11 and len(cols)>6:  # tabla => Resto de las filas
                     item_json = {
                         "producto": cols[0],
                         "cantidad": cols[1],
@@ -420,7 +420,10 @@ def subir_csv():
                         "neto": cols[3],
                         "iva_guia": cols[4],
                         "precio": cols[5],
-                        "total": cols[6].replace('\r', '')
+                        "total": cols[6],
+                        "p_guia": cols[7],
+                        "total_neto": cols[8],
+                        "desc_aplicado": cols[9].replace('\r', '')
                     }
                     array_json_liquidacion.append(item_json)
             print('--- datos ---')

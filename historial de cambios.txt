@@ -54,7 +54,7 @@ v1.1.0 ()
 v.1.1.1
 - se muestra detalles_extras en lista_liquidacion.
 
-v.1.1.2 
+v.1.1.2 (18-11-25)
 - main_sidebar: Se agrego overflow-y a las opciones de cada periodo.
 - base_form :  
   - agregar check para elegir que item de la lista de insumos se va a registrar. ok
@@ -65,3 +65,9 @@ v.1.1.2
   - reordenar las unidades de medida: litro, kilogramo, mililitro, miligramo. OK
   - Default en 0 las cantidad_x_riego y total_aplicado al agregar fila.
   Observacion: Error al definir miligramo -> debiese ser gramo. 
+
+v.1.1.3 07-01-2026
+- Se modico vista liquidacion.
+  - se agregaron 3 columnas a la tabla detalle: p_guia , total_neto y desc_aplicado.
+  - se agregaron 2 nuevos datos a detalles_extras: total_bultos y desc_x_bulto
+- respectivamente se modificaron las rutas para obtener datos csv. registrar y actualizar.

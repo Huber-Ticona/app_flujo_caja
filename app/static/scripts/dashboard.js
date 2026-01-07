@@ -219,6 +219,8 @@ $(".dashboard-contenido").on("click", "#rellenar_datos", function () {
         $("#flete_stgo_ari").val(datos_csv[6]);
         $("#total_descuento").val(datos_csv[7]);
         $("#total_pago").val(datos_csv[8]);
+        $("#total_bulto").val(datos_csv[9]);
+        $("#desc_x_bulto").val(datos_csv[10]);
     }
 });
 
@@ -233,6 +235,9 @@ $(".dashboard-contenido").on("click", "#btn-add-item", function () {
         precio_venta: "0",
         producto: "TOMATE CALIBRE ",
         total: "0",
+        p_guia: "0",
+        total_neto: "0",
+        desc_aplicado: "0",
     };
     crear_fila_liquidacion(data);
 });
@@ -277,7 +282,18 @@ function crear_fila_liquidacion(dato) {
         .attr("type", "number")
         .val(dato.total)
         .addClass("input-table-liquidacion total-lq");
-
+    var p_guia_input = $("<input>")
+        .attr("type", "number")
+        .val(dato.p_guia)
+        .addClass("input-table-liquidacion p_guia-lq");
+    var total_neto_input = $("<input>")
+        .attr("type", "number")
+        .val(dato.total_neto)
+        .addClass("input-table-liquidacion total_neto-lq");
+    var desc_aplicado_input = $("<input>")
+        .attr("type", "number")
+        .val(dato.desc_aplicado)
+        .addClass("input-table-liquidacion desc_aplicado-lq");
     var boton = $("<button>")
         .text("Eliminar")
         .addClass("btn-remover-fila-liquidacion");
@@ -290,6 +306,9 @@ function crear_fila_liquidacion(dato) {
         $("<td>").append(ivaGuiaInput),
         $("<td>").append(precioInput),
         $("<td>").append(totalInput),
+        $("<td>").append(p_guia_input),
+        $("<td>").append(total_neto_input),
+        $("<td>").append(desc_aplicado_input),
         $("<td>").append(boton)
     );
 
@@ -309,6 +328,9 @@ function obtenerDatosDeTablaLiquidacion() {
         var ivaGuia = fila.find(".ivaguia-lq").val();
         var precio = fila.find(".precio-lq").val();
         var total = fila.find(".total-lq").val();
+        var p_guia = fila.find(".p_guia-lq").val();
+        var total_neto = fila.find(".total_neto-lq").val();
+        var desc_aplicado = fila.find(".desc_aplicado-lq").val();
 
         // Crea un objeto JSON con los valores de la fila
         var filaJSON = {
@@ -319,6 +341,9 @@ function obtenerDatosDeTablaLiquidacion() {
             iva_guia: ivaGuia,
             precio: precio,
             total: total,
+            p_guia: p_guia,
+            total_neto: total_neto,
+            desc_aplicado: desc_aplicado,
         };
 
         // Agrega el objeto JSON al array
@@ -364,6 +389,8 @@ $(".dashboard-contenido").on("click", "#registrar_liquidacion", function () {
         nro_guia: $("#nro_guia").val(),
         vendedor: $("#input-vendedor").val(),
         comentario: $("#input-comentario").val(),
+        total_bulto: parseInt($("#total_bulto").val()),
+        desc_x_bulto: parseInt($("#desc_x_bulto").val()),
     };
 
     console.log("detalles extras", detalles_extras);
