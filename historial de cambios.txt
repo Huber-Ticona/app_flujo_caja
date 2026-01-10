@@ -71,3 +71,6 @@ v.1.1.3 07-01-2026
   - se agregaron 3 columnas a la tabla detalle: p_guia , total_neto y desc_aplicado.
   - se agregaron 2 nuevos datos a detalles_extras: total_bultos y desc_x_bulto
 - respectivamente se modificaron las rutas para obtener datos csv. registrar y actualizar.
+
+v.1.1.4 09-01-26
+- Se agrego bot_telegram.

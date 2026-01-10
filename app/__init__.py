@@ -1,5 +1,5 @@
 from flask import Flask, redirect, url_for, jsonify,render_template
-from .extensions import db, migrate, login_manager,minify,csrf,cache
+from .extensions import db, migrate, login_manager,minify,csrf,cache,bot_telegram
 from .config import ConfigDevelop,ConfigProduction
 from dotenv import load_dotenv
 from time import sleep
@@ -26,7 +26,8 @@ def create_app():
 
     minify.init_app(app)
     cache.init_app(app)
-
+    bot_telegram.init_app(app)
+    
     # Registramos blueprints
     from .main import main_bp
     from .auth.auth import auth_bp

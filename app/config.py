@@ -15,6 +15,10 @@ class ConfigDevelop(Config):
     USER=os.getenv('USER')
     PASSWORD=os.getenv('PASSWORD')
     HOST=os.getenv('HOST')
+
+    TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+    TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+
     SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{USER}:{PASSWORD}@{HOST}/{DB}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG  = True
@@ -30,7 +34,8 @@ class ConfigDevelop(Config):
     SQLALCHEMY_TRACK_MODIFICATIONS = False """
 
 class ConfigProduction(Config):
-    
+    TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+    TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
     # BASE DE DATOS CONFIGURACION
     DB= os.getenv('TEST_DB')
     USER=os.getenv('TEST_USER')

@@ -6,7 +6,7 @@ from ..forms import Login_Form
 from html import escape
 import requests
 from ..models import Usuario,RegistroInicioSesion
-from ..extensions import db
+from ..extensions import db, bot_telegram
 from user_agents import parse
 
 auth_bp = Blueprint('auth_bp', __name__,
@@ -104,7 +104,7 @@ def login():
             db.session.commit()
 
             login_user(user)  # remember=form.remember_me.data)
-
+            bot_telegram.send_alert(f"Inicio de sesión EXITOSO desde IP: {ip} | OS: {os} | Browser: {browser} | Country: {country}")
             return redirect(url_for('main_bp.home'))
         else:
             # Incrementar el contador de intentos fallidos
@@ -128,6 +128,9 @@ def login():
             )
             db.session.add(nuevo_registro)
             db.session.commit()
+
+            bot_telegram.send_alert(f"Intento de inicio de sesión FALLIDO desde IP: {ip} | OS: {os} | Browser: {browser} | Country: {country}")
+        
             flash(f'Credenciales invalidas. Intente nuevamente. (Intentos restantes: { max_intentos_fallidos - session["intentos_fallidos"]})',
                   'warning')
 

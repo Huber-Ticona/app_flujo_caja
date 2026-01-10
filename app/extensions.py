@@ -9,12 +9,47 @@ import datetime
 from sqlalchemy import inspect
 from html import escape
 from flask_caching import Cache
+from flask import current_app
+import requests
+
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 minify = Minify( passive=True)
 cache = Cache()
 csrf = CSRFProtect()
+
+class TelegramNotifier:
+    def __init__(self, token=None, chat_id=None):
+        self.token = token
+        self.chat_id = chat_id
+
+    def init_app(self, app):
+        """Permite cargar el token desde la configuración de Flask"""
+        self.token = app.config.get('TELEGRAM_TOKEN')
+        self.chat_id = app.config.get('TELEGRAM_CHAT_ID')
+
+    def send_alert(self, message):
+        if not self.token or not self.chat_id:
+            current_app.logger.warning("Telegram Notifier no configurado.")
+            return None
+            
+        url = f"https://api.telegram.org/bot{self.token}/sendMessage"
+        payload = {
+            'chat_id': self.chat_id,
+            'text': message,
+            'parse_mode': 'HTML'
+        }
+        try:
+            # timeout es vital para que Flask no se quede colgado infinitamente
+            response = requests.post(url, data=payload, timeout=5)
+            return response.json()
+        except Exception as e:
+            current_app.logger.error(f"Error enviando a Telegram: {e}")
+            return None
+        
+
+bot_telegram = TelegramNotifier()
 
 
 def sanitize_json(input_json):
